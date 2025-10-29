@@ -1,0 +1,128 @@
+CREATE TABLE USUARIO (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE ACTITUD (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    descripcion TEXT,
+    fecha DATE,
+    tipo VARCHAR(20) NOT NULL,
+    id_usuario INT NOT NULL UNIQUE,
+    FOREIGN KEY (id_usuario) REFERENCES USUARIO(id )
+);
+
+CREATE TABLE AMONESTACION (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nivel VARCHAR(20) NOT NULL,
+    id_actitud INT,
+    FOREIGN KEY (id_actitud) REFERENCES ACTITUD(id )
+);
+
+CREATE TABLE RECONOCIMIENTO (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    detalle TEXT,
+    id_actitud INT,
+    FOREIGN KEY (id_actitud) REFERENCES ACTITUD(id )
+);
+
+CREATE TABLE MENCION (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fecha DATE,
+    id_reconocimiento INT,
+    FOREIGN KEY (id_reconocimiento) REFERENCES RECONOCIMIENTO(id )
+);
+
+CREATE TABLE PROBI (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fecha DATE,
+    id_mencion INT,
+    FOREIGN KEY (id_mencion) REFERENCES MENCION(id )
+);
+
+CREATE TABLE DIRECTIVO (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    apellidos VARCHAR(50) NOT NULL,
+    poder VARCHAR(50) NOT NULL,
+    id_usuario INT NOT NULL UNIQUE,
+    FOREIGN KEY (id_usuario) REFERENCES USUARIO(id )
+);
+
+CREATE TABLE EXPEDIENTE (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    estado VARCHAR(50) NOT NULL,
+    id_directivo INT NOT NULL UNIQUE,
+    FOREIGN KEY (id_directivo) REFERENCES DIRECTIVO(id )
+);
+
+CREATE TABLE PREVI (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    detalle TEXT,
+    fecha DATE,
+    id_directivo INT NOT NULL UNIQUE,
+    id_expediente INT,
+    FOREIGN KEY (id_directivo) REFERENCES DIRECTIVO(id ),
+    FOREIGN KEY (id_expediente) REFERENCES EXPEDIENTE(id )
+);
+
+CREATE TABLE PROFESOR (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    apellidos VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE ALUMNO (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    apellidos VARCHAR(50) NOT NULL,
+    curso VARCHAR(25) NOT NULL,
+    id_usuario INT NOT NULL UNIQUE,
+    FOREIGN KEY (id_usuario) REFERENCES USUARIO(id )
+);
+
+CREATE TABLE TAREA (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    descripcion TEXT,
+    estado VARCHAR(25) NOT NULL,
+    id_profesor INT NOT NULL,
+    id_alumno INT NOT NULL,
+    UNIQUE (id_profesor, id_alumno),
+    FOREIGN KEY (id_profesor) REFERENCES PROFESOR(id ),
+    FOREIGN KEY (id_alumno) REFERENCES ALUMNO(id )
+);
+
+CREATE TABLE CURSO (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nivel VARCHAR(25) NOT NULL,
+    curso VARCHAR(25) NOT NULL,
+    modulo VARCHAR(25) NOT NULL
+);
+
+CREATE TABLE CURSO_ALUMNO (
+    id_curso INT,
+    id_alumno INT,
+    PRIMARY KEY (id_curso, id_alumno),
+    FOREIGN KEY (id_curso) REFERENCES CURSO(id),
+    FOREIGN KEY (id_alumno) REFERENCES ALUMNO(id)
+);
+
+CREATE TABLE HORARIO (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    dia VARCHAR(20) NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fin TIME NOT NULL
+);
+
+CREATE TABLE AULA_CONVIVENCIA (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    fecha DATE,
+    horario VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE ROOT (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(25) NOT NULL,
+    nombre VARCHAR(50) NOT NULL
+);
