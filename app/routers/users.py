@@ -12,7 +12,7 @@ class UserDb(BaseModel):
     name : str 
     username : str
     password : str
-
+string
 class UserIn(BaseModel):
     name : str 
     username : str
@@ -51,14 +51,25 @@ async def login(userIn : UserIn):
     return userFound[0]
 
 # Get all users
-@router.get("/get_users/", status_code=status.HTTP_200_OK)
+@router.get("/", status_code=status.HTTP_200_OK)
 async def get_users():
     return users
 
+# Get user by ID
+@router.get("/{id}", status_code=status.HTTP_200_OK)
+async def get_user(id : int):
+    userFound = [u for u in users if u.id == id]
+    if len(userFound) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    return userFound[0]
+
 # Delete user by ID
-@router.delete("/delete_user/{user_id}", status_code=status.HTTP_200_OK)
-async def delete_user(user_id : int):
-    userFound = [u for u in users if u.id == user_id]
+@router.delete("/{id}", status_code=status.HTTP_200_OK)
+async def delete_user(id : int):
+    userFound = [u for u in users if u.id == id]
     if len(userFound) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
