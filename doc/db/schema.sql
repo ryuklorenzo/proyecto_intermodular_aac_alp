@@ -1,5 +1,8 @@
 CREATE TABLE USUARIO (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    contraseña VARCHAR(50) NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    nombre VARCHAR(50) NOT NULL
     nombre VARCHAR(50) NOT NULL,
     username VARCHAR(25) NOT NULL UNIQUE,
     password VARCHAR(100) NOT NULL,
