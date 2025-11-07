@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, HTTPSException
+from fastapi import APIRouter, status, HTTPException
 from pydantic import BaseModel
 
 router = APIRouter(
@@ -25,7 +25,7 @@ users : list[UserDb] = []
 async def create_user(userIn : UserIn):
     userFound = [u for u in users if u.username == userIn.username]
     if len(userFound) > 0:
-        raise HTTPSException(
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="That username already exists"
         )
@@ -44,7 +44,7 @@ async def create_user(userIn : UserIn):
 async def login(userIn : UserIn):
     userFound = [u for u in users if u.username == userIn.username and u.password == userIn.password]
     if len(userFound) == 0:
-        raise HTTPSException(
+        raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Incorrect username or password"
         )
@@ -60,7 +60,7 @@ async def get_users():
 async def delete_user(user_id : int):
     userFound = [u for u in users if u.id == user_id]
     if len(userFound) == 0:
-        raise HTTPSException(
+        raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
