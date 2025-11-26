@@ -36,7 +36,7 @@ async def create_user(userIn : UserIn):
 # User login  ----------------------------------------(INICIAR SESION)-----------------------------------------------------------
 @router.post("/login/", response_model=Token, status_code=status.HTTP_200_OK)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()): # el depends asigna al form_data los datos que vienen en el body
-    
+
     #aqui compruebo que venga user y pwd en la peticion
     username: str | None = form_data.get("username")
     password: str | None = form_data.get("password")
@@ -45,7 +45,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()): # el depends 
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username and/or password"
         )
-    
+
     #Busco el usuario en la "base de datos"
     userFound = [u for u in users if u.username == username]
     if len(userFound) == 0:
@@ -53,7 +53,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()): # el depends 
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username and/or password"
         )
-    
+
     #Compruebo la contraseña
     user : UserDb = userFound[0]
     if verify_password(plain_pw=password, hashed_pw=user.password):
@@ -61,7 +61,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()): # el depends 
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username and/or password"
         )
-    
+
     token = create_access_token(UserBase(username=user.username, password=user.password))
     return token
 
@@ -70,34 +70,34 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()): # el depends 
 @router.get("/",response_model=list[UserOut] ,status_code=status.HTTP_200_OK)
 async def get_all_users(authorization: str | None = Header()):
     print(authorization)
-    
+
     parts = authorization.split(":") #asi separamos mytoken de lo demas
     if len(parts) !=2:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Forbidden"
         )
-    
+
     if parts[0] != "mytoken": #verificamos que el token sea correcto
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Forbidden"
         )
-    
+
     paylaod_parts = parts[1].split("--")
     if len(paylaod_parts) !=2: #asi separamos username de name
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Forbidden"
         )
-    
+
     username = paylaod_parts[0]
     if username not in [u.username for u in users] :
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Forbidden"
         )
-    
+
     return [UserOut(id=UserDb.id, name=UserDb.name, username=UserDb.username) for UserDb in users]
     #tecnicamente es lo mismo que: "return users" ya que FastAPI se encarga de hacer el filtrado poniendole el response_model
 '''
