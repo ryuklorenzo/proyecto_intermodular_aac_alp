@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from app.models import UserBase
 
-SECRET_KEY = "1234567890"
+SECRET_KEY = "1234567890" #3f5a2fc8da7cfef74c16ec6b3da25cc401052930c0b4979c1bedb664168fc486
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MIN = 7 * 24 * 60
 

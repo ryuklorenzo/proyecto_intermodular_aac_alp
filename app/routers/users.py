@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from app.models import UserBase, UserIn, UserDb, UserOut, UserLoginIn
 from app.database import users
-from app.auth.auth import create_access_token, verify_password, Token
+from app.auth.auth import create_access_token, verify_password, Token, oauth2_scheme, decode_token, TokenData
 
 '''
 uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
@@ -37,16 +37,17 @@ async def create_user(userIn : UserIn):
 @router.post("/login/", response_model=Token, status_code=status.HTTP_200_OK)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()): # el depends asigna al form_data los datos que vienen en el body
 
-    #aqui compruebo que venga user y pwd en la peticion
-    username: str | None = form_data.get("username")
-    password: str | None = form_data.get("password")
+    #1. Aqui compruebo que venga user y pwd en la peticion
+    username: str | None = form_data.username
+    password: str | None = form_data.password
+
     if username is None or password is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username and/or password"
         )
 
-    #Busco el usuario en la "base de datos"
+    #2. Busco el usuario en la "base de datos"
     userFound = [u for u in users if u.username == username]
     if len(userFound) == 0:
         raise HTTPException(
@@ -54,9 +55,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()): # el depends 
             detail="Incorrect username and/or password"
         )
 
-    #Compruebo la contraseña
+    #3. Compruebo la contraseña
     user : UserDb = userFound[0]
-    if verify_password(plain_pw=password, hashed_pw=user.password):
+    if not verify_password(plain_pw=password, hashed_pw=user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username and/or password"
@@ -68,31 +69,10 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()): # el depends 
 
 # Get all users  ----------------------------------------(PEDIR TODOS LOS USUARIOS)-----------------------------------------------------------
 @router.get("/",response_model=list[UserOut] ,status_code=status.HTTP_200_OK)
-async def get_all_users(authorization: str | None = Header()):
-    print(authorization)
+async def get_all_users(token: str = Depends(oauth2_scheme)):
 
-    parts = authorization.split(":") #asi separamos mytoken de lo demas
-    if len(parts) !=2:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Forbidden"
-        )
-
-    if parts[0] != "mytoken": #verificamos que el token sea correcto
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Forbidden"
-        )
-
-    paylaod_parts = parts[1].split("--")
-    if len(paylaod_parts) !=2: #asi separamos username de name
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Forbidden"
-        )
-
-    username = paylaod_parts[0]
-    if username not in [u.username for u in users] :
+    data : TokenData = decode_token(token)
+    if data.username not in [u.username for u in users] :
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Forbidden"
