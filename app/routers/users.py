@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Header
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from app.models import UserBase, UserIn, UserDb, UserOut, UserLoginIn
-from app.database import users
+from app.database import users, insert_user
 from app.auth.auth import create_access_token, verify_password, Token, oauth2_scheme, decode_token, TokenData
 
 '''
@@ -17,16 +17,15 @@ router = APIRouter(
 # User signup ----------------------------------------(CREAR USUARIO NUEVO)-----------------------------------------------------------
 @router.post("/singup/", status_code=status.HTTP_201_CREATED)
 async def create_user(userIn : UserIn):
-    userFound = [u for u in users if u.username == userIn.username]
-    if len(userFound) > 0:
+    '''userDb = get_user_by_username(userIn.username)
+    if userDb: #is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="That username already exists"
-        )
+        )'''
 
-    users.append(
+    insert_user(
         UserDb(
-            id = len(users) + 1,
             name = userIn.name,
             username = userIn.username,
             password = userIn.password
