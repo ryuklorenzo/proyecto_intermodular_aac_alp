@@ -6,7 +6,7 @@ from app.database import users, insert_user
 from app.auth.auth import create_access_token, verify_password, Token, oauth2_scheme, decode_token, TokenData
 
 '''
-uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8081 --reload
 '''
 
 router = APIRouter(
@@ -22,7 +22,8 @@ async def create_user(userIn : UserIn):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="That username already exists"
-        )'''
+        )
+    '''
 
     insert_user(
         UserDb(

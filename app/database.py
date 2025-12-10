@@ -19,6 +19,7 @@ def insert_user(user: UserDb)-> int:
             return cursor.lastrowid
 
 def get_user_by_password(username:str) -> UserDb | None:
+    
     return None
 
 users : list[UserDb] = [
