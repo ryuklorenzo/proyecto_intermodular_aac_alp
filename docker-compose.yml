@@ -19,10 +19,13 @@ services:
       MARIADB_USER: myapi
       MARIADB_PASSWORD: myapi
       MARIADB_DATABASE: myapi
+    ports:
+      - "3306:3306"
     networks:
       - myapi_network
     volumes:
       - ./myapidb_data:/data/db
+    
 
   myapiadminer:
     image: adminer

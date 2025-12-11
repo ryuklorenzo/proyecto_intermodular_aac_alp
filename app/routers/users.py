@@ -3,10 +3,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from app.models import UserBase, UserIn, UserDb, UserOut, UserLoginIn
 from app.database import users, insert_user
-from app.auth.auth import create_access_token, verify_password, Token, oauth2_scheme, decode_token, TokenData
+from app.auth.auth import create_access_token, verify_password, Token, oauth2_scheme, decode_token, TokenData, get_hash_password
 
 '''
-uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8081 --reload
 '''
 
 router = APIRouter(
@@ -18,22 +18,22 @@ router = APIRouter(
 # User signup ----------------------------------------(CREAR USUARIO NUEVO)-----------------------------------------------------------
 @router.post("/singup/", status_code=status.HTTP_201_CREATED)
 async def create_user(userIn : UserIn):
-    '''userDb = get_user_by_username(userIn.username)
-    if userDb: #is not None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="That username already exists"
-        )'''
-    hashed = verify_password  
 
-    insert_user(
-        UserDb(
-            id=len(users) + 1,
-            name = userIn.name,
-            username = userIn.username,
-            password = userIn.password
-        )
+    hashed_password = get_hash_password(userIn.password)
+    new_user = UserDb(
+        id=0, 
+        name=userIn.name,
+        username=userIn.username,
+        password=hashed_password
     )
+    try:
+        user_id = insert_user(new_user)
+        return {"message": "Usuario creado exitosamente", "id": user_id}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al crear el usuario: {str(e)}"
+        )
 
 
 # User login  ----------------------------------------(INICIAR SESION)-----------------------------------------------------------
