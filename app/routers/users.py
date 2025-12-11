@@ -14,6 +14,7 @@ router = APIRouter(
     tags=["Users"]
 )
 
+
 # User signup ----------------------------------------(CREAR USUARIO NUEVO)-----------------------------------------------------------
 @router.post("/singup/", status_code=status.HTTP_201_CREATED)
 async def create_user(userIn : UserIn):
@@ -23,14 +24,17 @@ async def create_user(userIn : UserIn):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="That username already exists"
         )'''
+    hashed = verify_password  
 
     insert_user(
         UserDb(
+            id=len(users) + 1,
             name = userIn.name,
             username = userIn.username,
             password = userIn.password
         )
     )
+
 
 # User login  ----------------------------------------(INICIAR SESION)-----------------------------------------------------------
 @router.post("/login/", response_model=Token, status_code=status.HTTP_200_OK)
@@ -96,6 +100,7 @@ HMACSHA256(
 
 '''
 
+
 # Get user by ID  ----------------------------------------(PEDIR UN USUARIO)-----------------------------------------------------------
 @router.get("/{id}", status_code=status.HTTP_200_OK)
 async def get_user(userDb : UserDb):
@@ -106,6 +111,7 @@ async def get_user(userDb : UserDb):
             detail="User not found"
         )
     return userFound[0]
+
 
 # Delete user by ID  ----------------------------------------(BORRAR USUARIO)-----------------------------------------------------------
 @router.delete("/{id}", status_code=status.HTTP_200_OK)

@@ -9,10 +9,10 @@ db_config = {
     "database": "myapi"
 }
 
-def insert_user(user: UserDb)-> int:
+def insert_user(user: UserDb)-> int | None :
     with mariadb.connect(**db_config)as conn:
         with conn.cursor() as cursor:
-            sql = "insert into users (name, username, password) as values (?, ?, ?)"
+            sql = "INSERT INTO USUARIO (nombre, username, password) VALUES (?, ?, ?)"
             values = (user.name, user.username, user.password)
             cursor.execute(sql, values)
             conn.commit()
