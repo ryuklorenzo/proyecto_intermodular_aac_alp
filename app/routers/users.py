@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Header
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from app.models import UserBase, UserIn, UserDb, UserOut, UserLoginIn
-from app.database import usersAdmins, insert_user, read_all_users, deleteUser
+from app.database import usersAdmins, insert_user, read_all_users, deleteUser, read_user_by_id
 from app.auth.auth import create_access_token, verify_password, Token, oauth2_scheme, decode_token, TokenData, get_hash_password
 
 '''
@@ -100,25 +100,29 @@ HMACSHA256(
 '''
 
 # Get user by ID  ----------------------------------------(PEDIR UN USUARIO)-----------------------------------------------------------
-@router.get("/{id}", status_code=status.HTTP_200_OK)
-async def get_user(userDb : UserDb):
-    userFound = [u for u in users if u.id == userDb.id]
-    if len(userFound) == 0:
+@router.get("/{id}", response_model=UserOut, status_code=status.HTTP_200_OK)
+async def get_user(id: int): 
+    
+    # Buscamos en la base de datos usando la ID de la URL
+    user_db = read_user_by_id(id)
+    
+    if not user_db:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
-    return userFound[0]
+        
+    # Devolvemos el objeto, FastAPI se encarga de filtrarlo a UserOut
+    return user_db
 
 # Delete user by ID  ----------------------------------------(BORRAR USUARIO)-----------------------------------------------------------
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
 async def delete_user(userBase : UserBase):
     
-    db_users = read_all_users()
-    userFound = [u for u in db_users if u.username == userBase.username]
-    if len(userFound) == 0:
+    deleted = deleteUser(userBase)
+    if not deleted:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )    
-    return deleteUser(userFound[0])
+            status_code=status.HTTP_401_UNAUTHORIZED, # O 404
+            detail="Error: Usuario no encontrado o contraseña incorrecta"
+        )
+    return {"message": "Usuario eliminado correctamente"}

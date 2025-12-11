@@ -83,7 +83,6 @@ def deleteUser(user: UserBase) -> bool:
             conn.close()
             print("No existe ese usuario")
             return False # El usuario no existe
-
         stored_hash = result[0]
 
         # 2. Comprobamos si la contraseña que nos pasan coincide con el hash de la BD
@@ -102,6 +101,34 @@ def deleteUser(user: UserBase) -> bool:
     except mariadb.Error as e:
         print(f"Error deleting user: {e}")
         return False
+
+def read_user_by_id(id: int) -> UserDb | None:
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+        
+        # Seleccionamos los datos filtrando por ID
+        sql = "SELECT id, nombre, username, password FROM USUARIO WHERE id = ?"
+        cursor.execute(sql, (id,))
+        row = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if row:
+            # Si existe, devolvemos el objeto UserDb
+            return UserDb(
+                id=row[0], 
+                name=row[1], 
+                username=row[2], 
+                password=row[3]
+            )
+        return None # Si no existe, devolvemos None
+        
+    except mariadb.Error as e:
+        print(f"Error reading user by id: {e}")
+        return None
+
 
 usersAdmins : list[UserDb] = [
     UserDb(id=1,
