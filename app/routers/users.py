@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Header
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from app.models import UserBase, UserIn, UserDb, UserOut, UserLoginIn
-from app.database import users, insert_user
+from app.database import usersAdmins, insert_user, read_all_users, deleteUser
 from app.auth.auth import create_access_token, verify_password, Token, oauth2_scheme, decode_token, TokenData, get_hash_password
 
 '''
@@ -49,7 +49,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()): # el depends 
         )
 
     #2. Busco el usuario en la "base de datos"
-    userFound = [u for u in users if u.username == username]
+    userFound = [u for u in usersAdmins if u.username == username]
     if len(userFound) == 0:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -73,16 +73,18 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()): # el depends 
 async def get_all_users(token: str = Depends(oauth2_scheme)):
 
     data : TokenData = decode_token(token)
-    if data.username not in [u.username for u in users] :
+    #verificamos que sea un usuario con poderes
+    if data.username not in [u.username for u in usersAdmins] :
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Forbidden"
         )
 
-    return [UserOut(id=UserDb.id, name=UserDb.name, username=UserDb.username) for UserDb in users]
-    #tecnicamente es lo mismo que: "return users" ya que FastAPI se encarga de hacer el filtrado poniendole el response_model
-'''
+    #coger los usuarios de la BD
+    db_users = read_all_users()
+    return [UserOut(id=u.id, name=u.name, username=u.username) for u in db_users]
 
+'''
 payload
 consta de tres partes:
 "sub" : "luffy"          subject -> quien es el usuario
@@ -95,7 +97,6 @@ HMACSHA256(
     base64UrlEncode(header) + "." + base64UrlEncode(payload),
     secret
 )
-
 '''
 
 # Get user by ID  ----------------------------------------(PEDIR UN USUARIO)-----------------------------------------------------------
@@ -111,12 +112,13 @@ async def get_user(userDb : UserDb):
 
 # Delete user by ID  ----------------------------------------(BORRAR USUARIO)-----------------------------------------------------------
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
-async def delete_user(userDb : UserDb):
-    userFound = [u for u in users if u.id == userDb.id]
+async def delete_user(userBase : UserBase):
+    
+    db_users = read_all_users()
+    userFound = [u for u in db_users if u.username == userBase.username]
     if len(userFound) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
-        )
-    users.remove(userFound[0])
-    return {"message": "User deleted successfully"}
+        )    
+    return deleteUser(userFound[0])
