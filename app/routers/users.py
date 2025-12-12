@@ -14,6 +14,7 @@ router = APIRouter(
     tags=["Users"]
 )
 
+
 # User signup ----------------------------------------(CREAR USUARIO NUEVO)-----------------------------------------------------------
 @router.post("/singup/", status_code=status.HTTP_201_CREATED)
 async def create_user(userIn : UserIn, token: str = Depends(oauth2_scheme)):
@@ -41,6 +42,7 @@ async def create_user(userIn : UserIn, token: str = Depends(oauth2_scheme)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al crear el usuario: {str(e)}"
         )
+
 
 # User login  ----------------------------------------(INICIAR SESION)-----------------------------------------------------------
 @router.post("/login/", response_model=Token, status_code=status.HTTP_200_OK)
@@ -107,6 +109,7 @@ HMACSHA256(
 )
 '''
 
+
 # Get user by ID  ----------------------------------------(PEDIR UN USUARIO)-----------------------------------------------------------
 @router.get("/{id}", response_model=UserOut, status_code=status.HTTP_200_OK)
 async def get_user(id: int, token: str = Depends(oauth2_scheme)): 
@@ -129,6 +132,7 @@ async def get_user(id: int, token: str = Depends(oauth2_scheme)):
         
     # Devolvemos el objeto, FastAPI se encarga de filtrarlo a UserOut
     return user_db
+
 
 # Delete user by ID  ----------------------------------------(BORRAR USUARIO)-----------------------------------------------------------
 @router.delete("/{id}", status_code=status.HTTP_200_OK)

@@ -1,6 +1,8 @@
 from app.models import UserDb, UserIn, UserBase
 from app.models import AlumnoCreate, AlumnoDb
 from app.auth.auth import verify_password, get_hash_password
+from app.models import UserDb, UserIn, UserBase, RootDb
+from app.auth.auth import verify_password
 import mariadb
 
 db_config = {
@@ -11,34 +13,6 @@ db_config = {
     "database": "myapi"
 }
 
-usersAdmins : list[UserDb] = [
-    UserDb(
-        id=1,
-        name="luffy",
-        username="luffy",
-        password="$2b$12$QNDLTj7xe8Sl2qMXpj0nNeGds4e79922CGaC00482dcpooo2vW3kW"
-        ),
-    UserDb(
-        id=2,
-        name="zoro",
-        username="zoro",
-        password="$2b$12$IATg6PFpDn6eTHD8nMhbAecOpvQNieFCm36SNwNddGNMeCbzmdHMO"
-        ),
-    UserDb(
-        id=3,
-        name="azael",
-        username="azael",
-        password=get_hash_password("azael")
-    ),
-    UserDb(
-        id=4,
-        name="angel",
-        username="angel",
-        password=get_hash_password("angel")
-    )
-]
-
-#---------------------------------------_FUNCIONES_USER_------------------------------------------------------------
 def insert_user(user: UserDb) -> int:
     try:
         conn = mariadb.connect(**db_config)
@@ -56,6 +30,7 @@ def insert_user(user: UserDb) -> int:
         
     except mariadb.Error as e:
         print(f"Error connecting to MariaDB: {e}")
+        # Es importante relanzar el error para que el endpoint lo capture
         raise e
     finally:
         # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
@@ -63,6 +38,10 @@ def insert_user(user: UserDb) -> int:
             conn.close()
         if cursor:
             cursor.close()
+
+
+def get_user_by_password(username:str) -> UserDb | None:
+    return None
 
 def read_all_users() -> list[UserDb]:
     try:
@@ -76,11 +55,9 @@ def read_all_users() -> list[UserDb]:
         
         users_db = []
         for row in results:
-            # Mapeamos los resultados de la BD al modelo UserDb
-            # row[0]=id, row[1]=nombre, row[2]=username, row[3]=password
             user = UserDb(
                 id=row[0], 
-                name=row[1],       # En BD es 'nombre', en modelo es 'name'
+                name=row[1],
                 username=row[2], 
                 password=row[3]
             )
@@ -172,11 +149,87 @@ def read_user_by_id(id: int) -> UserDb | None:
         if cursor:
             cursor.close()
 
-#---------------------------------------_FUNCIONES_ROOT_------------------------------------------------------------
+
+usersAdmins : list[UserDb] = [
+    UserDb(id=1,
+        name="luffy",
+        username="luffy",
+        password="$2b$12$QNDLTj7xe8Sl2qMXpj0nNeGds4e79922CGaC00482dcpooo2vW3kW"),
+    UserDb(id=2,
+        name="zoro",
+        username="zoro",
+        password="$2b$12$IATg6PFpDn6eTHD8nMhbAecOpvQNieFCm36SNwNddGNMeCbzmdHMO")
+]
+
+# --------------------------------------------------- ROOTS ---------------------------------------------------
+
+def insert_root(root: RootDb) -> int:
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+        sql = "INSERT INTO ROOT (name, code) VALUES (?, ?)"
+        values = (root.name, root.code)
+        
+        cursor.execute(sql, values)
+        conn.commit()
+        last_id = cursor.lastrowid
+        
+        cursor.close()
+        conn.close()
+        return last_id
+        
+    except mariadb.Error as e:
+        print(f"Error inserting root: {e}")
+        raise e
 
 
-#---------------------------------------_FUNCIONES_ALUMNO_------------------------------------------------------------
+def read_all_roots() -> list[RootDb]:
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+        
+        sql = "SELECT id, name, code FROM ROOT"
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        
+        roots_db = []
+        for row in results:
+            root = RootDb(
+                id=row[0], 
+                name=row[1],
+                code=row[2]
+            )
+            roots_db.append(root)
+            
+        cursor.close()
+        conn.close()
+        return roots_db
+        
+    except mariadb.Error as e:
+        print(f"Error reading roots: {e}")
+        return []
 
+def delete_root(id: int) -> bool:
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql_delete = "DELETE FROM ROOT WHERE id = ?"
+        cursor.execute(sql_delete, (id,))
+        conn.commit()
+
+        deleted = cursor.rowcount > 0
+
+        cursor.close()
+        conn.close()
+        return deleted
+
+    except mariadb.Error as e:
+        print(f"Error deleting root: {e}")
+        return False
+
+
+#--------------------------------------------------- ALUMNOS ---------------------------------------------------
 def insert_alumno(alumno: AlumnoCreate) -> int:
     conn = None
     try:
@@ -299,4 +352,3 @@ def baja_alumno(id: int) -> bool:
             conn.close()
         if cursor:
             cursor.close()
-

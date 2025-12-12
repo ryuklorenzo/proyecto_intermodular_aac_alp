@@ -7,5 +7,5 @@ app.include_router(alumno.router)
 app.include_router(root.router)
 
 @app.get("/")
-async def root():
-    return{"Bienvenido a nuestra API "}
+async def root_endpoint():
+    return {"message": "Bienvenido a nuestra API"}
