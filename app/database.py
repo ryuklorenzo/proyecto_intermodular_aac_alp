@@ -37,7 +37,7 @@ usersAdmins : list[UserDb] = [
     )
 ]
 
-#---------------------------------------_FUNCIONES USER------------------------------------------------------------
+#---------------------------------------_FUNCIONES_USER_------------------------------------------------------------
 def insert_user(user: UserDb) -> int:
     try:
         conn = mariadb.connect(**db_config)
@@ -144,4 +144,9 @@ def read_user_by_id(id: int) -> UserDb | None:
     except mariadb.Error as e:
         print(f"Error reading user by id: {e}")
         return None
+
+#---------------------------------------_FUNCIONES_ROOT_------------------------------------------------------------
+
+
+#---------------------------------------_FUNCIONES_ALUMNO_------------------------------------------------------------
 
