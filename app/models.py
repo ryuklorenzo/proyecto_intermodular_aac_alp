@@ -27,7 +27,19 @@ class UserLoginIn(UserBase):
 
 #-------------------------------MODELS_ROOTS-----------------------------
 
+class RootBase(BaseModel):
+    name : str
+    code: str
 
+class RootIn(BaseModel):
+    code: str
+    name: str
+
+class RootDb(RootBase):
+    id: int
+
+class RootOut(RootDb):
+    pass
 
 #-------------------------------MODELS_ALUMNOS-----------------------------
 
