@@ -79,6 +79,7 @@ CREATE TABLE ALUMNO (
     nombre VARCHAR(50) NOT NULL,
     apellidos VARCHAR(50) NOT NULL,
     curso VARCHAR(25) NOT NULL,
+    activo TINYINT(1) DEFAULT 1,
     id_usuario INT NOT NULL UNIQUE,
     FOREIGN KEY (id_usuario) REFERENCES USUARIO(id )
 );

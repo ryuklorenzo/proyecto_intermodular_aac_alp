@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+#-------------------------------MODELS_USERS-----------------------------
 #Usuario base
 class UserBase(BaseModel):
     username : str
@@ -21,6 +22,12 @@ class UserOut(BaseModel):
 class TokenOut(BaseModel):
     token: str
 
-
 class UserLoginIn(UserBase):
     pass
+
+#-------------------------------MODELS_ROOTS-----------------------------
+
+
+
+#-------------------------------MODELS_ALUMNOS-----------------------------
+
