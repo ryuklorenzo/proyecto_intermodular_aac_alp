@@ -16,7 +16,15 @@ router = APIRouter(
 
 # User signup ----------------------------------------(CREAR USUARIO NUEVO)-----------------------------------------------------------
 @router.post("/singup/", status_code=status.HTTP_201_CREATED)
-async def create_user(userIn : UserIn):
+async def create_user(userIn : UserIn, token: str = Depends(oauth2_scheme)):
+
+    data : TokenData = decode_token(token)
+    #verificamos que sea un usuario con poderes
+    if data.username not in [u.username for u in usersAdmins] :
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden"
+        )
 
     hashed_password = get_hash_password(userIn.password)
     new_user = UserDb(
@@ -101,8 +109,15 @@ HMACSHA256(
 
 # Get user by ID  ----------------------------------------(PEDIR UN USUARIO)-----------------------------------------------------------
 @router.get("/{id}", response_model=UserOut, status_code=status.HTTP_200_OK)
-async def get_user(id: int): 
+async def get_user(id: int, token: str = Depends(oauth2_scheme)): 
     
+    data : TokenData = decode_token(token)
+    #verificamos que sea un usuario con poderes
+    if data.username not in [u.username for u in usersAdmins] :
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden"
+        )
     # Buscamos en la base de datos usando la ID de la URL
     user_db = read_user_by_id(id)
     
@@ -117,8 +132,16 @@ async def get_user(id: int):
 
 # Delete user by ID  ----------------------------------------(BORRAR USUARIO)-----------------------------------------------------------
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
-async def delete_user(userBase : UserBase):
+async def delete_user(userBase : UserBase, token: str = Depends(oauth2_scheme)):
     
+    
+    data : TokenData = decode_token(token)
+    #verificamos que sea un usuario con poderes
+    if data.username not in [u.username for u in usersAdmins] :
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden"
+        )
     deleted = deleteUser(userBase)
     if not deleted:
         raise HTTPException(

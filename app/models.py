@@ -30,4 +30,15 @@ class UserLoginIn(UserBase):
 
 
 #-------------------------------MODELS_ALUMNOS-----------------------------
+class AlumnoBase(BaseModel):
+    nombre: str
+    apellidos: str
+    curso: str
 
+class AlumnoCreate(AlumnoBase):
+    activo: bool = True
+    id_usuario: int  # Necesario para vincular con la tabla USUARIO
+
+class AlumnoDb(AlumnoCreate):
+    id: int
+    pass

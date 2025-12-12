@@ -1,4 +1,5 @@
 from app.models import UserDb, UserIn, UserBase
+from app.models import AlumnoCreate, AlumnoDb
 from app.auth.auth import verify_password, get_hash_password
 import mariadb
 
@@ -49,13 +50,19 @@ def insert_user(user: UserDb) -> int:
         conn.commit()
         last_id = cursor.lastrowid
         
-        cursor.close()
-        conn.close()
+        #cursor.close()
+        #conn.close()
         return last_id
         
     except mariadb.Error as e:
         print(f"Error connecting to MariaDB: {e}")
         raise e
+    finally:
+        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
+        if conn:
+            conn.close()
+        if cursor:
+            cursor.close()
 
 def read_all_users() -> list[UserDb]:
     try:
@@ -79,13 +86,19 @@ def read_all_users() -> list[UserDb]:
             )
             users_db.append(user)
             
-        cursor.close()
-        conn.close()
+        #cursor.close()
+        #conn.close()
         return users_db
         
     except mariadb.Error as e:
         print(f"Error reading users: {e}")
         return []
+    finally:
+        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
+        if conn:
+            conn.close()
+        if cursor:
+            cursor.close()
 
 def deleteUser(user: UserBase) -> bool:
     try:
@@ -98,7 +111,7 @@ def deleteUser(user: UserBase) -> bool:
         result = cursor.fetchone()
 
         if not result:
-            conn.close()
+            #conn.close()
             print("No existe ese usuario")
             return False # El usuario no existe
         stored_hash = result[0]
@@ -109,16 +122,22 @@ def deleteUser(user: UserBase) -> bool:
             sql_delete = "DELETE FROM USUARIO WHERE username = ?"
             cursor.execute(sql_delete, (user.username,))
             conn.commit()
-            conn.close()
+            #conn.close()
             return True
         else:
-            conn.close()
+            #conn.close()
             print("Contraseña no es correcta")
             return False # La contraseña no es correcta
 
     except mariadb.Error as e:
         print(f"Error deleting user: {e}")
         return False
+    finally:
+        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
+        if conn:
+            conn.close()
+        if cursor:
+            cursor.close()
 
 def read_user_by_id(id: int) -> UserDb | None:
     try:
@@ -130,8 +149,8 @@ def read_user_by_id(id: int) -> UserDb | None:
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
         
-        cursor.close()
-        conn.close()
+        #cursor.close()
+        #conn.close()
         
         if row:
             # Si existe, devolvemos el objeto UserDb
@@ -146,9 +165,138 @@ def read_user_by_id(id: int) -> UserDb | None:
     except mariadb.Error as e:
         print(f"Error reading user by id: {e}")
         return None
+    finally:
+        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
+        if conn:
+            conn.close()
+        if cursor:
+            cursor.close()
 
 #---------------------------------------_FUNCIONES_ROOT_------------------------------------------------------------
 
 
 #---------------------------------------_FUNCIONES_ALUMNO_------------------------------------------------------------
+
+def insert_alumno(alumno: AlumnoCreate) -> int:
+    conn = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+        
+        sql = "INSERT INTO ALUMNO (nombre, apellidos, curso, activo, id_usuario) VALUES (?, ?, ?, ?, ?)"
+        values = (alumno.nombre, alumno.apellidos, alumno.curso, alumno.activo, alumno.id_usuario)
+        
+        cursor.execute(sql, values)
+        conn.commit()
+        last_id = cursor.lastrowid
+        
+        cursor.close()
+        return last_id
+        
+    except mariadb.Error as e:
+        print(f"Error insertando alumno: {e}")
+        raise e
+    finally:
+        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
+        if conn:
+            conn.close()
+        if cursor:
+            cursor.close()
+
+def read_all_alumnos() -> list[AlumnoDb]:
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+        
+        # Seleccionamos todos (puedes añadir un WHERE activo = 1 si solo quieres ver los activos)
+        sql = "SELECT id, nombre, apellidos, curso, activo, id_usuario FROM ALUMNO"
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        
+        alumnos_db = []
+        for row in results:
+            alumno = AlumnoDb(
+                id=row[0],
+                nombre=row[1],
+                apellidos=row[2],
+                curso=row[3],
+                activo=bool(row[4]), # Convertimos 1/0 a True/False
+                id_usuario=row[5]
+            )
+            alumnos_db.append(alumno)
+            
+        #cursor.close()
+        #conn.close()
+        return alumnos_db
+        
+    except mariadb.Error as e:
+        print(f"Error leyendo alumnos: {e}")
+        return []
+    finally:
+        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
+        if conn:
+            conn.close()
+        if cursor:
+            cursor.close()
+
+def read_alumno_by_id(id: int) -> AlumnoCreate | None:
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+        
+        sql = "SELECT id, nombre, apellidos, curso, activo, id_usuario FROM ALUMNO WHERE id = ?"
+        cursor.execute(sql, (id,))
+        row = cursor.fetchone()
+        
+        #cursor.close()
+        #conn.close()
+        
+        if row:
+            return AlumnoCreate(
+                id=row[0],
+                nombre=row[1],
+                apellidos=row[2],
+                curso=row[3],
+                activo=bool(row[4]),
+                id_usuario=row[5]
+            )
+        return None
+        
+    except mariadb.Error as e:
+        print(f"Error leyendo alumno por id: {e}")
+        return None
+    finally:
+        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
+        if conn:
+            conn.close()
+        if cursor:
+            cursor.close()
+
+def baja_alumno(id: int) -> bool:
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        # Actualizamos el campo activo a 0 (False)
+        sql = "UPDATE ALUMNO SET activo = 0 WHERE id = ?"
+        cursor.execute(sql, (id,))
+        conn.commit()
+        
+        # Verificamos si se afectó alguna fila
+        filas_afectadas = cursor.rowcount
+        
+        #cursor.close()
+        #conn.close()
+        
+        return filas_afectadas > 0
+
+    except mariadb.Error as e:
+        print(f"Error dando de baja al alumno: {e}")
+        return False
+    finally:
+        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
+        if conn:
+            conn.close()
+        if cursor:
+            cursor.close()
 
