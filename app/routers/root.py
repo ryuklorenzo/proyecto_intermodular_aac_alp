@@ -1,6 +1,5 @@
 from os import read
 from fastapi import APIRouter, Depends, status, HTTPException
-from app.main import root
 from app.models import RootIn, RootDb, RootOut
 from app.database import usersAdmins, read_all_roots, delete_root, insert_root
 from app.auth.auth import  oauth2_scheme, decode_token, TokenData
