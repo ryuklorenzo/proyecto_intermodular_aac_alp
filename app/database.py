@@ -12,7 +12,18 @@ db_config = {
     "password": "myapi",
     "database": "myapi"
 }
+usersAdmins : list[UserDb] = [
+    UserDb(id=1,
+        name="angel",
+        username="angel",
+        password=get_hash_password("angel")),
+    UserDb(id=2,
+        name="azael",
+        username="azael",
+        password=get_hash_password("azael"))
+]
 
+# --------------------------------------------------- USERS ---------------------------------------------------
 def insert_user(user: UserDb) -> int:
     try:
         conn = mariadb.connect(**db_config)
@@ -148,18 +159,6 @@ def read_user_by_id(id: int) -> UserDb | None:
             conn.close()
         if cursor:
             cursor.close()
-
-
-usersAdmins : list[UserDb] = [
-    UserDb(id=1,
-        name="luffy",
-        username="luffy",
-        password="$2b$12$QNDLTj7xe8Sl2qMXpj0nNeGds4e79922CGaC00482dcpooo2vW3kW"),
-    UserDb(id=2,
-        name="zoro",
-        username="zoro",
-        password="$2b$12$IATg6PFpDn6eTHD8nMhbAecOpvQNieFCm36SNwNddGNMeCbzmdHMO")
-]
 
 # --------------------------------------------------- ROOTS ---------------------------------------------------
 
