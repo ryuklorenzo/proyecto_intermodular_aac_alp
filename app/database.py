@@ -14,11 +14,6 @@ def insert_user(user: UserDb) -> int:
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
-        
-        # Corrección: Tabla 'USUARIO' y columnas según schema.sql
-        # Nota: Tu schema tiene 'contraseña' (varchar 50) y 'password' (varchar 100).
-        # Usaremos 'password' para el hash seguro y repetiremos el valor en 'contraseña' 
-        # para cumplir el NOT NULL de tu esquema actual.
         sql = "INSERT INTO USUARIO (nombre, username, password) VALUES (?, ?, ?)"
         values = (user.name, user.username, user.password)
         
@@ -51,11 +46,9 @@ def read_all_users() -> list[UserDb]:
         
         users_db = []
         for row in results:
-            # Mapeamos los resultados de la BD al modelo UserDb
-            # row[0]=id, row[1]=nombre, row[2]=username, row[3]=password
             user = UserDb(
                 id=row[0], 
-                name=row[1],       # En BD es 'nombre', en modelo es 'name'
+                name=row[1],
                 username=row[2], 
                 password=row[3]
             )
