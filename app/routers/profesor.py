@@ -10,7 +10,7 @@ router = APIRouter(
 )
 
 # 1. Insertar Profesors
-@router.post("/teachers/create", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("/create", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_profesor(profesor: ProfesorCreate):
     try: 
         profesor_id = insert_profesor(profesor)
@@ -24,7 +24,7 @@ async def crear_profesor(profesor: ProfesorCreate):
 
 # 2. Ver todos los PROFESORES
 @router.get("/", response_model=List[ProfesorDb], status_code=status.HTTP_200_OK)
-async def read_all_profesores():
+async def ver_profesores():
     # Aquí podrías añadir Depends(oauth2_scheme) si quieres que solo usuarios logueados lo vean
     profesores = read_all_profesores()
     return profesores
