@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 # Create Root ----------------------------------------(CREAR ROOT NUEVO)-----------------------------------------------------------
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/root_add/", status_code=status.HTTP_201_CREATED)
 async def create_root(rootIn : RootIn, token: str = Depends(oauth2_scheme)):
 
     # Validamos si es admin
@@ -52,7 +52,7 @@ async def get_all_roots(token: str = Depends(oauth2_scheme)):
 
 # Delete ROOT ----------------------------------------(BORRAR ROOT)-----------------------------------------------------------
 
-@router.delete("/{id}", status_code=status.HTTP_200_OK)
+@router.delete("/{id}/", status_code=status.HTTP_200_OK)
 async def delete_root_e(id: int, token: str = Depends(oauth2_scheme)):
 
     data: TokenData = decode_token(token)

@@ -111,7 +111,7 @@ HMACSHA256(
 
 
 # Get user by ID  ----------------------------------------(PEDIR UN USUARIO)-----------------------------------------------------------
-@router.get("/{id}", response_model=UserOut, status_code=status.HTTP_200_OK)
+@router.get("/{id}/", response_model=UserOut, status_code=status.HTTP_200_OK)
 async def get_user(id: int, token: str = Depends(oauth2_scheme)): 
     
     data : TokenData = decode_token(token)
@@ -135,7 +135,7 @@ async def get_user(id: int, token: str = Depends(oauth2_scheme)):
 
 
 # Delete user by ID  ----------------------------------------(BORRAR USUARIO)-----------------------------------------------------------
-@router.delete("/{id}", status_code=status.HTTP_200_OK)
+@router.delete("/{id}/", status_code=status.HTTP_200_OK)
 async def delete_user(userBase : UserBase, token: str = Depends(oauth2_scheme)):
     
     

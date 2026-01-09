@@ -11,8 +11,9 @@ router = APIRouter(
     tags=["Alumnos"]
 )
 
+
 # 1. Insertar Alumno
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("/alumno_add/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_alumno(alumno: AlumnoCreate):
     try:
         # Nota: El id_usuario debe existir previamente en la tabla USUARIO
@@ -24,6 +25,7 @@ async def crear_alumno(alumno: AlumnoCreate):
             detail=f"Error al crear el alumno. Verifica que el id_usuario exista: {str(e)}"
         )
 
+
 # 2. Ver todos los alumnos
 @router.get("/", response_model=List[AlumnoDb], status_code=status.HTTP_200_OK)
 async def ver_alumnos():
@@ -31,8 +33,9 @@ async def ver_alumnos():
     alumnos = read_all_alumnos()
     return alumnos
 
+
 # 3. Ver alumno por ID
-@router.get("/{id}", response_model=AlumnoCreate, status_code=status.HTTP_200_OK)
+@router.get("/{id}/", response_model=AlumnoCreate, status_code=status.HTTP_200_OK)
 async def ver_alumno_por_id(id: int):
     alumno = read_alumno_by_id(id)
     if not alumno:
@@ -42,8 +45,9 @@ async def ver_alumno_por_id(id: int):
         )
     return alumno
 
+
 # 4. Dar de baja (Soft Delete)
-@router.delete("/baja/{id}", status_code=status.HTTP_200_OK)
+@router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
 async def dar_baja_alumno(id: int):
     # Primero verificamos si existe
     alumno = read_alumno_by_id(id)
@@ -62,3 +66,9 @@ async def dar_baja_alumno(id: int):
         )
         
     return {"message": f"Alumno con id {id} dado de baja correctamente (activo=False)"}
+
+
+
+
+
+
