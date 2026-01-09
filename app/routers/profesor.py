@@ -24,7 +24,7 @@ async def crear_profesor(profesor: ProfesorCreate):
 
 # 2. Ver todos los PROFESORES
 @router.get("/", response_model=List[ProfesorDb], status_code=status.HTTP_200_OK)
-async def read_all_profesores():
+async def ver_profesores():
     # Aquí podrías añadir Depends(oauth2_scheme) si quieres que solo usuarios logueados lo vean
     profesores = read_all_profesores()
     return profesores
