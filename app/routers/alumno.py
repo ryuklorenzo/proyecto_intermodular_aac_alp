@@ -7,13 +7,13 @@ from app.auth.auth import oauth2_scheme # Si quieres proteger las rutas con toke
 #insertar alumno, ver alumnos, ver alumnoID, dar de baja
 
 router = APIRouter(
-    prefix="/alumnos",
-    tags=["Alumnos"]
+    prefix="/students",
+    tags=["Students"]
 )
 
 
 # 1. Insertar Alumno
-@router.post("/alumno_add/", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("/add/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_alumno(alumno: AlumnoCreate):
     try:
         # Nota: El id_usuario debe existir previamente en la tabla USUARIO

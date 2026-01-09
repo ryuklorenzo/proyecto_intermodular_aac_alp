@@ -353,3 +353,8 @@ def baja_alumno(id: int) -> bool:
             cursor.close()
 
 #--------------------------------------------------- PROFESORES ---------------------------------------------------
+def insert_profesor():
+    pass
+
+def read_all_profesores():
+    pass
