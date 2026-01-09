@@ -62,10 +62,3 @@ async def dar_baja_alumno(id: int):
         )
         
     return {"message": f"Alumno con id {id} dado de baja correctamente (activo=False)"}
-
-
-
-
-
-
-

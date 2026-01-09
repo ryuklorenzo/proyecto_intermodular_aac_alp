@@ -351,3 +351,5 @@ def baja_alumno(id: int) -> bool:
             conn.close()
         if cursor:
             cursor.close()
+
+#--------------------------------------------------- PROFESORES ---------------------------------------------------

@@ -54,3 +54,5 @@ class AlumnoCreate(AlumnoBase):
 class AlumnoDb(AlumnoCreate):
     id: int
     pass
+
+#-------------------------------MODELS_PROFESORES-----------------------------
