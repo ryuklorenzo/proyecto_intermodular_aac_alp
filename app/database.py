@@ -1,5 +1,5 @@
 from app.models import UserDb, UserIn, UserBase
-from app.models import AlumnoCreate, AlumnoDb
+from app.models import AlumnoCreate, AlumnoDb, ProfesorDb, ProfesorCreate
 from app.auth.auth import verify_password, get_hash_password
 from app.models import UserDb, UserIn, UserBase, RootDb
 from app.auth.auth import verify_password
@@ -353,8 +353,124 @@ def baja_alumno(id: int) -> bool:
             cursor.close()
 
 #--------------------------------------------------- PROFESORES ---------------------------------------------------
-def insert_profesor():
-    pass
 
-def read_all_profesores():
-    pass
+def insert_profesor(profesor: ProfesorCreate) -> int:
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = "INSERT INTO PROFESOR (nombre, apellidos, activo) VALUES (?, ?, ?)"
+        values = (profesor.nombre, profesor.apellidos, profesor.activo)
+
+        cursor.execute(sql, values)
+        conn.commit()
+        last_id = cursor.lastrowid
+
+        cursor.close()
+        conn.close()
+        return last_id
+
+    except mariadb.Error as e:
+        print(f"Error insertando profesor: {e}")
+        raise e
+
+
+def read_all_profesores() -> list[ProfesorDb]:
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+        
+        sql = "SELECT id, nombre, apellidos, curso, activo, id_usuario FROM PROFESOR"
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        
+        profesor_db = []
+        for row in results:
+            profesor = ProfesorDb(
+                id=row[0],
+                nombre=row[1],
+                apellidos=row[2],
+                activo=bool(row[3]), # Convertimos 1/0 a True/False
+            )
+            profesor_db.append(profesor)
+            
+        #cursor.close()
+        #conn.close()
+        return profesor_db
+        
+    except mariadb.Error as e:
+        print(f"Error leyendo profesor: {e}")
+        return []
+    finally:
+        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
+        if conn:
+            conn.close()
+        if cursor:
+            cursor.close()
+
+
+def read_profesor_by_id(id: int) -> ProfesorDb | None:
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+        
+        sql = "SELECT id, nombre, apellidos, curso, activo, id_usuario FROM PROFESOR WHERE id = ?"
+        cursor.execute(sql, (id,))
+        row = cursor.fetchone()
+        
+        if row:
+            return ProfesorDb(
+                id=row[0],
+                nombre=row[1],
+                apellidos=row[2],
+                activo=bool(row[3])
+            )
+        return None
+        
+    except mariadb.Error as e:
+        print(f"Error leyendo profesor por id: {e}")
+        return None
+    finally:
+        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
+        if conn:
+            conn.close()
+        if cursor:
+            cursor.close()
+
+
+def delete_profesor(id: int) -> bool:
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql_delete = "DELETE FROM PROFESOR WHERE id = ?"
+        cursor.execute(sql_delete, (id,))
+        conn.commit()
+
+        deleted = cursor.rowcount > 0
+
+        cursor.close()
+        conn.close()
+        return deleted
+
+    except mariadb.Error as e:
+        print(f"Error deleting root: {e}")
+        return False
+
+
+def profesor_exists(nombre: str, apellidos: str) -> bool:
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = "SELECT id FROM PROFESOR WHERE nombre = ? AND apellidos = ?"
+        cursor.execute(sql, (nombre, apellidos))
+        exists = cursor.fetchone() is not None
+
+        cursor.close()
+        conn.close()
+        return exists
+
+    except mariadb.Error as e:
+        print(f"Error checking profesor: {e}")
+        return False
