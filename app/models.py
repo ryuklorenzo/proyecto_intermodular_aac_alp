@@ -72,3 +72,23 @@ class ProfesorOut(ProfesorDb):
 class ProfesorImport(BaseModel):
     nombre: str
     apellidos: str
+
+#-------------------------------MODELS_DIRECTIVOS-----------------------------
+class DirectivoBase(BaseModel):
+    nombre: str
+    apellidos: str
+    cargo: str
+
+class DirectivoCreate(DirectivoBase):
+    activo: bool = True
+
+class DirectivoDb(DirectivoCreate):
+    id: int
+
+class DirectivoOut(DirectivoDb):
+    pass
+
+class DirectivoImport(BaseModel):
+    nombre: str
+    apellidos: str
+    cargo: str
