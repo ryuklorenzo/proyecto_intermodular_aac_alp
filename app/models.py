@@ -54,3 +54,21 @@ class AlumnoCreate(AlumnoBase):
 class AlumnoDb(AlumnoCreate):
     id: int
     pass
+
+#-------------------------------MODELS_PROFESORES-----------------------------
+class ProfesorBase(BaseModel):
+    nombre: str
+    apellidos: str
+
+class ProfesorCreate(ProfesorBase):
+    activo: bool = True
+
+class ProfesorDb(ProfesorCreate):
+    id: int
+
+class ProfesorOut(ProfesorDb):
+    pass
+
+class ProfesorImport(BaseModel):
+    nombre: str
+    apellidos: str
