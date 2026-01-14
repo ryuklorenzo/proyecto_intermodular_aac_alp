@@ -2,11 +2,13 @@ from app.models import UserDb, UserIn, UserBase
 from app.models import AlumnoCreate, AlumnoDb, ProfesorDb, ProfesorCreate
 from app.auth.auth import verify_password, get_hash_password
 from app.models import UserDb, UserIn, UserBase, RootDb
-from app.auth.auth import verify_password
+from app.auth.auth import verify_password, TokenData
+from app.auth.auth import  oauth2_scheme, decode_token
+from fastapi import APIRouter, Depends, status, HTTPException
 import mariadb
 
 db_config = {
-    "host": "127.0.0.1",
+    "host": "myapidb",
     "port": 3306,
     "user": "myapi",
     "password": "myapi",
@@ -23,8 +25,19 @@ usersAdmins : list[UserDb] = [
         password=get_hash_password("azael"))
 ]
 
+def validateIsAdmin(token) -> bool:
+    data: TokenData = decode_token(token)
+    if data.username not in [u.username for u in usersAdmins]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden"
+        )
+    return True
+
 # --------------------------------------------------- USERS ---------------------------------------------------
 def insert_user(user: UserDb) -> int:
+    conn = None
+    cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -55,6 +68,8 @@ def get_user_by_password(username:str) -> UserDb | None:
     return None
 
 def read_all_users() -> list[UserDb]:
+    conn = None
+    cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -89,6 +104,8 @@ def read_all_users() -> list[UserDb]:
             cursor.close()
 
 def deleteUser(user: UserBase) -> bool:
+    conn = None
+    cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -128,6 +145,8 @@ def deleteUser(user: UserBase) -> bool:
             cursor.close()
 
 def read_user_by_id(id: int) -> UserDb | None:
+    conn = None
+    cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -163,6 +182,8 @@ def read_user_by_id(id: int) -> UserDb | None:
 # --------------------------------------------------- ROOTS ---------------------------------------------------
 
 def insert_root(root: RootDb) -> int:
+    conn = None
+    cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -183,6 +204,8 @@ def insert_root(root: RootDb) -> int:
 
 
 def read_all_roots() -> list[RootDb]:
+    conn = None
+    cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -209,6 +232,8 @@ def read_all_roots() -> list[RootDb]:
         return []
 
 def delete_root(id: int) -> bool:
+    conn = None
+    cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -231,6 +256,7 @@ def delete_root(id: int) -> bool:
 #--------------------------------------------------- ALUMNOS ---------------------------------------------------
 def insert_alumno(alumno: AlumnoCreate) -> int:
     conn = None
+    cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -256,6 +282,8 @@ def insert_alumno(alumno: AlumnoCreate) -> int:
             cursor.close()
 
 def read_all_alumnos() -> list[AlumnoDb]:
+    conn = None
+    cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -292,6 +320,8 @@ def read_all_alumnos() -> list[AlumnoDb]:
             cursor.close()
 
 def read_alumno_by_id(id: int) -> AlumnoCreate | None:
+    conn = None
+    cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -325,6 +355,8 @@ def read_alumno_by_id(id: int) -> AlumnoCreate | None:
             cursor.close()
 
 def baja_alumno(id: int) -> bool:
+    conn = None
+    cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -357,7 +389,6 @@ def baja_alumno(id: int) -> bool:
 def insert_profesor(profesor: ProfesorCreate) -> int:
     conn = None
     cursor = None
-
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -384,7 +415,6 @@ def insert_profesor(profesor: ProfesorCreate) -> int:
 def read_all_profesores() -> list[ProfesorDb]:
     conn = None
     cursor = None
-
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -419,7 +449,6 @@ def read_all_profesores() -> list[ProfesorDb]:
 def read_profesor_by_id(id: int) -> ProfesorDb | None:
     conn = None
     cursor = None
-
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -452,7 +481,6 @@ def read_profesor_by_id(id: int) -> ProfesorDb | None:
 def delete_profesor(id: int) -> bool:
     conn = None
     cursor = None
-
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -477,7 +505,6 @@ def delete_profesor(id: int) -> bool:
 def profesor_exists(nombre: str, apellidos: str) -> bool:
     conn = None
     cursor = None
-
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()

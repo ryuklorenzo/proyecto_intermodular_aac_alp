@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Header
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from app.models import UserBase, UserIn, UserDb, UserOut, UserLoginIn
-from app.database import usersAdmins, insert_user, read_all_users, deleteUser, read_user_by_id
+from app.database import usersAdmins, insert_user, read_all_users, deleteUser, read_user_by_id, validateIsAdmin
 from app.auth.auth import create_access_token, verify_password, Token, oauth2_scheme, decode_token, TokenData, get_hash_password
 
 '''
@@ -18,30 +18,27 @@ router = APIRouter(
 # User signup ----------------------------------------(CREAR USUARIO NUEVO)-----------------------------------------------------------
 @router.post("/singup/", status_code=status.HTTP_201_CREATED)
 async def create_user(userIn : UserIn, token: str = Depends(oauth2_scheme)):
-
-    data : TokenData = decode_token(token)
-    #verificamos que sea un usuario con poderes
-    if data.username not in [u.username for u in usersAdmins] :
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Forbidden"
+    if validateIsAdmin(token) == True:
+        hashed_password = get_hash_password(userIn.password)
+        new_user = UserDb(
+            id=0, 
+            name=userIn.name,
+            username=userIn.username,
+            password=hashed_password
         )
-
-    hashed_password = get_hash_password(userIn.password)
-    new_user = UserDb(
-        id=0, 
-        name=userIn.name,
-        username=userIn.username,
-        password=hashed_password
-    )
-    try:
-        user_id = insert_user(new_user)
-        return {"message": "Usuario creado exitosamente", "id": user_id}
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al crear el usuario: {str(e)}"
-        )
+        try:
+            user_id = insert_user(new_user)
+            return {"message": "Usuario creado exitosamente", "id": user_id}
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error al crear el usuario: {str(e)}"
+            )
+    else:
+            raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=f"UNAUTHORIZED"
+                )
 
 
 # User login  ----------------------------------------(INICIAR SESION)-----------------------------------------------------------
@@ -81,19 +78,15 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()): # el depends 
 # Get all users  ----------------------------------------(PEDIR TODOS LOS USUARIOS)-----------------------------------------------------------
 @router.get("/",response_model=list[UserOut] ,status_code=status.HTTP_200_OK)
 async def get_all_users(token: str = Depends(oauth2_scheme)):
-
-    data : TokenData = decode_token(token)
-    #verificamos que sea un usuario con poderes
-    if data.username not in [u.username for u in usersAdmins] :
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Forbidden"
-        )
-
-    #coger los usuarios de la BD
-    db_users = read_all_users()
-    return [UserOut(id=u.id, name=u.name, username=u.username) for u in db_users]
-
+    if validateIsAdmin(token) == True:
+        #coger los usuarios de la BD
+        db_users = read_all_users()
+        return [UserOut(id=u.id, name=u.name, username=u.username) for u in db_users]
+    else:
+            raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=f"UNAUTHORIZED"
+                )
 '''
 payload
 consta de tres partes:
@@ -113,43 +106,39 @@ HMACSHA256(
 # Get user by ID  ----------------------------------------(PEDIR UN USUARIO)-----------------------------------------------------------
 @router.get("/{id}/", response_model=UserOut, status_code=status.HTTP_200_OK)
 async def get_user(id: int, token: str = Depends(oauth2_scheme)): 
-    
-    data : TokenData = decode_token(token)
-    #verificamos que sea un usuario con poderes
-    if data.username not in [u.username for u in usersAdmins] :
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Forbidden"
-        )
-    # Buscamos en la base de datos usando la ID de la URL
-    user_db = read_user_by_id(id)
-    
-    if not user_db:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+    if validateIsAdmin(token) == True:
+        # Buscamos en la base de datos usando la ID de la URL
+        user_db = read_user_by_id(id)
         
-    # Devolvemos el objeto, FastAPI se encarga de filtrarlo a UserOut
-    return user_db
+        if not user_db:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+            
+        # Devolvemos el objeto, FastAPI se encarga de filtrarlo a UserOut
+        return user_db
+    else:
+            raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=f"UNAUTHORIZED"
+                )
 
 
 # Delete user by ID  ----------------------------------------(BORRAR USUARIO)-----------------------------------------------------------
 @router.delete("/{id}/", status_code=status.HTTP_200_OK)
 async def delete_user(userBase : UserBase, token: str = Depends(oauth2_scheme)):
-    
-    
-    data : TokenData = decode_token(token)
-    #verificamos que sea un usuario con poderes
-    if data.username not in [u.username for u in usersAdmins] :
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Forbidden"
-        )
-    deleted = deleteUser(userBase)
-    if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, # O 404
-            detail="Error: Usuario no encontrado o contraseña incorrecta"
-        )
-    return {"message": "Usuario eliminado correctamente"}
+    if validateIsAdmin(token) == True:
+        deleted = deleteUser(userBase)
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, # O 404
+                detail="Error: Usuario no encontrado o contraseña incorrecta"
+            )
+        return {"message": "Usuario eliminado correctamente"}
+    else:
+            raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=f"UNAUTHORIZED"
+                )
+
