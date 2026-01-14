@@ -2,7 +2,9 @@ from app.models import UserDb, UserIn, UserBase
 from app.models import AlumnoCreate, AlumnoDb, ProfesorDb, ProfesorCreate
 from app.auth.auth import verify_password, get_hash_password
 from app.models import UserDb, UserIn, UserBase, RootDb
-from app.auth.auth import verify_password
+from app.auth.auth import verify_password, TokenData
+from app.auth.auth import  oauth2_scheme, decode_token
+from fastapi import APIRouter, Depends, status, HTTPException
 import mariadb
 
 db_config = {
@@ -22,6 +24,15 @@ usersAdmins : list[UserDb] = [
         username="azael",
         password=get_hash_password("azael"))
 ]
+
+def validateIsAdmin(token) -> bool:
+    data: TokenData = decode_token(token)
+    if data.username not in [u.username for u in usersAdmins]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden"
+        )
+    return True
 
 # --------------------------------------------------- USERS ---------------------------------------------------
 def insert_user(user: UserDb) -> int:
