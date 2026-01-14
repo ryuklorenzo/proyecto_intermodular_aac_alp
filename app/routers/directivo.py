@@ -14,7 +14,7 @@ async def crear_directivo(directivo: DirectivoCreate, token: str = Depends(oauth
     if validateIsAdmin(token) == True:
         try: 
             if directivo_exists(directivo.nombre, directivo.apellidos, directivo.cargo) == False:
-                directivo_id = insert_directivo(directivo)
+                directivo_id = insert_directivo(directivo) #FALTA AÑADIR EL ID-USUARIO
                 return {"message": "directivo creado exitosamente", "id": directivo_id}
             else: 
                 raise HTTPException(
