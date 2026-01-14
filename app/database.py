@@ -575,7 +575,7 @@ def read_all_directivos() -> list[DirectivoDb]:
             conn.close()
 
 
-def read_directico_by_id(id: int) -> DirectivoDb | None:
+def read_directivo_by_id(id: int) -> DirectivoDb | None:
     conn = None
     cursor = None
 
