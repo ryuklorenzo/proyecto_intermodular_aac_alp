@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
-from app.models import ProfesorCreate, ProfesorDb
+from app.models import ProfesorCreate, ProfesorDb, ProfesorBase
 from app.auth.auth import oauth2_scheme, TokenData # Si quieres proteger las rutas con token
-from app.database import insert_profesor, read_all_profesores, profesor_exists, validateIsAdmin
+from app.database import insert_profesor,delete_profesor, read_all_profesores,read_profesor_by_id,  profesor_exists, validateIsAdmin
 
 router = APIRouter(
     prefix="/techers",
@@ -41,6 +41,40 @@ async def ver_profesores(token: str = Depends(oauth2_scheme)):
     # Aquí podrías añadir Depends(oauth2_scheme) si quieres que solo usuarios logueados lo vean 
         profesores = read_all_profesores()
         return profesores
+    else:
+            raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=f"UNAUTHORIZED"
+                )
+
+
+@router.get("/{id}/", response_model=ProfesorCreate, status_code=status.HTTP_200_OK)
+async def ver_profesor_por_id(id: int, token: str = Depends(oauth2_scheme)):
+    if validateIsAdmin(token) == True:
+        profesor = read_profesor_by_id(id)
+        if not profesor:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Profesor con id {id} no encontrado"
+            )
+        return profesor
+    else:
+            raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=f"UNAUTHORIZED"
+                )
+
+
+@router.delete("/{id}/", status_code=status.HTTP_200_OK)
+async def delete_user(profesorBase : ProfesorBase, token: str = Depends(oauth2_scheme)):
+    if validateIsAdmin(token) == True:
+        deleted = delete_profesor(profesorBase)
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, # O 404
+                detail="Error: Profesor no encontrado o contraseña incorrecta"
+            )
+        return {"message": "Profesor eliminado correctamente"}
     else:
             raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,

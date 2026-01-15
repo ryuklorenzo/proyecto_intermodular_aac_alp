@@ -7,8 +7,6 @@ from app.auth.auth import  oauth2_scheme, decode_token
 from fastapi import APIRouter, Depends, status, HTTPException
 import mariadb
 
-from app.routers import directivo
-
 db_config = {
     "host": "myapidb",
     "port": 3306,
@@ -376,7 +374,7 @@ def insert_profesor(profesor: ProfesorCreate) -> int:
         cursor = conn.cursor()
 
         sql = "INSERT INTO PROFESOR (nombre, apellidos, activo) VALUES (?, ?, ?)"
-        values = (profesor.nombre, profesor.apellidos, profesor.activo)
+        values = (profesor.nombre, profesor.apellidos, profesor.activo) #FALTA AÑADIR EL ID-USUARIO
 
         cursor.execute(sql, values)
         conn.commit()
