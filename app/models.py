@@ -78,6 +78,7 @@ class DirectivoBase(BaseModel):
     nombre: str
     apellidos: str
     cargo: str
+    id_usuario: int
 
 class DirectivoCreate(DirectivoBase):
     activo: bool = True
@@ -92,3 +93,4 @@ class DirectivoImport(BaseModel):
     nombre: str
     apellidos: str
     cargo: str
+    id_usuario: int

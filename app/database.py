@@ -520,8 +520,8 @@ def insert_directivo(directivo: DirectivoCreate) -> int:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = "INSERT INTO DIRECTIVO (nombre, apellidos, activo, cargo) VALUES (?, ?, ?)"
-        values = (directivo.nombre, directivo.apellidos, directivo.activo, directivo.cargo)
+        sql = "INSERT INTO DIRECTIVO (nombre, apellidos, activo, cargo, id_usuario) VALUES (?, ?, ?, ?, ?)"
+        values = (directivo.nombre, directivo.apellidos, directivo.activo, directivo.cargo, directivo.id_usuario)
 
         cursor.execute(sql, values)
         conn.commit()
@@ -547,7 +547,7 @@ def read_all_directivos() -> list[DirectivoDb]:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = "SELECT id, nombre, apellidos, activo, cargo FROM DIRECTIVO"
+        sql = "SELECT id, nombre, apellidos, activo, cargo, id_usuario FROM DIRECTIVO"
         cursor.execute(sql)
         results = cursor.fetchall()
         
@@ -558,7 +558,8 @@ def read_all_directivos() -> list[DirectivoDb]:
                 nombre=row[1],
                 apellidos=row[2],
                 activo=bool(row[3]),  # 1/0 → True/False
-                cargo=row[4]
+                cargo=row[4],
+                id_usuario=row[5]
             )
             directivo_db.append(directivo)
             
@@ -583,7 +584,7 @@ def read_directivo_by_id(id: int) -> DirectivoDb | None:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = "SELECT id, nombre, apellidos, activo, cargo FROM DIRECTIVO WHERE id = ?"
+        sql = "SELECT id, nombre, apellidos, activo, cargo, id_usuario FROM DIRECTIVO WHERE id = ?"
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
         
@@ -593,7 +594,8 @@ def read_directivo_by_id(id: int) -> DirectivoDb | None:
                 nombre=row[1],
                 apellidos=row[2],
                 activo=bool(row[3]),
-                cargo=row[4]
+                cargo=row[4],
+                id_usuario=row[5]
             )
         return None
         
