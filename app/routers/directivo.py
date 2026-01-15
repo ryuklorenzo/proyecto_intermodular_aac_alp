@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models import DirectivoCreate, DirectivoDb, DirectivoBase
 from app.auth.auth import oauth2_scheme, TokenData # Si quieres proteger las rutas con token
-from app.database import insert_directivo, read_directivo_by_id, delete_directivo,  read_all_directivos, directivo_exists, validateIsAdmin
+from app.database import insert_directivo, read_directivo_by_id, read_all_directivos, directivo_exists, validateIsAdmin, delete_directivo as delete_directivo_db
 
 router = APIRouter(
     prefix="/executives",
@@ -64,13 +64,13 @@ async def ver_directivo_por_id(id: int, token: str = Depends(oauth2_scheme)):
 
 
 @router.delete("/{id}/", status_code=status.HTTP_200_OK)
-async def delete_directivo(directivoBase : DirectivoBase, token: str = Depends(oauth2_scheme)):
+async def delete_directivo(id: int, token: str = Depends(oauth2_scheme)):
     if validateIsAdmin(token) == True:
-        deleted = delete_directivo(directivoBase)
+        deleted = delete_directivo_db(id)
         if not deleted:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, # O 404
-                detail="Error: Directivo no encontrado o contraseña incorrecta"
+                detail="Error: Directivo no encontrado"
             )
         return {"message": "Directivo eliminado correctamente"}
     else:
