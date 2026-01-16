@@ -40,8 +40,8 @@ def insert_user(user: UserDb) -> int:
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
-        sql = "INSERT INTO USUARIO (nombre, username, password) VALUES (?, ?, ?)"
-        values = (user.name, user.username, user.password)
+        sql = "INSERT INTO USUARIO (nombre, apellidos, activo, password) VALUES (?, ?, ?, ?)"
+        values = (user.nombre, user.apellidos,user.activo, user.password)
         
         cursor.execute(sql, values)
         conn.commit()

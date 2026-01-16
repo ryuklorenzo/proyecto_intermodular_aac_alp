@@ -22,8 +22,8 @@ async def create_user(userDb : UserDb, token: str = Depends(oauth2_scheme)):
         hashed_password = get_hash_password(userDb.password)
         new_user = UserDb(
             id=0, 
-            name=userDb.nombre,
-            username=userDb.apellidos,
+            nombre=userDb.nombre,
+            apellidos=userDb.apellidos,
             activo=userDb.activo,
             password=hashed_password
         )
@@ -44,35 +44,29 @@ async def create_user(userDb : UserDb, token: str = Depends(oauth2_scheme)):
 
 # User login  ----------------------------------------(INICIAR SESION)-----------------------------------------------------------
 @router.post("/login/", response_model=Token, status_code=status.HTTP_200_OK)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()): # el depends asigna al form_data los datos que vienen en el body
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    
+    # form de autenticacion
+    username_input = form_data.username 
+    password_input = form_data.password
 
-    #1. Aqui compruebo que venga user y pwd en la peticion
-    username: str | None = form_data.username
-    password: str | None = form_data.password
-
-    if username is None or password is None:
+    # busco en useradmins
+    userFound = [u for u in usersAdmins if u.nombre == username_input]
+    
+    if not userFound:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username and/or password"
         )
-
-    #2. Busco el usuario en la "base de datos"
-    userFound = [u for u in usersAdmins if u.nombre == username]
-    if len(userFound) == 0:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username and/or password"
-        )
-
-    #3. Compruebo la contraseña
+    # compruebo la contraseña
     user : UserDb = userFound[0]
-    if not verify_password(plain_pw=password, hashed_pw=user.password):
+    
+    if not verify_password(plain_pw=password_input, hashed_pw=user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username and/or password"
         )
-
-    token = create_access_token(UserBase(username=user.nombre, password=user.password))
+    token = create_access_token(user)
     return token
 
 
