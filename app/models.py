@@ -69,7 +69,7 @@ class ProfesorDb(BaseModel):
 
 #-------------------------------MODELS_DIRECTIVOS-----------------------------
 class DirectivoImport(BaseModel):
-    id_usuario: int
+    id_profesor: int
     cargo: str
 
 class DirectivoDb(BaseModel):
@@ -77,5 +77,5 @@ class DirectivoDb(BaseModel):
     nombre: str
     apellidos: str
     activo: bool
-    id_usuario: int
+    id_profesor: int
     cargo: str
