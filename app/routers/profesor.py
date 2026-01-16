@@ -1,82 +1,76 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
-from app.models import ProfesorCreate, ProfesorDb, ProfesorBase
-from app.auth.auth import oauth2_scheme, TokenData # Si quieres proteger las rutas con token
-from app.database import insert_profesor,delete_profesor, read_all_profesores,read_profesor_by_id,  profesor_exists, validateIsAdmin
+from app.models import ProfesorImport, ProfesorDb
+from app.auth.auth import oauth2_scheme
+from app.database import (
+    insert_profesor,
+    delete_profesor,
+    read_all_profesores,
+    read_profesor_by_id,
+    profesor_exists,
+    validateIsAdmin
+)
 
 router = APIRouter(
-    prefix="/techers",
+    prefix="/teachers",
     tags=["Teachers"]
 )
 
-# 1. Insertar Profesors
 @router.post("/create", status_code=status.HTTP_201_CREATED, response_model=dict)
-async def crear_profesor(profesor: ProfesorCreate, token: str = Depends(oauth2_scheme)):
-    if validateIsAdmin(token) == True:
-        try: 
-            if profesor_exists(profesor.nombre, profesor.apellidos) == False:
-                profesor_id = insert_profesor(profesor)
-                return {"message": "Profesor creado exitosamente", "id": profesor_id}
-            else: 
-                raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error"
-            )
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error, ese profesor ya esta creado"
-            )
-    else:
+async def crear_profesor(profesor: ProfesorImport, token: str = Depends(oauth2_scheme)):
+    if not validateIsAdmin(token):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+
+    # Comprobamos si ya existe el profesor por id_usuario
+    if profesor_exists(profesor.id_usuario):
         raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"UNAUTHORIZED"
-            )
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Profesor con ese usuario ya existe"
+        )
+
+    profesor_id = insert_profesor(profesor)
+    if profesor_id == -1:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error creando el profesor"
+        )
+
+    return {"message": "Profesor creado exitosamente", "id": profesor_id}
 
 
-# 2. Ver todos los PROFESORES
 @router.get("/", response_model=List[ProfesorDb], status_code=status.HTTP_200_OK)
 async def ver_profesores(token: str = Depends(oauth2_scheme)):
-    if validateIsAdmin(token) == True:
-    # Aquí podrías añadir Depends(oauth2_scheme) si quieres que solo usuarios logueados lo vean 
-        profesores = read_all_profesores()
-        return profesores
-    else:
-            raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"UNAUTHORIZED"
-                )
+    if not validateIsAdmin(token):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+
+    profesores = read_all_profesores()
+    return profesores
 
 
-@router.get("/{id}/", response_model=ProfesorCreate, status_code=status.HTTP_200_OK)
+@router.get("/{id}/", response_model=ProfesorDb, status_code=status.HTTP_200_OK)
 async def ver_profesor_por_id(id: int, token: str = Depends(oauth2_scheme)):
-    if validateIsAdmin(token) == True:
-        profesor = read_profesor_by_id(id)
-        if not profesor:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Profesor con id {id} no encontrado"
-            )
-        return profesor
-    else:
-            raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"UNAUTHORIZED"
-                )
+    if not validateIsAdmin(token):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+
+    profesor = read_profesor_by_id(id)
+    if not profesor:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Profesor con id {id} no encontrado"
+        )
+    return profesor
 
 
 @router.delete("/{id}/", status_code=status.HTTP_200_OK)
-async def delete_user(profesorBase : ProfesorBase, token: str = Depends(oauth2_scheme)):
-    if validateIsAdmin(token) == True:
-        deleted = delete_profesor(profesorBase)
-        if not deleted:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, # O 404
-                detail="Error: Profesor no encontrado o contraseña incorrecta"
-            )
-        return {"message": "Profesor eliminado correctamente"}
-    else:
-            raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"UNAUTHORIZED"
-                )
+async def borrar_profesor(id: int, token: str = Depends(oauth2_scheme)):
+    if not validateIsAdmin(token):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+
+    deleted = delete_profesor(id)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profesor no encontrado"
+        )
+
+    return {"message": "Profesor eliminado correctamente"}
