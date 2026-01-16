@@ -1,5 +1,5 @@
--- 1. TABLAS INDEPENDIENTES Y LA BASE DE USUARIOS
--- ---------------------------------------------
+-- create database myapi;
+-- use database myapi;
 
 CREATE TABLE USUARIO (
     id INT AUTO_INCREMENT PRIMARY KEY,

@@ -1,4 +1,4 @@
-from os import read
+'''from os import read
 from fastapi import APIRouter, Depends, status, HTTPException
 from app.models import RootIn, RootDb, RootOut
 from app.database import usersAdmins, read_all_roots, delete_root, insert_root, validateIsAdmin
@@ -62,3 +62,4 @@ async def delete_root_e(id: int, token: str = Depends(oauth2_scheme)):
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail=f"UNAUTHORIZED"
                 )
+'''
