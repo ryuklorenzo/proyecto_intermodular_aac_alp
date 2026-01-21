@@ -1,5 +1,5 @@
-from app.models import DirectivoCreate, DirectivoDb, UserDb
-from app.models import AlumnoCreate, ProfesorDb, ProfesorCreate
+from app.models import DirectivoImport, DirectivoDb, UserDb, UserBase
+from app.models import AlumnoCreate, ProfesorDb, ProfesorImport
 from app.auth.auth import verify_password, get_hash_password
 from app.auth.auth import verify_password, TokenData
 from app.auth.auth import  oauth2_scheme, decode_token
@@ -143,6 +143,12 @@ def deleteUser(user: UserDb) -> bool:
             cursor.close()
 
 def read_user_by_id(id: int) -> UserDb | None:
+    """
+    Lee un usuario por su id y devuelve un objeto UserDb.
+    """
+    conn = None
+    cursor = None
+
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -151,12 +157,8 @@ def read_user_by_id(id: int) -> UserDb | None:
         sql = "SELECT id, nombre, apellidos, activo, password FROM USUARIO WHERE id = ?"
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
-        
-        #cursor.close()
-        #conn.close()
-        
+
         if row:
-            # Si existe, devolvemos el objeto UserDb
             return UserDb(
                 id=row[0], 
                 nombre=row[1], 
@@ -164,17 +166,18 @@ def read_user_by_id(id: int) -> UserDb | None:
                 activo=row[3],
                 password=row[4]
             )
-        return None # Si no existe, devolvemos None
-        
-    except mariadb.Error as e:
-        print(f"Error reading user by id: {e}")
         return None
+
+    except mariadb.Error as e:
+        print(f"Error leyendo usuario por id: {e}")
+        return None
+
     finally:
-        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
-        if conn:
-            conn.close()
         if cursor:
             cursor.close()
+        if conn:
+            conn.close()
+
 
 '''# --------------------------------------------------- ROOTS ---------------------------------------------------
 
@@ -362,25 +365,38 @@ def baja_alumno(id: int) -> bool:
 
 #--------------------------------------------------- PROFESORES ---------------------------------------------------
 
-def insert_profesor(profesor: ProfesorCreate) -> int:
+def insert_profesor(profesor: ProfesorImport) -> int:
+
     conn = None
     cursor = None
 
     try:
+        usuario = read_user_by_id(profesor.id_usuario)
+        if not usuario:
+            print("Usuario no encontrado")
+            return -1
+
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = "INSERT INTO PROFESOR (nombre, apellidos, activo) VALUES (?, ?, ?)"
-        values = (profesor.nombre, profesor.apellidos, profesor.activo) #FALTA AÑADIR EL ID-USUARIO
+        sql = """
+        INSERT INTO PROFESOR (nombre, apellidos, activo, id_usuario)
+        VALUES (?, ?, ?, ?)
+        """
+        values = (
+            usuario.name,
+            usuario.apellidos,
+            usuario.activo,
+            usuario.id
+        )
 
         cursor.execute(sql, values)
         conn.commit()
-
         return cursor.lastrowid
 
     except mariadb.Error as e:
         print(f"Error insertando profesor: {e}")
-        return -1 
+        return -1
 
     finally:
         if cursor:
@@ -392,29 +408,28 @@ def insert_profesor(profesor: ProfesorCreate) -> int:
 def read_all_profesores() -> list[ProfesorDb]:
     conn = None
     cursor = None
-
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
-        
-        sql = "SELECT id, nombre, apellidos, activo FROM PROFESOR"
+
+        sql = "SELECT id, nombre, apellidos, activo, id_usuario FROM PROFESOR"
         cursor.execute(sql)
         results = cursor.fetchall()
-        
-        profesor_db = []
-        for row in results:
-            profesor = ProfesorDb(
+
+        profesores = [
+            ProfesorDb(
                 id=row[0],
                 nombre=row[1],
                 apellidos=row[2],
-                activo=bool(row[3])  # 1/0 → True/False
+                activo=bool(row[3]),
+                id_usuario=row[4]
             )
-            profesor_db.append(profesor)
-            
-        return profesor_db
-        
+            for row in results
+        ]
+        return profesores
+
     except mariadb.Error as e:
-        print(f"Error leyendo profesor: {e}")
+        print(f"Error leyendo profesores: {e}")
         return []
 
     finally:
@@ -427,24 +442,24 @@ def read_all_profesores() -> list[ProfesorDb]:
 def read_profesor_by_id(id: int) -> ProfesorDb | None:
     conn = None
     cursor = None
-
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
-        
-        sql = "SELECT id, nombre, apellidos, activo FROM PROFESOR WHERE id = ?"
+
+        sql = "SELECT id, nombre, apellidos, activo, id_usuario FROM PROFESOR WHERE id = ?"
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
-        
+
         if row:
             return ProfesorDb(
                 id=row[0],
                 nombre=row[1],
                 apellidos=row[2],
-                activo=bool(row[3])
+                activo=bool(row[3]),
+                id_usuario=row[4]
             )
         return None
-        
+
     except mariadb.Error as e:
         print(f"Error leyendo profesor por id: {e}")
         return None
@@ -456,11 +471,9 @@ def read_profesor_by_id(id: int) -> ProfesorDb | None:
             conn.close()
 
 
-
 def delete_profesor(id: int) -> bool:
     conn = None
     cursor = None
-
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
@@ -472,7 +485,7 @@ def delete_profesor(id: int) -> bool:
         return cursor.rowcount > 0
 
     except mariadb.Error as e:
-        print(f"Error deleting profesor: {e}")
+        print(f"Error borrando profesor: {e}")
         return False
 
     finally:
@@ -482,21 +495,21 @@ def delete_profesor(id: int) -> bool:
             conn.close()
 
 
-def profesor_exists(nombre: str, apellidos: str) -> bool:
+def profesor_exists(id_usuario: int) -> bool:
+
     conn = None
     cursor = None
-
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = "SELECT id FROM PROFESOR WHERE nombre = ? AND apellidos = ?"
-        cursor.execute(sql, (nombre, apellidos))
+        sql = "SELECT id FROM PROFESOR WHERE id_usuario = ?"
+        cursor.execute(sql, (id_usuario,))
 
         return cursor.fetchone() is not None
 
     except mariadb.Error as e:
-        print(f"Error checking profesor: {e}")
+        print(f"Error comprobando profesor: {e}")
         return False
 
     finally:
@@ -505,27 +518,42 @@ def profesor_exists(nombre: str, apellidos: str) -> bool:
         if conn:
             conn.close()
 
+
 #--------------------------------------------------- DIRECTIVOS ---------------------------------------------------
 
-def insert_directivo(directivo: DirectivoCreate) -> int:
+def insert_directivo(directivo: DirectivoImport) -> int:
     conn = None
     cursor = None
 
     try:
+        # 1️⃣ Obtener datos del profesor
+        profesor = read_profesor_by_id(directivo.id_profesor)
+        if not profesor:
+            print("Profesor no encontrado")
+            return -1
+
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = "INSERT INTO DIRECTIVO (nombre, apellidos, activo, cargo, id_usuario) VALUES (?, ?, ?, ?, ?)"
-        values = (directivo.nombre, directivo.apellidos, directivo.activo, directivo.cargo, directivo.id_usuario)
+        sql = """
+        INSERT INTO DIRECTIVO (nombre, apellidos, activo, cargo, id_profesor)
+        VALUES (?, ?, ?, ?, ?)
+        """
+        values = (
+            profesor.nombre,
+            profesor.apellidos,
+            profesor.activo,
+            directivo.cargo,
+            profesor.id 
+        )
 
         cursor.execute(sql, values)
         conn.commit()
-
         return cursor.lastrowid
 
     except mariadb.Error as e:
         print(f"Error insertando directivo: {e}")
-        return -1 
+        return -1
 
     finally:
         if cursor:
@@ -542,26 +570,25 @@ def read_all_directivos() -> list[DirectivoDb]:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = "SELECT id, nombre, apellidos, activo, cargo, id_usuario FROM DIRECTIVO"
+        sql = "SELECT id, nombre, apellidos, activo, cargo, id_profesor FROM DIRECTIVO"
         cursor.execute(sql)
         results = cursor.fetchall()
         
-        directivo_db = []
-        for row in results:
-            directivo = DirectivoDb(
+        directivos = [
+            DirectivoDb(
                 id=row[0],
                 nombre=row[1],
                 apellidos=row[2],
-                activo=bool(row[3]),  # 1/0 → True/False
+                activo=bool(row[3]),
                 cargo=row[4],
-                id_usuario=row[5]
+                id_profesor=row[5]
             )
-            directivo_db.append(directivo)
-            
-        return directivo_db
+            for row in results
+        ]
+        return directivos
         
     except mariadb.Error as e:
-        print(f"Error leyendo directivo: {e}")
+        print(f"Error leyendo directivos: {e}")
         return []
 
     finally:
@@ -579,7 +606,7 @@ def read_directivo_by_id(id: int) -> DirectivoDb | None:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = "SELECT id, nombre, apellidos, activo, cargo, id_usuario FROM DIRECTIVO WHERE id = ?"
+        sql = "SELECT id, nombre, apellidos, activo, cargo, id_profesor FROM DIRECTIVO WHERE id = ?"
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
         
@@ -590,7 +617,7 @@ def read_directivo_by_id(id: int) -> DirectivoDb | None:
                 apellidos=row[2],
                 activo=bool(row[3]),
                 cargo=row[4],
-                id_usuario=row[5]
+                id_profesor=row[5]
             )
         return None
         
@@ -603,7 +630,6 @@ def read_directivo_by_id(id: int) -> DirectivoDb | None:
             cursor.close()
         if conn:
             conn.close()
-
 
 
 def delete_directivo(id: int) -> bool:
@@ -621,7 +647,7 @@ def delete_directivo(id: int) -> bool:
         return cursor.rowcount > 0
 
     except mariadb.Error as e:
-        print(f"Error deleting directivo: {e}")
+        print(f"Error borrando directivo: {e}")
         return False
 
     finally:
@@ -631,7 +657,8 @@ def delete_directivo(id: int) -> bool:
             conn.close()
 
 
-def directivo_exists(nombre: str, apellidos: str, cargo: str) -> bool:
+def directivo_exists(id_profesor: int, cargo: str) -> bool:
+
     conn = None
     cursor = None
 
@@ -639,13 +666,13 @@ def directivo_exists(nombre: str, apellidos: str, cargo: str) -> bool:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = "SELECT id FROM DIRECTIVO WHERE nombre = ? AND apellidos = ? AND cargo = ?"
-        cursor.execute(sql, (nombre, apellidos, cargo))
+        sql = "SELECT id FROM DIRECTIVO WHERE id_profesor = ? AND cargo = ?"
+        cursor.execute(sql, (id_profesor, cargo))
 
         return cursor.fetchone() is not None
 
     except mariadb.Error as e:
-        print(f"Error checking directivo: {e}")
+        print(f"Error comprobando directivo: {e}")
         return False
 
     finally:

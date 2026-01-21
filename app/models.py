@@ -47,41 +47,26 @@ class AlumnoCreate(BaseModel):
     curso: bool = True
 
 #-------------------------------MODELS_PROFESORES-----------------------------
-class ProfesorBase(BaseModel):
-    nombre: str
-    apellidos: str
-
-class ProfesorCreate(ProfesorBase):
-    activo: bool = True
-
-class ProfesorDb(ProfesorCreate):
-    id: int
-
-class ProfesorOut(ProfesorDb):
-    pass
-
 class ProfesorImport(BaseModel):
+    id_usuario: int
+
+class ProfesorDb(BaseModel):
+    id: int
     nombre: str
     apellidos: str
+    activo: bool
+    id_usuario: int
+
 
 #-------------------------------MODELS_DIRECTIVOS-----------------------------
-class DirectivoBase(BaseModel):
-    nombre: str
-    apellidos: str
-    cargo: str
-    id_usuario: int
-
-class DirectivoCreate(DirectivoBase):
-    activo: bool = True
-
-class DirectivoDb(DirectivoCreate):
-    id: int
-
-class DirectivoOut(DirectivoDb):
-    pass
-
 class DirectivoImport(BaseModel):
+    id_profesor: int
+    cargo: str
+
+class DirectivoDb(BaseModel):
+    id: int
     nombre: str
     apellidos: str
+    activo: bool
+    id_profesor: int
     cargo: str
-    id_usuario: int
