@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
-from app.models import DirectivoImport, DirectivoDb
+from app.models import DirectivoImport, DirectivoOut
 from app.auth.auth import oauth2_scheme
 from app.database import (
     insert_directivo,
@@ -16,7 +16,7 @@ router = APIRouter(
     tags=["Executives"]
 )
 
-@router.post("/create", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("/create/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_directivo(directivo: DirectivoImport, token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
@@ -37,7 +37,7 @@ async def crear_directivo(directivo: DirectivoImport, token: str = Depends(oauth
     return {"message": "Directivo creado exitosamente", "id": directivo_id}
 
 
-@router.get("/", response_model=List[DirectivoDb], status_code=status.HTTP_200_OK)
+@router.get("/", response_model=List[DirectivoOut], status_code=status.HTTP_200_OK)
 async def ver_directivos(token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
@@ -46,7 +46,7 @@ async def ver_directivos(token: str = Depends(oauth2_scheme)):
     return directivos
 
 
-@router.get("/{id}/", response_model=DirectivoDb, status_code=status.HTTP_200_OK)
+@router.get("/{id}/", response_model=DirectivoOut, status_code=status.HTTP_200_OK)
 async def ver_directivo_por_id(id: int, token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
-from app.models import ProfesorImport, ProfesorDb
+from app.models import ProfesorImport, ProfesorOut
 from app.auth.auth import oauth2_scheme
 from app.database import (
     insert_profesor,
@@ -22,7 +22,7 @@ async def crear_profesor(profesor: ProfesorImport, token: str = Depends(oauth2_s
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     # Comprobamos si ya existe el profesor por id_usuario
-    if profesor_exists(profesor.id_usuario):
+    if profesor_exists(profesor.id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Profesor con ese usuario ya existe"
@@ -38,7 +38,7 @@ async def crear_profesor(profesor: ProfesorImport, token: str = Depends(oauth2_s
     return {"message": "Profesor creado exitosamente", "id": profesor_id}
 
 
-@router.get("/", response_model=List[ProfesorDb], status_code=status.HTTP_200_OK)
+@router.get("/", response_model=List[ProfesorOut], status_code=status.HTTP_200_OK)
 async def ver_profesores(token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
@@ -47,7 +47,7 @@ async def ver_profesores(token: str = Depends(oauth2_scheme)):
     return profesores
 
 
-@router.get("/{id}/", response_model=ProfesorDb, status_code=status.HTTP_200_OK)
+@router.get("/{id}/", response_model=ProfesorOut, status_code=status.HTTP_200_OK)
 async def ver_profesor_por_id(id: int, token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
