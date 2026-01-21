@@ -71,8 +71,7 @@ def read_all_users() -> list[UserDb]:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        # Seleccionamos id, nombre, username y password
-        sql = "SELECT id, nombre, username, password FROM USUARIO"
+        sql = "SELECT id, nombre, apellidos, activo, password FROM USUARIO"
         cursor.execute(sql)
         results = cursor.fetchall()
         
@@ -80,9 +79,10 @@ def read_all_users() -> list[UserDb]:
         for row in results:
             user = UserDb(
                 id=row[0], 
-                name=row[1],
-                username=row[2], 
-                password=row[3]
+                nombre=row[1],
+                apellidos=row[2], 
+                activo=row[3],
+                password=row[4]
             )
             users_db.append(user)
             
@@ -100,17 +100,20 @@ def read_all_users() -> list[UserDb]:
         if cursor:
             cursor.close()
 
-def deleteUser(user: UserBase) -> bool:
+def deleteUser(user: UserDb) -> bool:
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
         # 1. Primero buscamos la contraseña hasheada de ese usuario
-        sql_check = "SELECT password FROM USUARIO WHERE username = ?"
-        cursor.execute(sql_check, (user.username,))
-        result = cursor.fetchone()
+        sql_delete = "DELETE FROM USUARIO WHERE id = ?"
+        cursor.execute(sql_delete, (user.id,))
+        conn.commit()
+        return True
+        
+        '''result = cursor.fetchone()'''
 
-        if not result:
+        '''if not result:
             #conn.close()
             print("No existe ese usuario")
             return False # El usuario no existe
@@ -119,17 +122,17 @@ def deleteUser(user: UserBase) -> bool:
         # 2. Comprobamos si la contraseña que nos pasan coincide con el hash de la BD
         if verify_password(user.password, stored_hash):
             # 3. Si coincide, procedemos a borrar
-            sql_delete = "DELETE FROM USUARIO WHERE username = ?"
-            cursor.execute(sql_delete, (user.username,))
+            sql_delete = "DELETE FROM USUARIO WHERE id = ?"
+            cursor.execute(sql_delete, (user.id,))
             conn.commit()
             #conn.close()
             return True
         else:
             #conn.close()
             print("Contraseña no es correcta")
-            return False # La contraseña no es correcta
+            return False # La contraseña no es correcta'''
 
-    except mariadb.Error as e:
+    except mariadb as e:
         print(f"Error deleting user: {e}")
         return False
     finally:
@@ -145,7 +148,7 @@ def read_user_by_id(id: int) -> UserDb | None:
         cursor = conn.cursor()
         
         # Seleccionamos los datos filtrando por ID
-        sql = "SELECT id, nombre, username, password FROM USUARIO WHERE id = ?"
+        sql = "SELECT id, nombre, apellidos, activo, password FROM USUARIO WHERE id = ?"
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
         
@@ -156,9 +159,10 @@ def read_user_by_id(id: int) -> UserDb | None:
             # Si existe, devolvemos el objeto UserDb
             return UserDb(
                 id=row[0], 
-                name=row[1], 
-                username=row[2], 
-                password=row[3]
+                nombre=row[1], 
+                apellidos=row[2], 
+                activo=row[3],
+                password=row[4]
             )
         return None # Si no existe, devolvemos None
         

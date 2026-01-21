@@ -16,6 +16,7 @@ class UserOut(BaseModel):
     id: int
     nombre: str
     apellidos: str
+    activo: bool
 
 # Formato de respuesta al iniciar sesión
 class TokenOut(BaseModel):
