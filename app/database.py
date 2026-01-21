@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-from app.models import DirectivoImport, DirectivoDb, UserDb, UserIn, UserBase
-from app.models import AlumnoCreate, AlumnoDb, ProfesorDb, ProfesorImport
-=======
 from app.models import DirectivoImport, DirectivoDb, UserDb, UserBase
 from app.models import AlumnoCreate, ProfesorDb, ProfesorImport
->>>>>>> 229be46e5d0a71d3b06541de4dbcc29dabe125f5
 from app.auth.auth import verify_password, get_hash_password
 from app.auth.auth import verify_password, TokenData
 from app.auth.auth import  oauth2_scheme, decode_token
@@ -389,7 +384,7 @@ def insert_profesor(profesor: ProfesorImport) -> int:
         VALUES (?, ?, ?, ?)
         """
         values = (
-            usuario.name,
+            usuario.nombre,
             usuario.apellidos,
             usuario.activo,
             usuario.id
