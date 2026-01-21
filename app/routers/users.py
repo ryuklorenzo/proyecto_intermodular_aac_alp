@@ -76,7 +76,7 @@ async def get_all_users(token: str = Depends(oauth2_scheme)):
     if validateIsAdmin(token) == True:
         #coger los usuarios de la BD
         db_users = read_all_users()
-        return [UserOut(id=u.id, name=u.nombre, username=u.apellidos) for u in db_users]
+        return [UserOut(id=u.id, nombre=u.nombre, apellidos=u.apellidos, activo=u.activo ) for u in db_users]
     else:
             raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -122,9 +122,9 @@ async def get_user(id: int, token: str = Depends(oauth2_scheme)):
 
 # Delete user by ID  ----------------------------------------(BORRAR USUARIO)-----------------------------------------------------------
 @router.delete("/{id}/", status_code=status.HTTP_200_OK)
-async def delete_user(userBase : UserBase, token: str = Depends(oauth2_scheme)):
+async def delete_user(UserDb : UserDb, token: str = Depends(oauth2_scheme)):
     if validateIsAdmin(token) == True:
-        deleted = deleteUser(userBase)
+        deleted = deleteUser(UserDb)
         if not deleted:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, # O 404
