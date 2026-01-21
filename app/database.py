@@ -1,5 +1,5 @@
 from app.models import DirectivoImport, DirectivoOut, UserDb, UserBase
-from app.models import AlumnoCreate, ProfesorOut, ProfesorImport
+from app.models import AlumnoCreate, AlumnoOut, ProfesorOut, ProfesorImport
 from app.auth.auth import verify_password, get_hash_password
 from app.auth.auth import verify_password, TokenData
 from app.auth.auth import  oauth2_scheme, decode_token
@@ -274,56 +274,66 @@ def insert_alumno(alumno: AlumnoCreate) -> int:
         if cursor:
             cursor.close()
 
-def read_all_alumnos() -> list[AlumnoCreate]:
-    try:
-        conn = mariadb.connect(**db_config)
-        cursor = conn.cursor()
-        
-        # Seleccionamos todos (puedes añadir un WHERE activo = 1 si solo quieres ver los activos)
-        sql = "SELECT id, curso FROM ALUMNO" #hacer el join
-        cursor.execute(sql)
-        results = cursor.fetchall()
-        
-        alumnos_db = []
-        for row in results:
-            alumno = AlumnoCreate(
-                id=row[0],
-                curso=row[1]
-            )
-            alumnos_db.append(alumno)
-            
-        #cursor.close()
-        #conn.close()
-        return alumnos_db
-        
-    except mariadb as e:
-        print(f"Error leyendo alumnos: {e}")
-        return []
-    finally:
-        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
-        if conn:
-            conn.close()
-        if cursor:
-            cursor.close()
-
-def read_alumno_by_id(id: int) -> AlumnoCreate | None:
+def read_all_alumnos() -> list[AlumnoOut]:
     conn = None
     cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = "SELECT id, curso FROM ALUMNO WHERE id = ?" #hacer el join
+        sql = """
+        SELECT a.id, a.curso, u.nombre, u.apellidos, u.activo 
+        FROM ALUMNO a
+        JOIN USUARIO u ON a.id = u.id
+        """
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        
+        alumnos_db = []
+        for row in results:
+            alumno = AlumnoOut(
+                id=row[0],
+                curso=row[1],
+                nombre=row[2],
+                apellidos=row[3],
+                activo=bool(row[4])
+            )
+            alumnos_db.append(alumno)
+            
+        return alumnos_db
+        
+    except mariadb.Error as e:
+        print(f"Error leyendo alumnos: {e}")
+        return []
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+def read_alumno_by_id(id: int) -> AlumnoOut | None:
+    conn = None
+    cursor = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+        
+        sql = """
+        SELECT a.id, a.curso, u.nombre, u.apellidos, u.activo 
+        FROM ALUMNO a
+        JOIN USUARIO u ON a.id = u.id
+        WHERE a.id = ?
+        """
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
         
-        #cursor.close()
-        #conn.close()
-        
         if row:
-            return AlumnoCreate(
+            return AlumnoOut(
                 id=row[0],
-                curso=row[1]
+                curso=row[1],
+                nombre=row[2],
+                apellidos=row[3],
+                activo=bool(row[4])
             )
         return None
         
@@ -331,39 +341,38 @@ def read_alumno_by_id(id: int) -> AlumnoCreate | None:
         print(f"Error leyendo alumno por id: {e}")
         return None
     finally:
-        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
-        if conn:
-            conn.close()
         if cursor:
             cursor.close()
+        if conn:
+            conn.close()
 
 def baja_alumno(id: int) -> bool:
+    conn = None
+    cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        # Actualizamos el campo activo a 0 (False)
-        sql = "UPDATE ALUMNO SET activo = 0 WHERE id = ?" #coger el id de alummno y buscar en usuario
+        sql = """
+        UPDATE USUARIO u
+        JOIN ALUMNO a ON u.id = a.id
+        SET u.activo = 0
+        WHERE a.id = ?
+        """
+        
         cursor.execute(sql, (id,))
         conn.commit()
         
-        # Verificamos si se afectó alguna fila
-        filas_afectadas = cursor.rowcount
-        
-        #cursor.close()
-        #conn.close()
-        
-        return filas_afectadas > 0
+        return True
 
-    except mariadb as e:
+    except mariadb.Error as e:
         print(f"Error dando de baja al alumno: {e}")
         return False
     finally:
-        # Esto asegura que la conexión se cierre SIEMPRE, incluso si hubo error
-        if conn:
-            conn.close()
         if cursor:
             cursor.close()
+        if conn:
+            conn.close()
 
 #--------------------------------------------------- PROFESORES ---------------------------------------------------
 
@@ -410,7 +419,11 @@ def read_all_profesores() -> list[ProfesorOut]:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = "SELECT id, nombre, apellidos, activo, id_usuario FROM PROFESOR"
+        sql = """
+        SELECT p.id, u.nombre, u.apellidos, u.activo
+        FROM PROFESOR p
+        JOIN USUARIO u ON p.id = u.id
+        """
         cursor.execute(sql)
         results = cursor.fetchall()
 
@@ -419,8 +432,7 @@ def read_all_profesores() -> list[ProfesorOut]:
                 id=row[0],
                 nombre=row[1],
                 apellidos=row[2],
-                activo=bool(row[3]),
-                id_usuario=row[4]
+                activo=bool(row[3])
             )
             for row in results
         ]
@@ -437,20 +449,30 @@ def read_all_profesores() -> list[ProfesorOut]:
             conn.close()
 
 
-def read_profesor_by_id(id: int) -> ProfesorImport | None:
+def read_profesor_by_id(id: int) -> ProfesorOut | None:
     conn = None
     cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = "SELECT id FROM PROFESOR WHERE id = ?" #hacer el join
+        # CORRECCIÓN: Hacemos JOIN con USUARIO para obtener nombre y apellidos
+        # ya que la tabla PROFESOR solo tiene el ID.
+        sql = """
+        SELECT p.id, u.nombre, u.apellidos, u.activo
+        FROM PROFESOR p
+        JOIN USUARIO u ON p.id = u.id
+        WHERE p.id = ?
+        """
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
 
         if row:
-            return ProfesorImport(
-                id=row[0]
+            return ProfesorOut(
+                id=row[0],
+                nombre=row[1],
+                apellidos=row[2],
+                activo=bool(row[3])
             )
         return None
 
@@ -552,6 +574,8 @@ def insert_directivo(directivo: DirectivoImport) -> int:
             conn.close()
 
 
+# En app/database.py
+
 def read_all_directivos() -> list[DirectivoOut]:
     conn = None
     cursor = None
@@ -560,21 +584,26 @@ def read_all_directivos() -> list[DirectivoOut]:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = "SELECT id, nombre, apellidos, activo, cargo, id_profesor FROM DIRECTIVO"
+        sql = """
+        SELECT d.id, u.nombre, u.apellidos, u.activo, d.cargo
+        FROM DIRECTIVO d
+        JOIN PROFESOR p ON d.id = p.id
+        JOIN USUARIO u ON p.id = u.id
+        """
         cursor.execute(sql)
         results = cursor.fetchall()
         
-        directivos = [
-            DirectivoOut(
-                id=row[0],
-                nombre=row[1],
-                apellidos=row[2],
-                activo=bool(row[3]),
-                cargo=row[4],
-                id_profesor=row[5]
+        directivos = []
+        for row in results:
+            directivos.append(
+                DirectivoOut(
+                    id_profesor=row[0],
+                    nombre=row[1],
+                    apellidos=row[2],
+                    activo=bool(row[3]),
+                    cargo=row[4]
+                )
             )
-            for row in results
-        ]
         return directivos
         
     except mariadb.Error as e:
