@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
-from app.models import AlumnoCreate, AlumnoDb
+from app.models import AlumnoCreate
 from app.database import insert_alumno, read_all_alumnos, read_alumno_by_id, baja_alumno, validateIsAdmin
 from app.auth.auth import oauth2_scheme # Si quieres proteger las rutas con token
 
@@ -33,7 +33,7 @@ async def crear_alumno(alumno: AlumnoCreate, token: str = Depends(oauth2_scheme)
 
 
 # 2. Ver todos los alumnos
-@router.get("/", response_model=List[AlumnoDb], status_code=status.HTTP_200_OK)
+@router.get("/", response_model=List[AlumnoCreate], status_code=status.HTTP_200_OK)
 async def ver_alumnos(token: str = Depends(oauth2_scheme)):
     # Aquí podrías añadir Depends(oauth2_scheme) si quieres que solo usuarios logueados lo vean
     if validateIsAdmin(token) == True:
