@@ -3,20 +3,19 @@ from pydantic import BaseModel
 #-------------------------------MODELS_USERS-----------------------------
 #Usuario base
 class UserBase(BaseModel):
-    username : str
+    nombre : str
+    apellidos : str
+    activo : bool = True
     password : str
 
-class UserIn(UserBase):
-    name : str
-
 # Los datos de los usuarios se almacenan en la bsae de datos
-class UserDb(UserIn):
+class UserDb(UserBase):
     id: int
 
 class UserOut(BaseModel):
     id: int
-    name: str
-    username: str
+    nombre: str
+    apellidos: str
 
 # Formato de respuesta al iniciar sesión
 class TokenOut(BaseModel):
@@ -25,7 +24,7 @@ class TokenOut(BaseModel):
 class UserLoginIn(UserBase):
     pass
 
-#-------------------------------MODELS_ROOTS-----------------------------
+'''#-------------------------------MODELS_ROOTS-----------------------------
 
 class RootBase(BaseModel):
     name : str
@@ -39,7 +38,7 @@ class RootDb(RootBase):
     id: int
 
 class RootOut(RootDb):
-    pass
+    pass'''
 
 #-------------------------------MODELS_ALUMNOS-----------------------------
 class AlumnoBase(BaseModel):

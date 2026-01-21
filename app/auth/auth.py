@@ -39,7 +39,7 @@ def verify_password(plain_pw, hashed_pw) -> bool:
 
 def create_access_token(user: UserBase) -> Token:
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MIN)
-    to_encode = {"sub": user.username, "exp": expire}
+    to_encode = {"sub": user.nombre, "exp": expire}
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return Token(access_token=encoded_jwt, token_type="bearer")
 

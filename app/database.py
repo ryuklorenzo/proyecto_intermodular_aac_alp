@@ -1,7 +1,6 @@
 from app.models import DirectivoImport, DirectivoDb, UserDb, UserIn, UserBase
 from app.models import AlumnoCreate, AlumnoDb, ProfesorDb, ProfesorImport
 from app.auth.auth import verify_password, get_hash_password
-from app.models import UserDb, UserIn, UserBase, RootDb
 from app.auth.auth import verify_password, TokenData
 from app.auth.auth import  oauth2_scheme, decode_token
 from fastapi import APIRouter, Depends, status, HTTPException
@@ -16,18 +15,20 @@ db_config = {
 }
 usersAdmins : list[UserDb] = [
     UserDb(id=1,
-        name="angel",
-        username="angel",
+        nombre="angel",
+        apellidos="angel",
+        activo=1,
         password=get_hash_password("angel")),
     UserDb(id=2,
-        name="azael",
-        username="azael",
+        nombre="azael",
+        apellidos="azael",
+        activo=1,
         password=get_hash_password("azael"))
 ]
 
 def validateIsAdmin(token) -> bool:
     data: TokenData = decode_token(token)
-    if data.username not in [u.username for u in usersAdmins]:
+    if data.username not in [u.nombre for u in usersAdmins]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Forbidden"
@@ -39,8 +40,8 @@ def insert_user(user: UserDb) -> int:
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
-        sql = "INSERT INTO USUARIO (nombre, username, password) VALUES (?, ?, ?)"
-        values = (user.name, user.username, user.password)
+        sql = "INSERT INTO USUARIO (nombre, apellidos, activo, password) VALUES (?, ?, ?, ?)"
+        values = (user.nombre, user.apellidos,user.activo, user.password)
         
         cursor.execute(sql, values)
         conn.commit()
@@ -174,7 +175,7 @@ def read_user_by_id(id: int) -> UserDb | None:
             conn.close()
 
 
-# --------------------------------------------------- ROOTS ---------------------------------------------------
+'''# --------------------------------------------------- ROOTS ---------------------------------------------------
 
 def insert_root(root: RootDb) -> int:
     try:
@@ -239,7 +240,7 @@ def delete_root(id: int) -> bool:
 
     except mariadb.Error as e:
         print(f"Error deleting root: {e}")
-        return False
+        return False'''
 
 
 #--------------------------------------------------- ALUMNOS ---------------------------------------------------
