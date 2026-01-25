@@ -44,18 +44,21 @@ class RootOut(RootDb):
 #-------------------------------MODELS_ALUMNOS-----------------------------
 class AlumnoCreate(BaseModel):
     id: int  # Necesario para vincular con la tabla USUARIO
-    curso: bool = True
+    curso: str 
+
+class AlumnoOut(AlumnoCreate):
+    nombre : str
+    apellidos : str
+    activo : bool = True
 
 #-------------------------------MODELS_PROFESORES-----------------------------
 class ProfesorImport(BaseModel):
-    id_usuario: int
-
-class ProfesorDb(BaseModel):
     id: int
-    nombre: str
-    apellidos: str
-    activo: bool
-    id_usuario: int
+
+class ProfesorOut(ProfesorImport):
+    nombre : str
+    apellidos : str
+    activo : bool = True
 
 
 #-------------------------------MODELS_DIRECTIVOS-----------------------------
@@ -63,10 +66,7 @@ class DirectivoImport(BaseModel):
     id_profesor: int
     cargo: str
 
-class DirectivoDb(BaseModel):
-    id: int
-    nombre: str
-    apellidos: str
-    activo: bool
-    id_profesor: int
-    cargo: str
+class DirectivoOut(DirectivoImport):
+    nombre : str
+    apellidos : str
+    activo : bool = True
