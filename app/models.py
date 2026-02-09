@@ -1,3 +1,4 @@
+from datetime import date
 from pydantic import BaseModel
 
 #-------------------------------MODELS_USERS-----------------------------
@@ -70,3 +71,34 @@ class DirectivoOut(DirectivoImport):
     nombre : str
     apellidos : str
     activo : bool = True
+
+
+#-------------------------------MODELS_ACTITUDES-----------------------------
+class ActitudBase(BaseModel):
+    descripcion: str
+    fecha: date
+    tipo: str
+
+
+class ActitudCreate(ActitudBase):
+    pass
+
+
+class ActitudOut(ActitudBase):
+    id: int
+    id_usuario: int
+
+
+#-------------------------------MODELS_TAREAS-----------------------------
+
+class TareaBase(BaseModel):
+    descripcion = str
+    estado: str
+    id_profesor: int
+    id_alumno: int
+
+class TareaCreate(TareaBase):
+    pass
+
+class TareaOut(TareaBase):
+    id: int
