@@ -67,7 +67,6 @@ async def ver_alumno_por_id(id: int, token: str = Depends(oauth2_scheme)):
 @router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
 async def dar_baja_alumno(id: int, token: str = Depends(oauth2_scheme)):
     if validateIsAdmin(token) == True:
-        # 1. Verificamos si existe
         alumno = read_alumno_by_id(id)
         if not alumno:
             raise HTTPException(
@@ -75,13 +74,9 @@ async def dar_baja_alumno(id: int, token: str = Depends(oauth2_scheme)):
                 detail="Alumno no encontrado"
             )
         
-        # 2. NUEVO: Verificamos si ya está dado de baja
         if not alumno.activo:
-            # Opcional: Puedes devolver un mensaje indicando que ya estaba inactivo
-            # o simplemente decir que está dado de baja correctamente (idempotencia).
             return {"message": f"El alumno con id {id} ya estaba dado de baja previamente"}
 
-        # 3. Procedemos a la baja si está activo
         exito = baja_alumno(id)
         if not exito:
             raise HTTPException(

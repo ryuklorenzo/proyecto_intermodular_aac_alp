@@ -8,7 +8,8 @@ from app.database import (
     read_all_profesores,
     read_profesor_by_id,
     profesor_exists,
-    validateIsAdmin
+    validateIsAdmin,
+    baja_profesor
 )
 
 router = APIRouter(
@@ -61,16 +62,26 @@ async def ver_profesor_por_id(id: int, token: str = Depends(oauth2_scheme)):
     return profesor
 
 
-@router.delete("/{id}/", status_code=status.HTTP_200_OK)
-async def borrar_profesor(id: int, token: str = Depends(oauth2_scheme)):
+@router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
+async def dar_de_baja_profesor(id: int, token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
-    deleted = delete_profesor(id)
-    if not deleted:
+    profesor = read_profesor_by_id(id)
+    if not profesor:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Profesor no encontrado"
         )
-
-    return {"message": "Profesor eliminado correctamente"}
+    
+    if not profesor.activo:
+        return {"message": f"El profesor con id {id} ya estaba dado de baja previamente"}
+    
+    exito = baja_profesor(id)
+    if not exito:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="No se pudo dar de baja al Profesor (Error en BD)"
+        )
+        
+    return {"message": f"Profesor con id {id} dado de baja correctamente (activo=False)"}

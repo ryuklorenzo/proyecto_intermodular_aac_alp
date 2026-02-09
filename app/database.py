@@ -534,6 +534,34 @@ def profesor_exists(id_usuario: int) -> bool:
         if conn:
             conn.close()
 
+def baja_profesor(id: int) -> bool:
+    conn = None
+    cursor = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = """
+        UPDATE USUARIO u
+        JOIN PROFESOR a ON u.id = a.id
+        SET u.activo = 0
+        WHERE a.id = ?
+        """
+        
+        cursor.execute(sql, (id,))
+        conn.commit()
+        
+        return True
+
+    except mariadb.Error as e:
+        print(f"Error dando de baja al profesor: {e}")
+        return False
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 #--------------------------------------------------- DIRECTIVOS ---------------------------------------------------
 
 def insert_directivo(directivo: DirectivoImport) -> int:
@@ -699,3 +727,4 @@ def directivo_exists(id_profesor: int, cargo: str) -> bool:
             cursor.close()
         if conn:
             conn.close()
+

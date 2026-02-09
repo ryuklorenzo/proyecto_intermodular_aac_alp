@@ -51,7 +51,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     password_input = form_data.password
 
     # busco en useradmins
-    userFound = [u for u in usersAdmins if u.nombre == username_input]
+    userFound = [u for u in usersAdmins if u.nombre == username_input] #Busque en root, o si tienen poderes ej directivo o profesor podian tener permisos
     
     if not userFound:
         raise HTTPException(

@@ -73,3 +73,30 @@ async def borrar_directivo(id: int, token: str = Depends(oauth2_scheme)):
         )
 
     return {"message": "Directivo eliminado correctamente"}
+
+
+'''
+@router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
+async def dar_de_baja_profesor(id: int, token: str = Depends(oauth2_scheme)):
+    if not validateIsAdmin(token):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+
+    profesor = read_profesor_by_id(id)
+    if not profesor:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profesor no encontrado"
+        )
+    
+    if not profesor.activo:
+        return {"message": f"El profesor con id {id} ya estaba dado de baja previamente"}
+    
+    exito = baja_profesor(id)
+    if not exito:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="No se pudo dar de baja al Profesor (Error en BD)"
+        )
+        
+    return {"message": f"Profesor con id {id} dado de baja correctamente (activo=False)"}
+'''
