@@ -1,5 +1,5 @@
 from app.models import DirectivoImport, DirectivoOut, UserDb, UserBase
-from app.models import AlumnoCreate, AlumnoOut, ProfesorOut, ProfesorImport
+from app.models import AlumnoCreate, AlumnoOut, ProfesorOut, ProfesorImport, ActitudCreate, ActitudOut, TareaCreate, TareaOut
 from app.auth.auth import verify_password, get_hash_password
 from app.auth.auth import verify_password, TokenData
 from app.auth.auth import  oauth2_scheme, decode_token
@@ -390,10 +390,16 @@ def insert_profesor(profesor: ProfesorImport) -> int:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        # 2. Insertar en PROFESOR usando el MISMO ID que el usuario.
-        # Según tu schema.sql, la tabla PROFESOR solo tiene la columna 'id'.
-        sql = "INSERT INTO PROFESOR (id) VALUES (?)"
-        values = (usuario.id,)
+        sql = """
+        INSERT INTO PROFESOR (nombre, apellidos, activo, id_usuario)
+        VALUES (?, ?, ?, ?)
+        """
+        values = (
+            usuario.name,
+            usuario.apellidos,
+            usuario.activo,
+            usuario.id
+        )
 
         cursor.execute(sql, values)
         conn.commit()
@@ -728,3 +734,177 @@ def directivo_exists(id_profesor: int, cargo: str) -> bool:
         if conn:
             conn.close()
 
+
+#--------------------------------------------------- ACTITUDES ---------------------------------------------------
+def insert_actitud(id_usuario: int, actitud: ActitudCreate) -> int:
+    conn = None
+    cursor = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = """
+        INSERT INTO ACTITUD (descripcion, fecha, tipo, id_usuario)
+        VALUES (?, ?, ?, ?)
+        """
+        values = (actitud.descripcion, actitud.fecha, actitud.tipo, id_usuario)
+
+        cursor.execute(sql, values)
+        conn.commit()
+        return cursor.lastrowid
+    
+    except mariadb.Error as e:
+        print(f"Error insertando actitud: {e}")
+        return -1
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+
+def read_actitudes_by_usuario(id_usuario: int) -> list[ActitudOut]:
+    conn = None
+    cursor = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = "SELECT id, descripcion, fecha, tipo, id_usuario FROM ACTITUD WHERE id_usuario = ?"
+        cursor.execute(sql, (id_usuario,))
+        results = cursor.fetchall()
+
+        return [
+            ActitudOut(
+                id=row[0],
+                descripcion=row[1],
+                fecha=row[2],
+                tipo=row[3],
+                id_usuario=row[4]
+            )
+            for row in results
+        ]
+
+    except mariadb.Error as e:
+        print(f"Error leyendo actitudes: {e}")
+        return []
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def delete_actitud(id_actitud: int) -> bool:
+    conn = None
+    cursor = None
+
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = "SELECT id, cargo FROM ACTITUD WHERE id = ?"
+        cursor.execute(sql, (id_actitud,))
+
+        return cursor.fetchone() is not None
+
+    except mariadb.Error as e:
+        print(f"Error comprobando actitud: {e}")
+        return False
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+#--------------------------------------------------- TAREAS ---------------------------------------------------
+def insert_tarea(tarea: TareaCreate) -> int:
+    conn = None
+    cursor = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = """
+        INSERT INTO ACTITUD (descripcion, estado, id_profesor, id_alumno)
+        VALUES (?, ?, ?, ?)
+        """
+        values = (tarea.descripcion, tarea.estado, tarea.id_profesor, tarea.id_alumno)
+
+        cursor.execute(sql, values)
+        conn.commit()
+        return cursor.lastrowid
+    
+    except mariadb.Error as e:
+        print(f"Error insertando tarea: {e}")
+        return -1
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+
+def read_tareas_by_alumno(id_alumno: int) -> list:
+    conn = None
+    cursor = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = "SELECT id, descripcion, estado, id_profesor, id_alumno FROM TAREA WHERE id_alumno = ?"
+        cursor.execute(sql, (id_alumno,))
+        results = cursor.fetchall()
+
+        return [
+            {
+                "id": row[0],
+                "descripcion": row[1],
+                "estado": row[2],
+                "id_profesor": row[3],
+                "id_alumno": row[4]
+            }
+            for row in results
+        ]
+
+    except mariadb.Error as e:
+        print(f"Error leyendo tareas: {e}")
+        return []
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def read_tareas_by_profesor(id_profesor: int) -> list:
+    conn = None
+    cursor = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = "SELECT id, descripcion, estado, id_profesor, id_alumno FROM TAREA WHERE id_profesor = ?"
+        cursor.execute(sql, (id_profesor,))
+        results = cursor.fetchall()
+
+        return [
+            {
+                "id": row[0],
+                "descripcion": row[1],
+                "estado": row[2],
+                "id_profesor": row[3],
+                "id_alumno": row[4]
+            }
+            for row in results
+        ]
+
+    except mariadb.Error as e:
+        print(f"Error leyendo tareas: {e}")
+        return []
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
