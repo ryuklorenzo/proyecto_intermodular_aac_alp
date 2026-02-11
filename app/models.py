@@ -92,7 +92,7 @@ class ActitudOut(ActitudBase):
 #-------------------------------MODELS_TAREAS-----------------------------
 
 class TareaBase(BaseModel):
-    descripcion = str
+    descripcion: str
     estado: str
     id_profesor: int
     id_alumno: int
