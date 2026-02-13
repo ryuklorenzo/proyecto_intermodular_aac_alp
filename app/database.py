@@ -390,14 +390,11 @@ def insert_profesor(id_usuario: int) -> int:
         cursor = conn.cursor()
 
         sql = """
-        INSERT INTO PROFESOR (nombre, apellidos, activo, id_usuario)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO PROFESOR (id)
+        VALUES (?)
         """
         values = (
-            usuario.nombre,
-            usuario.apellidos,
-            usuario.activo,
-            usuario.id
+            usuario.id,
         )
 
         cursor.execute(sql, values)
@@ -814,7 +811,7 @@ def delete_actitud(id_actitud: int) -> bool:
 
 
 #--------------------------------------------------- TAREAS ---------------------------------------------------
-def insert_tarea(id_profesor: int, id_alumno: int, tarea: TareaCreate) -> int:
+def insert_tarea(tarea: TareaCreate) -> int:
     conn = None
     cursor = None
     try:
@@ -822,10 +819,10 @@ def insert_tarea(id_profesor: int, id_alumno: int, tarea: TareaCreate) -> int:
         cursor = conn.cursor()
 
         sql = """
-        INSERT INTO ACTITUD (descripcion, estado, id_profesor, id_alumno)
+        INSERT INTO TAREA (descripcion, estado, id_profesor, id_alumno)
         VALUES (?, ?, ?, ?)
         """
-        values = (tarea.descripcion, tarea.estado, id_profesor, id_alumno)
+        values = (tarea.descripcion, tarea.estado, tarea.id_profesor, tarea.id_alumno)
 
         cursor.execute(sql, values)
         conn.commit()

@@ -57,6 +57,7 @@ class ProfesorImport(BaseModel):
     pass
 
 class ProfesorOut(ProfesorImport):
+    id: int
     nombre : str
     apellidos : str
     activo : bool = True
@@ -96,7 +97,8 @@ class TareaBase(BaseModel):
     estado: str
 
 class TareaCreate(TareaBase):
-    pass
+    id_profesor: int
+    id_alumno: int
 
 class TareaOut(TareaBase):
     id: int

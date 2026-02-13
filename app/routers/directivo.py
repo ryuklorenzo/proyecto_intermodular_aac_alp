@@ -16,7 +16,7 @@ router = APIRouter(
     tags=["Executives"]
 )
 
-@router.post("/create/", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_directivo(directivo: DirectivoImport, token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")

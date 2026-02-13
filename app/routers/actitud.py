@@ -15,7 +15,7 @@ router = APIRouter(
     tags=["Attitudes"]
 )
 
-@router.post("/usuario/{id_usuario}/", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_actitud(id_usuario: int, actitud: ActitudCreate, token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
