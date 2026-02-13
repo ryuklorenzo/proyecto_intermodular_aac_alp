@@ -54,7 +54,7 @@ class AlumnoOut(AlumnoCreate):
 
 #-------------------------------MODELS_PROFESORES-----------------------------
 class ProfesorImport(BaseModel):
-    id: int
+    pass
 
 class ProfesorOut(ProfesorImport):
     nombre : str
@@ -94,8 +94,6 @@ class ActitudOut(ActitudBase):
 class TareaBase(BaseModel):
     descripcion: str
     estado: str
-    id_profesor: int
-    id_alumno: int
 
 class TareaCreate(TareaBase):
     pass
