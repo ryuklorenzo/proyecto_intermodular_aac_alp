@@ -376,15 +376,14 @@ def baja_alumno(id: int) -> bool:
 
 #--------------------------------------------------- PROFESORES ---------------------------------------------------
 
-def insert_profesor(profesor: ProfesorImport) -> int:
+def insert_profesor(id_usuario: int) -> int: 
     conn = None
     cursor = None
 
     try:
-        # 1. Verificar si el usuario existe recuperando sus datos
-        usuario = read_user_by_id(profesor.id)
+        usuario = read_user_by_id(id_usuario)
         if not usuario:
-            print(f"Usuario con id {profesor.id} no encontrado")
+            print(f"Usuario con id {id_usuario} no encontrado")
             return -1
 
         conn = mariadb.connect(**db_config)
@@ -395,7 +394,7 @@ def insert_profesor(profesor: ProfesorImport) -> int:
         VALUES (?, ?, ?, ?)
         """
         values = (
-            usuario.name,
+            usuario.nombre,
             usuario.apellidos,
             usuario.activo,
             usuario.id
@@ -404,18 +403,14 @@ def insert_profesor(profesor: ProfesorImport) -> int:
         cursor.execute(sql, values)
         conn.commit()
         
-        # El id del profesor es el mismo que el del usuario insertado
         return usuario.id
 
     except mariadb.Error as e:
         print(f"Error insertando profesor: {e}")
         return -1
-
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 
 def read_all_profesores() -> list[ProfesorOut]:
@@ -819,7 +814,7 @@ def delete_actitud(id_actitud: int) -> bool:
 
 
 #--------------------------------------------------- TAREAS ---------------------------------------------------
-def insert_tarea(tarea: TareaCreate) -> int:
+def insert_tarea(id_profesor: int, id_alumno: int, tarea: TareaCreate) -> int:
     conn = None
     cursor = None
     try:
@@ -830,7 +825,7 @@ def insert_tarea(tarea: TareaCreate) -> int:
         INSERT INTO ACTITUD (descripcion, estado, id_profesor, id_alumno)
         VALUES (?, ?, ?, ?)
         """
-        values = (tarea.descripcion, tarea.estado, tarea.id_profesor, tarea.id_alumno)
+        values = (tarea.descripcion, tarea.estado, id_profesor, id_alumno)
 
         cursor.execute(sql, values)
         conn.commit()

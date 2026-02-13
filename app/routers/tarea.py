@@ -15,21 +15,22 @@ router = APIRouter(
     tags=["Tareas"]
 )
 
-@router.post("/create/", status_code=status.HTTP_201_CREATED, response_model=dict)
-async def crear_tarea(tarea: TareaCreate, token: str = Depends(oauth2_scheme)):
+@router.post("/create/{id_profesor}/{id_alumno}", status_code=status.HTTP_201_CREATED)
+async def crear_tarea(
+    id_profesor: int,
+    id_alumno: int,
+    tarea: TareaCreate,
+    token: str = Depends(oauth2_scheme)
+):
     if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+        raise HTTPException(status_code=401, detail="UNAUTHORIZED")
 
-    tarea_id = insert_tarea(tarea)
+    tarea_id = insert_tarea(id_profesor, id_alumno, tarea)
 
     if tarea_id == -1:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error al crear la tarea"
-        )
+        raise HTTPException(status_code=500, detail="Error al crear la tarea")
 
     return {"message": "Tarea asignada correctamente", "id": tarea_id}
-
 
 @router.get("/alumno/{id_alumno}/", response_model=List[TareaOut])
 async def ver_tareas_alumno(id_alumno: int, token: str = Depends(oauth2_scheme)):

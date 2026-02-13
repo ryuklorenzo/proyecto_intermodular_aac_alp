@@ -17,19 +17,22 @@ router = APIRouter(
     tags=["Teachers"]
 )
 
-@router.post("/create", status_code=status.HTTP_201_CREATED, response_model=dict)
-async def crear_profesor(profesor: ProfesorImport, token: str = Depends(oauth2_scheme)):
+@router.post("/create/{id_usuario}", status_code=status.HTTP_201_CREATED, response_model=dict)
+async def crear_profesor(
+    id_usuario: int,
+    token: str = Depends(oauth2_scheme)
+):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
-    # Comprobamos si ya existe el profesor por id_usuario
-    if profesor_exists(profesor.id):
+    if profesor_exists(id_usuario):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Profesor con ese usuario ya existe"
         )
 
-    profesor_id = insert_profesor(profesor)
+    profesor_id = insert_profesor(id_usuario)
+    
     if profesor_id == -1:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
