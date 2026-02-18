@@ -587,7 +587,7 @@ def insert_directivo(id_profesor: int, directivo: DirectivoImport) -> int:
 
         cursor.execute(sql, values)
         conn.commit()
-        return cursor.lastrowid
+        return profesor.id
 
     except mariadb.Error as e:
         print(f"Error insertando directivo: {e}")

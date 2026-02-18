@@ -61,8 +61,8 @@ class ProfesorOut(UserOut):
 
 
 #-------------------------------MODELS_DIRECTIVOS-----------------------------
-class DirectivoImport(ProfesorImport):
-    id_profesor: int
+class DirectivoImport(BaseModel):
+    #id_profesor: int
     cargo: str
 
 class DirectivoOut(ProfesorOut):
