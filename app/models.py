@@ -44,7 +44,6 @@ class RootOut(RootDb):
 
 #-------------------------------MODELS_ALUMNOS-----------------------------
 class AlumnoCreate(BaseModel):
-    id: int  # Necesario para vincular con la tabla USUARIO
     curso: str 
 
 class AlumnoOut(AlumnoCreate):
@@ -64,7 +63,6 @@ class ProfesorOut(ProfesorImport):
 
 #-------------------------------MODELS_DIRECTIVOS-----------------------------
 class DirectivoImport(BaseModel):
-    id_profesor: int
     cargo: str
 
 class DirectivoOut(DirectivoImport):
@@ -100,3 +98,12 @@ class TareaCreate(TareaBase):
 
 class TareaOut(TareaBase):
     id: int
+
+
+#-------------------------------MODELS_EXPEDIENTES-----------------------------
+class ExpedienteImport(BaseModel):
+    estado: str
+
+class ExpedienteOut(ExpedienteImport):
+    id: int
+    id_directivo: int

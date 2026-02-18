@@ -12,13 +12,15 @@ router = APIRouter(
 )
 
 
-# 1. Insertar Alumno
-@router.post("/add/", status_code=status.HTTP_201_CREATED, response_model=dict)
-async def crear_alumno(alumno: AlumnoCreate, token: str = Depends(oauth2_scheme)):
+@router.post("/add/{id_usuario}", status_code=status.HTTP_201_CREATED, response_model=dict)
+async def crear_alumno(
+    id_usuario: int,
+    alumno: AlumnoCreate,
+    token: str = Depends(oauth2_scheme)
+):
     if validateIsAdmin(token) == True:
         try:
-            # Nota: El id_usuario debe existir previamente en la tabla USUARIO
-            alumno_id = insert_alumno(alumno)
+            alumno_id = insert_alumno(id_usuario, alumno)
             return {"message": "Alumno creado exitosamente", "id": alumno_id}
         except Exception as e:
             raise HTTPException(
@@ -26,10 +28,11 @@ async def crear_alumno(alumno: AlumnoCreate, token: str = Depends(oauth2_scheme)
                 detail=f"Error al crear el alumno. Verifica que el id_usuario exista: {str(e)}"
             )
     else:
-            raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"UNAUTHORIZED"
-                )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="UNAUTHORIZED"
+        )
+
 
 
 # 2. Ver todos los alumnos
