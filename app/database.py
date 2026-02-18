@@ -248,14 +248,14 @@ def delete_root(id: int) -> bool:
 
 
 #--------------------------------------------------- ALUMNOS ---------------------------------------------------
-def insert_alumno(alumno: AlumnoCreate) -> int:
+def insert_alumno(id: int, alumno: AlumnoCreate) -> int:
     conn = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
         sql = "INSERT INTO ALUMNO (id, curso) VALUES (?, ?)"
-        values = (alumno.id, alumno.curso)
+        values = (id, alumno.curso)
         
         cursor.execute(sql, values)
         conn.commit()
@@ -282,7 +282,7 @@ def read_all_alumnos() -> list[AlumnoOut]:
         cursor = conn.cursor()
         
         sql = """
-        SELECT a.id, a.curso, u.nombre, u.apellidos, u.activo 
+        SELECT .id, a.curso, u.nombre, u.apellidos, u.activo 
         FROM ALUMNO a
         JOIN USUARIO u ON a.id = u.id
         """

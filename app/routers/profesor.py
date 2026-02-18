@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
-from app.models import ProfesorImport, ProfesorOut
+from app.models import ProfesorImport, ProfesorOut, UserBase
 from app.auth.auth import oauth2_scheme
 from app.database import (
     insert_profesor,
@@ -9,7 +9,8 @@ from app.database import (
     read_profesor_by_id,
     profesor_exists,
     validateIsAdmin,
-    baja_profesor
+    baja_profesor,
+    insert_user
 )
 
 router = APIRouter(
@@ -19,20 +20,19 @@ router = APIRouter(
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_profesor(
-    id_usuario: int,
+    userbase : UserBase, 
     token: str = Depends(oauth2_scheme)
 ):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
-    if profesor_exists(id_usuario):
+    user_id = insert_user(userbase)
+    if profesor_exists(user_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Profesor con ese usuario ya existe"
         )
-
-    user_id = insert_user(asljd, sdajl, sdalj)
-    profesor_id = insert_profesor(id_usuario)
+    profesor_id = insert_profesor(user_id)
     
     if profesor_id == -1:
         raise HTTPException(
