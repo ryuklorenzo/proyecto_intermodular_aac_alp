@@ -47,30 +47,26 @@ class AlumnoCreate(UserBase):
     #id: int  # Necesario para vincular con la tabla USUARIO
     curso: str 
 
-class AlumnoOut(AlumnoCreate):
+class AlumnoOut(UserOut):
     id: int
+    curso: str
     pass
 
 #-------------------------------MODELS_PROFESORES-----------------------------
 class ProfesorImport(UserBase):
     pass
 
-class ProfesorOut(ProfesorImport):
-    id: int
-    nombre : str
-    apellidos : str
-    activo : bool = True
+class ProfesorOut(UserOut):
+    pass
 
 
 #-------------------------------MODELS_DIRECTIVOS-----------------------------
-class DirectivoImport(BaseModel):
+class DirectivoImport(ProfesorImport):
     id_profesor: int
     cargo: str
 
-class DirectivoOut(DirectivoImport):
-    nombre : str
-    apellidos : str
-    activo : bool = True
+class DirectivoOut(ProfesorOut):
+    pass
 
 
 #-------------------------------MODELS_ACTITUDES-----------------------------
