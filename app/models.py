@@ -43,19 +43,19 @@ class RootOut(RootDb):
     pass'''
 
 #-------------------------------MODELS_ALUMNOS-----------------------------
-class AlumnoCreate(BaseModel):
+class AlumnoCreate(UserBase):
+    #id: int  # Necesario para vincular con la tabla USUARIO
     curso: str 
 
 class AlumnoOut(AlumnoCreate):
-    nombre : str
-    apellidos : str
-    activo : bool = True
+    pass
 
 #-------------------------------MODELS_PROFESORES-----------------------------
-class ProfesorImport(BaseModel):
+class ProfesorImport(UserBase):
     pass
 
 class ProfesorOut(ProfesorImport):
+    id: int
     nombre : str
     apellidos : str
     activo : bool = True
@@ -94,7 +94,8 @@ class TareaBase(BaseModel):
     estado: str
 
 class TareaCreate(TareaBase):
-    pass
+    id_profesor: int
+    id_alumno: int
 
 class TareaOut(TareaBase):
     id: int

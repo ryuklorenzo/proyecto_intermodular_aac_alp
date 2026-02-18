@@ -248,7 +248,7 @@ def delete_root(id: int) -> bool:
 
 
 #--------------------------------------------------- ALUMNOS ---------------------------------------------------
-def insert_alumno(id_usuario: int, alumno: AlumnoCreate) -> int:
+def insert_alumno(id: int, alumno: AlumnoCreate) -> int:
     conn = None
     cursor = None
     try:
@@ -256,7 +256,7 @@ def insert_alumno(id_usuario: int, alumno: AlumnoCreate) -> int:
         cursor = conn.cursor()
         
         sql = "INSERT INTO ALUMNO (id, curso) VALUES (?, ?)"
-        values = (id_usuario, alumno.curso)
+        values = (id, alumno.curso)
         
         cursor.execute(sql, values)
         conn.commit()
@@ -282,7 +282,7 @@ def read_all_alumnos() -> list[AlumnoOut]:
         cursor = conn.cursor()
         
         sql = """
-        SELECT a.id, a.curso, u.nombre, u.apellidos, u.activo 
+        SELECT .id, a.curso, u.nombre, u.apellidos, u.activo 
         FROM ALUMNO a
         JOIN USUARIO u ON a.id = u.id
         """
@@ -390,14 +390,11 @@ def insert_profesor(id_usuario: int) -> int:
         cursor = conn.cursor()
 
         sql = """
-        INSERT INTO PROFESOR (nombre, apellidos, activo, id_usuario)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO PROFESOR (id)
+        VALUES (?)
         """
         values = (
-            usuario.nombre,
-            usuario.apellidos,
-            usuario.activo,
-            usuario.id
+            usuario.id,
         )
 
         cursor.execute(sql, values)
@@ -529,6 +526,34 @@ def profesor_exists(id_usuario: int) -> bool:
         print(f"Error comprobando profesor: {e}")
         return False
 
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+def baja_profesor(id: int) -> bool:
+    conn = None
+    cursor = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = """
+        UPDATE USUARIO u
+        JOIN PROFESOR a ON u.id = a.id
+        SET u.activo = 0
+        WHERE a.id = ?
+        """
+        
+        cursor.execute(sql, (id,))
+        conn.commit()
+        
+        return True
+
+    except mariadb.Error as e:
+        print(f"Error dando de baja al profesor: {e}")
+        return False
     finally:
         if cursor:
             cursor.close()
@@ -786,7 +811,7 @@ def delete_actitud(id_actitud: int) -> bool:
 
 
 #--------------------------------------------------- TAREAS ---------------------------------------------------
-def insert_tarea(id_profesor: int, id_alumno: int, tarea: TareaCreate) -> int:
+def insert_tarea(tarea: TareaCreate) -> int:
     conn = None
     cursor = None
     try:
@@ -794,10 +819,10 @@ def insert_tarea(id_profesor: int, id_alumno: int, tarea: TareaCreate) -> int:
         cursor = conn.cursor()
 
         sql = """
-        INSERT INTO ACTITUD (descripcion, estado, id_profesor, id_alumno)
+        INSERT INTO TAREA (descripcion, estado, id_profesor, id_alumno)
         VALUES (?, ?, ?, ?)
         """
-        values = (tarea.descripcion, tarea.estado, id_profesor, id_alumno)
+        values = (tarea.descripcion, tarea.estado, tarea.id_profesor, tarea.id_alumno)
 
         cursor.execute(sql, values)
         conn.commit()

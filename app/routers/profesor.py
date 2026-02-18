@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
-from app.models import ProfesorImport, ProfesorOut
+from app.models import ProfesorImport, ProfesorOut, UserBase
 from app.auth.auth import oauth2_scheme
 from app.database import (
     insert_profesor,
@@ -8,7 +8,9 @@ from app.database import (
     read_all_profesores,
     read_profesor_by_id,
     profesor_exists,
-    validateIsAdmin
+    validateIsAdmin,
+    baja_profesor,
+    insert_user
 )
 
 router = APIRouter(
@@ -16,21 +18,21 @@ router = APIRouter(
     tags=["Teachers"]
 )
 
-@router.post("/create/{id_usuario}", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_profesor(
-    id_usuario: int,
+    userbase : UserBase, 
     token: str = Depends(oauth2_scheme)
 ):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
-    if profesor_exists(id_usuario):
+    user_id = insert_user(userbase)
+    if profesor_exists(user_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Profesor con ese usuario ya existe"
         )
-
-    profesor_id = insert_profesor(id_usuario)
+    profesor_id = insert_profesor(user_id)
     
     if profesor_id == -1:
         raise HTTPException(
@@ -64,16 +66,26 @@ async def ver_profesor_por_id(id: int, token: str = Depends(oauth2_scheme)):
     return profesor
 
 
-@router.delete("/{id}/", status_code=status.HTTP_200_OK)
-async def borrar_profesor(id: int, token: str = Depends(oauth2_scheme)):
+@router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
+async def dar_de_baja_profesor(id: int, token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
-    deleted = delete_profesor(id)
-    if not deleted:
+    profesor = read_profesor_by_id(id)
+    if not profesor:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Profesor no encontrado"
         )
-
-    return {"message": "Profesor eliminado correctamente"}
+    
+    if not profesor.activo:
+        return {"message": f"El profesor con id {id} ya estaba dado de baja previamente"}
+    
+    exito = baja_profesor(id)
+    if not exito:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="No se pudo dar de baja al Profesor (Error en BD)"
+        )
+        
+    return {"message": f"Profesor con id {id} dado de baja correctamente (activo=False)"}

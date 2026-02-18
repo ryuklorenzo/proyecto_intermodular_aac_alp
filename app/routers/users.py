@@ -17,14 +17,16 @@ router = APIRouter(
 
 # User signup ----------------------------------------(CREAR USUARIO NUEVO)-----------------------------------------------------------
 @router.post("/singup/", status_code=status.HTTP_201_CREATED)
-async def create_user(userDb : UserDb, token: str = Depends(oauth2_scheme)):
+async def create_user(
+    userbase : UserBase, 
+    token: str = Depends(oauth2_scheme)
+):
     if validateIsAdmin(token) == True:
-        hashed_password = get_hash_password(userDb.password)
-        new_user = UserDb(
-            id=0, 
-            nombre=userDb.nombre,
-            apellidos=userDb.apellidos,
-            activo=userDb.activo,
+        hashed_password = get_hash_password(userbase.password)
+        new_user = UserBase(
+            nombre=userbase.nombre,
+            apellidos=userbase.apellidos,
+            activo=userbase.activo,
             password=hashed_password
         )
         try:
@@ -51,7 +53,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     password_input = form_data.password
 
     # busco en useradmins
-    userFound = [u for u in usersAdmins if u.nombre == username_input]
+    userFound = [u for u in usersAdmins if u.nombre == username_input] #Busque en root, o si tienen poderes ej directivo o profesor podian tener permisos
     
     if not userFound:
         raise HTTPException(
