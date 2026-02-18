@@ -562,7 +562,14 @@ def read_directivo_by_id(id: int) -> DirectivoOut | None:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = "SELECT id, nombre, apellidos, activo, cargo, id_profesor FROM DIRECTIVO WHERE id = ?"
+        sql = """
+        SELECT u.id, u.nombre, u.apellidos, u.activo, d.cargo
+        FROM DIRECTIVO d
+        JOIN PROFESOR p ON d.id = p.id
+        JOIN USUARIO u ON p.id = u.id
+        WHERE id = ?
+        """ 
+        
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
         
