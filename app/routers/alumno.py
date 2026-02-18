@@ -34,10 +34,11 @@ async def crear_alumno(alumno: AlumnoCreate, token: str = Depends(oauth2_scheme)
                 detail=f"Error al crear el alumno. Verifica que el id_usuario exista: {str(e)}"
             )
     else:
-            raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"UNAUTHORIZED"
-                )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="UNAUTHORIZED"
+        )
+
 
 
 # 2. Ver todos los alumnos

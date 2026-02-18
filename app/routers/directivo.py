@@ -16,18 +16,23 @@ router = APIRouter(
     tags=["Executives"]
 )
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=dict)
-async def crear_directivo(directivo: DirectivoImport, token: str = Depends(oauth2_scheme)):
+@router.post("/{id_profesor}", status_code=status.HTTP_201_CREATED, response_model=dict)
+async def crear_directivo(
+    id_profesor: int,
+    directivo: DirectivoImport,
+    token: str = Depends(oauth2_scheme)
+):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
-    if directivo_exists(directivo.id_profesor, directivo.cargo):
+    if directivo_exists(id_profesor, directivo.cargo):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Directivo con ese profesor y cargo ya existe"
         )
 
-    directivo_id = insert_directivo(directivo)
+    directivo_id = insert_directivo(id_profesor, directivo)
+
     if directivo_id == -1:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -35,6 +40,7 @@ async def crear_directivo(directivo: DirectivoImport, token: str = Depends(oauth
         )
 
     return {"message": "Directivo creado exitosamente", "id": directivo_id}
+
 
 
 @router.get("/", response_model=List[DirectivoOut], status_code=status.HTTP_200_OK)

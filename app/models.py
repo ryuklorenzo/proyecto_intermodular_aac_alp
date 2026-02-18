@@ -97,3 +97,12 @@ class TareaCreate(TareaBase):
 
 class TareaOut(TareaBase):
     id: int
+
+
+#-------------------------------MODELS_EXPEDIENTES-----------------------------
+class ExpedienteImport(BaseModel):
+    estado: str
+
+class ExpedienteOut(ExpedienteImport):
+    id: int
+    id_directivo: int
