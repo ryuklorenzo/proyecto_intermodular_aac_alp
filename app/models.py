@@ -65,7 +65,9 @@ class DirectivoImport(BaseModel):
     #id_profesor: int
     cargo: str
 
-class DirectivoOut(ProfesorOut):
+class DirectivoOut(UserOut):
+    #id_profesor: int
+    cargo: str
     pass
 
 

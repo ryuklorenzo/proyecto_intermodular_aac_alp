@@ -611,7 +611,7 @@ def read_all_directivos() -> list[DirectivoOut]:
         cursor = conn.cursor()
         
         sql = """
-        SELECT d.id, u.nombre, u.apellidos, u.activo, d.cargo
+        SELECT u.id, u.nombre, u.apellidos, u.activo, d.cargo
         FROM DIRECTIVO d
         JOIN PROFESOR p ON d.id = p.id
         JOIN USUARIO u ON p.id = u.id
@@ -628,7 +628,7 @@ def read_all_directivos() -> list[DirectivoOut]:
                     apellidos=row[2],
                     activo=bool(row[3]),
                     cargo=row[4]
-                )
+                    )
             )
         return directivos
         
