@@ -282,7 +282,7 @@ def read_all_alumnos() -> list[AlumnoOut]:
         cursor = conn.cursor()
         
         sql = """
-        SELECT .id, a.curso, u.nombre, u.apellidos, u.activo 
+        SELECT a.id, a.curso, u.nombre, u.apellidos, u.activo 
         FROM ALUMNO a
         JOIN USUARIO u ON a.id = u.id
         """

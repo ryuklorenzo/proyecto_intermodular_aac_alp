@@ -48,6 +48,7 @@ class AlumnoCreate(UserBase):
     curso: str 
 
 class AlumnoOut(AlumnoCreate):
+    id: int
     pass
 
 #-------------------------------MODELS_PROFESORES-----------------------------
