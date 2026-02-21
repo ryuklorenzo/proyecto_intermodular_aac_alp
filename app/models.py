@@ -26,25 +26,8 @@ class TokenOut(BaseModel):
 class UserLoginIn(UserBase):
     pass
 
-'''#-------------------------------MODELS_ROOTS-----------------------------
-
-class RootBase(BaseModel):
-    name : str
-    code: str
-
-class RootIn(BaseModel):
-    code: str
-    name: str
-
-class RootDb(RootBase):
-    id: int
-
-class RootOut(RootDb):
-    pass'''
-
 #-------------------------------MODELS_ALUMNOS-----------------------------
 class AlumnoCreate(UserBase):
-    #id: int  # Necesario para vincular con la tabla USUARIO
     curso: str 
 
 class AlumnoOut(UserOut):
@@ -62,10 +45,10 @@ class ProfesorOut(UserOut):
 
 #-------------------------------MODELS_DIRECTIVOS-----------------------------
 class DirectivoImport(BaseModel):
-    #id_profesor: int
     cargo: str
 
-class DirectivoOut(ProfesorOut):
+class DirectivoOut(UserOut):
+    cargo: str
     pass
 
 

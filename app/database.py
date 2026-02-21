@@ -110,27 +110,6 @@ def deleteUser(user: UserDb) -> bool:
         cursor.execute(sql_delete, (user.id,))
         conn.commit()
         return True
-        
-        '''result = cursor.fetchone()'''
-
-        '''if not result:
-            #conn.close()
-            print("No existe ese usuario")
-            return False # El usuario no existe
-        stored_hash = result[0]
-
-        # 2. Comprobamos si la contraseña que nos pasan coincide con el hash de la BD
-        if verify_password(user.password, stored_hash):
-            # 3. Si coincide, procedemos a borrar
-            sql_delete = "DELETE FROM USUARIO WHERE id = ?"
-            cursor.execute(sql_delete, (user.id,))
-            conn.commit()
-            #conn.close()
-            return True
-        else:
-            #conn.close()
-            print("Contraseña no es correcta")
-            return False # La contraseña no es correcta'''
 
     except mariadb as e:
         print(f"Error deleting user: {e}")
@@ -177,74 +156,6 @@ def read_user_by_id(id: int) -> UserDb | None:
             cursor.close()
         if conn:
             conn.close()
-
-
-'''# --------------------------------------------------- ROOTS ---------------------------------------------------
-
-def insert_root(root: RootDb) -> int:
-    try:
-        conn = mariadb.connect(**db_config)
-        cursor = conn.cursor()
-        sql = "INSERT INTO ROOT (name, code) VALUES (?, ?)"
-        values = (root.name, root.code)
-        
-        cursor.execute(sql, values)
-        conn.commit()
-        last_id = cursor.lastrowid
-        
-        cursor.close()
-        conn.close()
-        return last_id
-        
-    except mariadb.Error as e:
-        print(f"Error inserting root: {e}")
-        raise e
-
-
-def read_all_roots() -> list[RootDb]:
-    try:
-        conn = mariadb.connect(**db_config)
-        cursor = conn.cursor()
-        
-        sql = "SELECT id, name, code FROM ROOT"
-        cursor.execute(sql)
-        results = cursor.fetchall()
-        
-        roots_db = []
-        for row in results:
-            root = RootDb(
-                id=row[0], 
-                name=row[1],
-                code=row[2]
-            )
-            roots_db.append(root)
-            
-        cursor.close()
-        conn.close()
-        return roots_db
-        
-    except mariadb.Error as e:
-        print(f"Error reading roots: {e}")
-        return []
-
-def delete_root(id: int) -> bool:
-    try:
-        conn = mariadb.connect(**db_config)
-        cursor = conn.cursor()
-
-        sql_delete = "DELETE FROM ROOT WHERE id = ?"
-        cursor.execute(sql_delete, (id,))
-        conn.commit()
-
-        deleted = cursor.rowcount > 0
-
-        cursor.close()
-        conn.close()
-        return deleted
-
-    except mariadb.Error as e:
-        print(f"Error deleting root: {e}")
-        return False'''
 
 
 #--------------------------------------------------- ALUMNOS ---------------------------------------------------
@@ -611,7 +522,7 @@ def read_all_directivos() -> list[DirectivoOut]:
         cursor = conn.cursor()
         
         sql = """
-        SELECT d.id, u.nombre, u.apellidos, u.activo, d.cargo
+        SELECT u.id, u.nombre, u.apellidos, u.activo, d.cargo
         FROM DIRECTIVO d
         JOIN PROFESOR p ON d.id = p.id
         JOIN USUARIO u ON p.id = u.id
@@ -623,12 +534,12 @@ def read_all_directivos() -> list[DirectivoOut]:
         for row in results:
             directivos.append(
                 DirectivoOut(
-                    id_profesor=row[0],
+                    id=row[0],
                     nombre=row[1],
                     apellidos=row[2],
                     activo=bool(row[3]),
                     cargo=row[4]
-                )
+                    )
             )
         return directivos
         
@@ -651,7 +562,14 @@ def read_directivo_by_id(id: int) -> DirectivoOut | None:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = "SELECT id, nombre, apellidos, activo, cargo, id_profesor FROM DIRECTIVO WHERE id = ?"
+        sql = """
+        SELECT u.id, u.nombre, u.apellidos, u.activo, d.cargo
+        FROM DIRECTIVO d
+        JOIN PROFESOR p ON d.id = p.id
+        JOIN USUARIO u ON p.id = u.id
+        WHERE id = ?
+        """ 
+        
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
         
