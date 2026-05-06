@@ -14,28 +14,6 @@ CREATE TABLE ROOT (
     FOREIGN KEY (id) REFERENCES USUARIO(id) ON DELETE CASCADE
 );
 
-CREATE TABLE CURSO (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nivel VARCHAR(25) NOT NULL,
-    curso VARCHAR(25) NOT NULL,
-    modulo VARCHAR(25) NOT NULL
-);
-
-CREATE TABLE HORARIO (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    dia VARCHAR(20) NOT NULL,
-    hora_inicio TIME NOT NULL,
-    hora_fin TIME NOT NULL
-);
-
-CREATE TABLE AULA_CONVIVENCIA (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL,
-    fecha DATE,
-    horario VARCHAR(50) NOT NULL
-);
-
-
 -- Personas
 
 CREATE TABLE ALUMNO (
@@ -53,6 +31,42 @@ CREATE TABLE DIRECTIVO (
     id INT PRIMARY KEY, 
     cargo VARCHAR(50), 
     FOREIGN KEY (id) REFERENCES PROFESOR(id) ON DELETE CASCADE
+);
+
+-- Cosas de clase, cursos
+
+CREATE TABLE HORARIO (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    dia VARCHAR(20) NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fin TIME NOT NULL
+);
+
+CREATE TABLE CURSO (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nivel VARCHAR(25) NOT NULL,
+    curso VARCHAR(25) NOT NULL,
+    modulo VARCHAR(25) NOT NULL,
+    id_horario INT,
+    FOREIGN KEY (id_horario) REFERENCES HORARIO(id) 
+);
+
+CREATE TABLE AULA_CONVIVENCIA (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    fecha DATE,
+    id_horario INT NOT NULL,
+    FOREIGN KEY (id_horario) REFERENCES HORARIO(id)
+);
+
+
+-- crear la tabla m-m que faltaba
+CREATE TABLE AULA_CONVIVENCIA_ALUMNO (
+    id_aula_convivencia INT,
+    id_alumno INT,
+    PRIMARY KEY (id_aula_convivencia, id_alumno),
+    FOREIGN KEY (id_aula_convivencia) REFERENCES AULA_CONVIVENCIA(id),
+    FOREIGN KEY (id_alumno) REFERENCES ALUMNO(id)
 );
 
 
