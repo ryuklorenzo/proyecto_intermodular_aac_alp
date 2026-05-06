@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
-from app.models import TareaCreate, TareaOut
+from app.models.tarea import TareaCreate, TareaOut
 from app.auth.auth import oauth2_scheme
 from app.database import (
     insert_tarea,

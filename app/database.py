@@ -1,5 +1,11 @@
-from app.models import DirectivoImport, DirectivoOut, UserDb, UserBase
-from app.models import AlumnoCreate, AlumnoOut, ProfesorOut, ProfesorImport, ActitudCreate, ActitudOut, TareaCreate, TareaOut, ExpedienteImport, ExpedienteOut
+from app.models.user import UserDb, UserBase
+from app.models.alumno import AlumnoCreate, AlumnoOut
+from app.models.profesor import ProfesorOut, ProfesorImport
+from app.models.directivo import DirectivoImport, DirectivoOut
+from app.models.actitud import ActitudCreate, ActitudOut
+from app.models.tarea import TareaCreate, TareaOut
+from app.models.expediente import ExpedienteImport, ExpedienteOut
+from app.models.horario import HorarioImport, HorarioOut
 from app.auth.auth import verify_password, get_hash_password
 from app.auth.auth import verify_password, TokenData
 from app.auth.auth import  oauth2_scheme, decode_token
@@ -892,7 +898,7 @@ def read_expediente_by_directivo(id_directivo: int) -> list[ExpedienteOut]:
         cursor.execute(sql, (id_directivo,))
         results = cursor.fetchall()
 
-        return [
+        return [ 
             ExpedienteOut(
                 id=row[0],
                 estado=row[1],
@@ -904,6 +910,127 @@ def read_expediente_by_directivo(id_directivo: int) -> list[ExpedienteOut]:
     except mariadb.Error as e:
         print(f"Error leyendo expedientes: {e}")
         return []
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+#--------------------------------------------------- HORARIOS ---------------------------------------------------
+def insert_horario(horario: HorarioImport) -> int:
+    conn = None
+    cursor = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = """
+        INSERT INTO HORARIO (dia, horario_inicio, horario_fin)
+        VALUES (?, ?)
+        """
+        values = (horario.dia, horario.horario_inicio, horario.horario_fin)
+
+        cursor.execute(sql, values)
+        conn.commit()
+        return cursor.lastrowid
+    
+    except mariadb.Error as e:
+        print(f"Error insertando horario: {e}")
+        return -1
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+
+def read_all_horarios() -> list[HorarioOut]:
+    conn = None
+    cursor = None
+
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+        
+        sql = """
+        SELECT id, dia, horario_inicio, horario_fin FROM HORARIO
+        """
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        
+        horarios = []
+        for row in results:
+            horarios.append(
+                HorarioOut(
+                    id=row[0],
+                    dia=row[1],
+                    horario_inicio=row[2],
+                    horario_fin=row[3]
+                )
+            )
+        return horarios
+        
+    except mariadb.Error as e:
+        print(f"Error leyendo horarios: {e}")
+        return []
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def update_horario(id: int, horario: HorarioImport) -> bool:
+    conn = None
+    cursor = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = """
+        UPDATE HORARIO
+        SET dia = ?, horario_inicio = ?, horario_fin = ?
+        WHERE id = ?
+        """
+        values = (
+            horario.dia,
+            horario.horario_inicio,
+            horario.horario_fin,
+            id
+        )
+
+        cursor.execute(sql, values)
+        conn.commit()
+
+        return cursor.rowcount > 0 #1 si se actualizo algo
+
+    except mariadb.Error as e:
+        print(f"Error actualizando horario: {e}")
+        return False
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def delete_horario(id: int) -> bool:
+    conn = None
+    cursor = None
+
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = "DELETE FROM HORARIO WHERE id = ?"
+        cursor.execute(sql, (id,))
+        return cursor.rowcount > 0
+
+    except mariadb.Error as e:
+        print(f"Error borrando actitud: {e}")
+        return False
 
     finally:
         if cursor:

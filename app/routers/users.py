@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, status, HTTPException, Header
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
-from app.models import UserBase, UserDb, UserOut, UserLoginIn
+from app.models.user import UserBase, UserDb, UserOut
+from app.models.auth import UserLoginIn
 from app.database import usersAdmins, insert_user, read_all_users, deleteUser, read_user_by_id, validateIsAdmin
 from app.auth.auth import create_access_token, verify_password, Token, oauth2_scheme, decode_token, TokenData, get_hash_password
 

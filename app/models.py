@@ -1,91 +1,103 @@
-from datetime import date
-from pydantic import BaseModel
+# from datetime import date
+# from pydantic import BaseModel
 
-#-------------------------------MODELS_USERS-----------------------------
-#Usuario base
-class UserBase(BaseModel):
-    nombre : str
-    apellidos : str
-    activo : bool = True
-    password : str
+# from app.routers import horario
 
-# Los datos de los usuarios se almacenan en la bsae de datos
-class UserDb(UserBase):
-    id: int
+# #-------------------------------MODELS_USERS-----------------------------
+# #Usuario base
+# class UserBase(BaseModel):
+#     nombre : str
+#     apellidos : str
+#     activo : bool = True
+#     password : str
 
-class UserOut(BaseModel):
-    id: int
-    nombre: str
-    apellidos: str
-    activo: bool
+# # Los datos de los usuarios se almacenan en la bsae de datos
+# class UserDb(UserBase):
+#     id: int
 
-# Formato de respuesta al iniciar sesión
-class TokenOut(BaseModel):
-    token: str
+# class UserOut(BaseModel):
+#     id: int
+#     nombre: str
+#     apellidos: str
+#     activo: bool
 
-class UserLoginIn(UserBase):
-    pass
+# # Formato de respuesta al iniciar sesión
+# class TokenOut(BaseModel):
+#     token: str
 
-#-------------------------------MODELS_ALUMNOS-----------------------------
-class AlumnoCreate(UserBase):
-    curso: str 
+# class UserLoginIn(UserBase):
+#     pass
 
-class AlumnoOut(UserOut):
-    id: int
-    curso: str
-    pass
+# #-------------------------------MODELS_ALUMNOS-----------------------------
+# class AlumnoCreate(UserBase):
+#     curso: str 
 
-#-------------------------------MODELS_PROFESORES-----------------------------
-class ProfesorImport(UserBase):
-    pass
+# class AlumnoOut(UserOut):
+#     id: int
+#     curso: str
+#     pass
 
-class ProfesorOut(UserOut):
-    pass
+# #-------------------------------MODELS_PROFESORES-----------------------------
+# class ProfesorImport(UserBase):
+#     pass
 
-
-#-------------------------------MODELS_DIRECTIVOS-----------------------------
-class DirectivoImport(BaseModel):
-    cargo: str
-
-class DirectivoOut(UserOut):
-    cargo: str
-    pass
+# class ProfesorOut(UserOut):
+#     pass
 
 
-#-------------------------------MODELS_ACTITUDES-----------------------------
-class ActitudBase(BaseModel):
-    descripcion: str
-    fecha: date
-    tipo: str
+# #-------------------------------MODELS_DIRECTIVOS-----------------------------
+# class DirectivoImport(BaseModel):
+#     cargo: str
+
+# class DirectivoOut(UserOut):
+#     cargo: str
+#     pass
 
 
-class ActitudCreate(ActitudBase):
-    pass
+# #-------------------------------MODELS_ACTITUDES-----------------------------
+# class ActitudBase(BaseModel):
+#     descripcion: str
+#     fecha: date
+#     tipo: str
 
 
-class ActitudOut(ActitudBase):
-    id: int
-    id_usuario: int
+# class ActitudCreate(ActitudBase):
+#     pass
 
 
-#-------------------------------MODELS_TAREAS-----------------------------
-
-class TareaBase(BaseModel):
-    descripcion: str
-    estado: str
-
-class TareaCreate(TareaBase):
-    id_profesor: int
-    id_alumno: int
-
-class TareaOut(TareaBase):
-    id: int
+# class ActitudOut(ActitudBase):
+#     id: int
+#     id_usuario: int
 
 
-#-------------------------------MODELS_EXPEDIENTES-----------------------------
-class ExpedienteImport(BaseModel):
-    estado: str
+# #-------------------------------MODELS_TAREAS-----------------------------
 
-class ExpedienteOut(ExpedienteImport):
-    id: int
-    id_directivo: int
+# class TareaBase(BaseModel):
+#     descripcion: str
+#     estado: str
+
+# class TareaCreate(TareaBase):
+#     id_profesor: int
+#     id_alumno: int
+
+# class TareaOut(TareaBase):
+#     id: int
+
+
+# #-------------------------------MODELS_EXPEDIENTES-----------------------------
+# class ExpedienteImport(BaseModel):
+#     estado: str
+
+# class ExpedienteOut(ExpedienteImport):
+#     id: int
+#     id_directivo: int
+
+
+# #-------------------------------MODELS_HORARIOS-----------------------------
+# class HorarioImport(BaseModel):
+#     dia: str
+#     horario_inicio: str
+#     horario_fin: str
+
+# class HorarioOut(HorarioImport):
+#     id: int

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
-from app.models import AlumnoCreate, AlumnoOut
+from app.models.alumno import AlumnoCreate, AlumnoOut
 from app.database import (
     insert_alumno, 
     read_all_alumnos, 

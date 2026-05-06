@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
-from app.models import ExpedienteImport, ExpedienteOut
+from app.models.expediente import ExpedienteImport, ExpedienteOut
 from app.auth.auth import oauth2_scheme
 from app.database import(
     insert_expediente, read_all_expedientes, read_expediente_by_directivo, read_directivo_by_id, validateIsAdmin
