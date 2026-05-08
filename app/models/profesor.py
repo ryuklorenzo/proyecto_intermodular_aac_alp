@@ -1,4 +1,4 @@
-from .user import UserOut
+from user import UserOut
 
 class ProfesorImport:
     pass

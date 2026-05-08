@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.tarea import TareaCreate, TareaOut
 from app.auth.auth import oauth2_scheme
-from app.database import (
-    insert_tarea,
-    read_tareas_by_alumno,
-    read_tareas_by_profesor,
-    read_user_by_id,
-    validateIsAdmin
+from app.database.tarea import (
+    insert_tarea, 
+    read_tareas_by_alumno, 
+    read_tareas_by_profesor
 )
+from app.database.user import read_user_by_id
+from app.database.database_config import validateIsAdmin
 
 router = APIRouter(
     prefix="/tareas",

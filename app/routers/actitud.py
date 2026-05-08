@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.actitud import ActitudCreate, ActitudOut
 from app.auth.auth import oauth2_scheme
-from app.database import (
+from app.routers.actitud import (
     insert_actitud,
     read_actitudes_by_usuario,
-    delete_actitud,
-    read_user_by_id,
-    validateIsAdmin
+    delete_actitud
 )
+from app.database.user import read_user_by_id
+from app.database.database_config import validateIsAdmin
 
 router = APIRouter(
     prefix="/attitudes",

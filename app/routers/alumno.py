@@ -1,15 +1,16 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.alumno import AlumnoCreate, AlumnoOut
-from app.database import (
+from app.auth.auth import oauth2_scheme # Si quieres proteger las rutas con token
+from app.database.user import insert_user
+from app.database.alumno import (
     insert_alumno, 
     read_all_alumnos, 
     read_alumno_by_id, 
     baja_alumno, 
-    validateIsAdmin,
-    insert_user
 )
-from app.auth.auth import oauth2_scheme # Si quieres proteger las rutas con token
+from app.database.database_config import validateIsAdmin
+
 
 #insertar alumno, ver alumnos, ver alumnoID, dar de baja
 

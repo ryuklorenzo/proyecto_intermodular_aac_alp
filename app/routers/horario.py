@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.horario import HorarioImport, HorarioOut
 from app.auth.auth import oauth2_scheme
-from app.database import (
+from app.database.horario import (
     insert_horario,
     read_all_horarios,
     update_horario,
     delete_horario,
-    validateIsAdmin
 )
+from app.database.database_config import validateIsAdmin
 
 router = APIRouter(
     prefix="/horarios",

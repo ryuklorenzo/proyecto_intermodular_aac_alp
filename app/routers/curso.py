@@ -2,14 +2,14 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.curso import CursoCreate, CursoOut
 from app.auth.auth import oauth2_scheme
-from app.database import (
+from app.database.curso import (
     insert_curso,
     read_all_cursos,
     read_curso_by_id,
     update_curso,
     delete_curso,
-    validateIsAdmin
 )
+from app.database.database_config import validateIsAdmin
 
 router = APIRouter(
     prefix="/cursos",

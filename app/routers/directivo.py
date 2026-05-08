@@ -2,14 +2,15 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.directivo import DirectivoImport, DirectivoOut
 from app.auth.auth import oauth2_scheme
-from app.database import (
+from app.database.directivo import (
     insert_directivo,
     read_directivo_by_id,
     read_all_directivos,
     directivo_exists,
-    validateIsAdmin,
     delete_directivo as delete_directivo_db
 )
+from app.database.database_config import validateIsAdmin
+
 
 router = APIRouter(
     prefix="/executives",
