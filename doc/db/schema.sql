@@ -145,3 +145,19 @@ CREATE TABLE PROBI (
     id_mencion INT,
     FOREIGN KEY (id_mencion) REFERENCES MENCION(id)
 );
+
+-- usuario -> alumno
+-- usuario -> profesor 
+-- usuario -> profesor -> directivo
+-- root
+-- usuario -> actitud
+-- usuario -> actitud -> amonestacion
+-- usuario -> actitud -> reconocimiento
+-- usuario -> actitud -> reconocimiento -> mencion
+-- usuario -> actitud -> reconocimiento -> mencion -> porbi
+-- usuario -> profesor -> directivo -> expediente
+-- usuario -> profesor -> directivo & expediente -> previ
+-- horario -> curso
+-- usuario -> profesor & alumno -> tarea
+-- curso & alumno -> curso_alumno 
+-- aula-convivencia & alumno -> aula_convivencia_alumno
