@@ -11,10 +11,10 @@ def insert_curso(curso: CursoCreate) -> int:
         cursor = conn.cursor()
 
         sql = """
-        INSERT INTO CURSO (nivel, curso, modulo)
-        VALUES (?, ?)
+        INSERT INTO CURSO (nivel, curso, modulo, id_horario)
+        VALUES (?, ?, ?, ?)
         """
-        values = (curso.nivel, curso.curso, curso.modulo)
+        values = (curso.nivel, curso.curso, curso.modulo, curso.id_horario)
 
         cursor.execute(sql, values)
         conn.commit()
@@ -37,7 +37,7 @@ def read_all_cursos() -> list[CursoOut]:
         cursor = conn.cursor()
         
         sql = """
-        SELECT id, nivel, curso, modulo FROM CURSO
+        SELECT id, nivel, curso, modulo, id_horario FROM CURSO
         """
         cursor.execute(sql)
         results = cursor.fetchall()
@@ -49,7 +49,8 @@ def read_all_cursos() -> list[CursoOut]:
                     id=row[0],
                     nivel=row[1],
                     curso=row[2],
-                    modulo=row[3]
+                    modulo=row[3],
+                    id_horario=row[4]
                 )
             )
         return cursos
@@ -72,7 +73,7 @@ def read_curso_by_id(id: int) -> CursoOut | None:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = "SELECT id, nivel, curso, modulo, FROM CURSO WHERE id = ?"
+        sql = "SELECT id, nivel, curso, modulo, id_horario FROM CURSO WHERE id = ?"
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
 
@@ -81,7 +82,8 @@ def read_curso_by_id(id: int) -> CursoOut | None:
                 id=row[0],
                 nivel=row[1],
                 curso=row[2],
-                modulo=row[3]
+                modulo=row[3],
+                id_horario=row[4]
             )
 
         return None
@@ -106,13 +108,14 @@ def update_curso(id: int, curso: CursoCreate) -> bool:
 
         sql = """
         UPDATE CURSO
-        SET nivel = ?, curso = ?, madulo = ?
+        SET nivel = ?, curso = ?, modulo = ?, id_horario = ?
         WHERE id = ?
         """
         values = (
             curso.nivel,
             curso.curso,
             curso.modulo,
+            curso.id_horario,
             id
         )
 

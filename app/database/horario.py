@@ -11,10 +11,10 @@ def insert_horario(horario: HorarioImport) -> int:
         cursor = conn.cursor()
 
         sql = """
-        INSERT INTO HORARIO (dia, horario_inicio, horario_fin)
-        VALUES (?, ?)
+        INSERT INTO HORARIO (formato, hora_inicio, hora_fin)
+        VALUES (?, ?, ?)
         """
-        values = (horario.dia, horario.horario_inicio, horario.horario_fin)
+        values = (horario.formato, horario.hora_inicio, horario.hora_fin)
 
         cursor.execute(sql, values)
         conn.commit()
@@ -37,7 +37,7 @@ def read_all_horarios() -> list[HorarioOut]:
         cursor = conn.cursor()
         
         sql = """
-        SELECT id, dia, horario_inicio, horario_fin FROM HORARIO
+        SELECT id, formato, hora_inicio, hora_fin FROM HORARIO
         """
         cursor.execute(sql)
         results = cursor.fetchall()
@@ -47,9 +47,9 @@ def read_all_horarios() -> list[HorarioOut]:
             horarios.append(
                 HorarioOut(
                     id=row[0],
-                    dia=row[1],
-                    horario_inicio=row[2],
-                    horario_fin=row[3]
+                    formato=row[1],
+                    hora_inicio=row[2],
+                    hora_fin=row[3]
                 )
             )
         return horarios
@@ -74,13 +74,13 @@ def update_horario(id: int, horario: HorarioImport) -> bool:
 
         sql = """
         UPDATE HORARIO
-        SET dia = ?, horario_inicio = ?, horario_fin = ?
+        SET formato = ?, hora_inicio = ?, hora_fin = ?
         WHERE id = ?
         """
         values = (
-            horario.dia,
-            horario.horario_inicio,
-            horario.horario_fin,
+            horario.formato,
+            horario.hora_inicio,
+            horario.hora_fin,
             id
         )
 
@@ -113,7 +113,7 @@ def delete_horario(id: int) -> bool:
         return cursor.rowcount > 0
 
     except mariadb.Error as e:
-        print(f"Error borrando actitud: {e}")
+        print(f"Error borrando horario: {e}")
         return False
 
     finally:
