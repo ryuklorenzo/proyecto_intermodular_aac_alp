@@ -18,10 +18,10 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_horario(
     horario: HorarioImport,
-    token: str = Depends(oauth2_scheme)
+    #token: str = Depends(oauth2_scheme)
 ):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    #if not validateIsAdmin(token): 
+    # raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     horario_id = insert_horario(horario)
 
@@ -36,7 +36,7 @@ async def crear_horario(
 
 
 @router.get("/", response_model=List[HorarioOut], status_code=status.HTTP_200_OK)
-async def ver_directivos(token: str = Depends(oauth2_scheme)):
+async def ver_horarios(token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
@@ -47,10 +47,10 @@ async def ver_directivos(token: str = Depends(oauth2_scheme)):
 async def actualizar_horario(
     id:int,
     horario: HorarioImport,
-    token: str = Depends(oauth2_scheme)
+    # token: str = Depends(oauth2_scheme)
 ):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=401, detail="UNAUTHORIZED")
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=401, detail="UNAUTHORIZED")
 
     updated = update_horario(id, horario)
 
@@ -64,9 +64,12 @@ async def actualizar_horario(
 
 
 @router.delete("/{id}/", status_code=status.HTTP_200_OK)
-async def borrar_directivo(id: int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+async def borrar_horario(
+    id: int, 
+    #token: str = Depends(oauth2_scheme)
+    ):
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     deleted = delete_horario(id)
     if not deleted:

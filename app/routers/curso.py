@@ -19,10 +19,10 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_curso(
     curso: CursoCreate,
-    token: str = Depends(oauth2_scheme)
+    # token: str = Depends(oauth2_scheme)
 ):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     curso_id = insert_curso(curso)
 
@@ -37,20 +37,25 @@ async def crear_curso(
 
 
 @router.get("/", response_model=List[CursoOut], status_code=status.HTTP_200_OK)
-async def ver_directivos(token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+async def ver_cursos(
+    #token: str = Depends(oauth2_scheme)
+    ):
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     return read_all_cursos()
 
 
 @router.get("/{id}/", response_model=CursoOut, status_code=status.HTTP_200_OK)
-async def ver_curso_by_id(id:int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="UNAUTHORIZED"
-        )
+async def ver_curso_by_id(
+    id:int, 
+    #token: str = Depends(oauth2_scheme)
+    ):
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(
+    #         status_code=status.HTTP_401_UNAUTHORIZED,
+    #         detail="UNAUTHORIZED"
+    #     )
 
     curso = read_curso_by_id(id)
 
@@ -64,10 +69,10 @@ async def ver_curso_by_id(id:int, token: str = Depends(oauth2_scheme)):
 async def actualizar_curso(
     id:int,
     curso: CursoCreate,
-    token: str = Depends(oauth2_scheme)
+    # token: str = Depends(oauth2_scheme)
 ):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=401, detail="UNAUTHORIZED")
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=401, detail="UNAUTHORIZED")
 
     updated = update_curso(id, curso)
 
@@ -81,9 +86,12 @@ async def actualizar_curso(
 
 
 @router.delete("/{id}/", status_code=status.HTTP_200_OK)
-async def borrar_curso(id: int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+async def borrar_curso(
+    id: int, 
+    #token: str = Depends(oauth2_scheme)
+    ):
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     deleted = delete_curso(id)
     if not deleted:
