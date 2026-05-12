@@ -48,8 +48,8 @@ def read_all_horarios() -> list[HorarioOut]:
                 HorarioOut(
                     id=row[0],
                     formato=row[1],
-                    hora_inicio=row[2],
-                    hora_fin=row[3]
+                    hora_inicio=str(row[2]),
+                    hora_fin=str(row[3])
                 )
             )
         return horarios

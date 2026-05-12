@@ -37,7 +37,11 @@ def read_all_cursos() -> list[CursoOut]:
         cursor = conn.cursor()
         
         sql = """
-        SELECT id, nivel, curso, modulo, id_horario FROM CURSO
+        SELECT 
+            c.id, c.nivel, c.curso, c.modulo, 
+            h.formato, h.hora_inicio, h.hora_fin 
+        FROM CURSO c
+        JOIN HORARIO h ON c.id_horario = h.id
         """
         cursor.execute(sql)
         results = cursor.fetchall()
@@ -50,7 +54,9 @@ def read_all_cursos() -> list[CursoOut]:
                     nivel=row[1],
                     curso=row[2],
                     modulo=row[3],
-                    id_horario=row[4]
+                    formato=str(row[4]),        # Convertimos a str por seguridad en el JSON
+                    hora_inicio=str(row[5]),
+                    hora_fin=str(row[6])
                 )
             )
         return cursos
@@ -73,7 +79,14 @@ def read_curso_by_id(id: int) -> CursoOut | None:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = "SELECT id, nivel, curso, modulo, id_horario FROM CURSO WHERE id = ?"
+        sql = """
+        SELECT 
+            c.id, c.nivel, c.curso, c.modulo, 
+            h.formato, h.hora_inicio, h.hora_fin 
+        FROM CURSO c
+        JOIN HORARIO h ON c.id_horario = h.id
+        WHERE c.id = ?
+        """
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
 
@@ -83,7 +96,9 @@ def read_curso_by_id(id: int) -> CursoOut | None:
                 nivel=row[1],
                 curso=row[2],
                 modulo=row[3],
-                id_horario=row[4]
+                formato=str(row[4]),
+                hora_inicio=str(row[5]),
+                hora_fin=str(row[6])
             )
 
         return None
@@ -106,6 +121,11 @@ def update_curso(id: int, curso: CursoCreate) -> bool:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
+        # verificar si existe el curso antes de actualizar
+        cursor.execute("SELECT id FROM CURSO WHERE id = ?", (id,))
+        if not cursor.fetchone():
+            return False
+
         sql = """
         UPDATE CURSO
         SET nivel = ?, curso = ?, modulo = ?, id_horario = ?
@@ -120,9 +140,12 @@ def update_curso(id: int, curso: CursoCreate) -> bool:
         )
 
         cursor.execute(sql, values)
+        
+        #filas_afectadas = cursor.rowcount
+        
         conn.commit()
-
-        return cursor.rowcount > 0 #1 si se actualizo algo
+        
+        return True
 
     except mariadb.Error as e:
         print(f"Error actualizando curso: {e}")
@@ -145,7 +168,12 @@ def delete_curso(id: int) -> bool:
 
         sql = "DELETE FROM CURSO WHERE id = ?"
         cursor.execute(sql, (id,))
-        return cursor.rowcount > 0
+        conn.commit()
+        
+        filas_afectadas = cursor.rowcount
+        print(f"Filas eliminadas: {filas_afectadas}") # Revisa esto en tu terminal
+        return filas_afectadas > 0
+    #TODO  esta mierda da 404, arreglar a futuro
 
     except mariadb.Error as e:
         print(f"Error borrando curso: {e}")
