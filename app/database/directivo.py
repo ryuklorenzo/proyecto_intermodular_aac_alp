@@ -97,7 +97,7 @@ def read_directivo_by_id(id: int) -> DirectivoOut | None:
         FROM DIRECTIVO d
         JOIN PROFESOR p ON d.id = p.id
         JOIN USUARIO u ON p.id = u.id
-        WHERE id = ?
+        WHERE u.id = ?
         """ 
         
         cursor.execute(sql, (id,))
@@ -110,7 +110,6 @@ def read_directivo_by_id(id: int) -> DirectivoOut | None:
                 apellidos=row[2],
                 activo=bool(row[3]),
                 cargo=row[4],
-                id_profesor=row[5]
             )
         return None
         
