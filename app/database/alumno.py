@@ -10,8 +10,8 @@ def insert_alumno(id: int, alumno: AlumnoCreate) -> int:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = "INSERT INTO ALUMNO (id, curso) VALUES (?, ?)"
-        values = (id, alumno.curso)
+        sql = "INSERT INTO ALUMNO (id, id_curso) VALUES (?, ?)"
+        values = (id, alumno.id_curso)
         
         cursor.execute(sql, values)
         conn.commit()
@@ -37,9 +37,12 @@ def read_all_alumnos() -> list[AlumnoOut]:
         cursor = conn.cursor()
         
         sql = """
-        SELECT a.id, a.curso, u.nombre, u.apellidos, u.activo 
+        SELECT 
+            a.id, u.nombre, u.apellidos, u.activo, 
+            c.id, c.curso, c.modulo
         FROM ALUMNO a
         JOIN USUARIO u ON a.id = u.id
+        JOIN CURSO c ON a.id_curso = c.id
         """
         cursor.execute(sql)
         results = cursor.fetchall()
@@ -48,10 +51,12 @@ def read_all_alumnos() -> list[AlumnoOut]:
         for row in results:
             alumno = AlumnoOut(
                 id=row[0],
-                curso=row[1],
-                nombre=row[2],
-                apellidos=row[3],
-                activo=bool(row[4])
+                nombre=row[1],
+                apellidos=row[2],
+                activo=bool(row[3]),
+                id_curso=row[4],
+                curso=row[5],
+                modulo=row[6]
             )
             alumnos_db.append(alumno)
             
@@ -74,9 +79,12 @@ def read_alumno_by_id(id: int) -> AlumnoOut | None:
         cursor = conn.cursor()
         
         sql = """
-        SELECT a.id, a.curso, u.nombre, u.apellidos, u.activo 
+        SELECT 
+            a.id, u.nombre, u.apellidos, u.activo, 
+            c.id, c.curso, c.modulo
         FROM ALUMNO a
         JOIN USUARIO u ON a.id = u.id
+        JOIN CURSO c ON a.id_curso = c.id
         WHERE a.id = ?
         """
         cursor.execute(sql, (id,))
@@ -85,10 +93,12 @@ def read_alumno_by_id(id: int) -> AlumnoOut | None:
         if row:
             return AlumnoOut(
                 id=row[0],
-                curso=row[1],
-                nombre=row[2],
-                apellidos=row[3],
-                activo=bool(row[4])
+                nombre=row[1],
+                apellidos=row[2],
+                activo=bool(row[3]),
+                id_curso=row[4],
+                curso=row[5],
+                modulo=row[6]
             )
         return None
         
