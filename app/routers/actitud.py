@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.actitud import ActitudCreate, ActitudOut
 from app.auth.auth import oauth2_scheme
-from app.routers.actitud import (
+from app.database.actitud import (
     insert_actitud,
     read_actitudes_by_usuario,
     delete_actitud

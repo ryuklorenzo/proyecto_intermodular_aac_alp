@@ -1,4 +1,4 @@
-from user import UserOut
+from app.models.user import UserOut
 
 class ProfesorImport:
     pass

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from user import UserOut
+from app.models.user import UserOut
 
 class DirectivoImport(BaseModel):
     cargo: str

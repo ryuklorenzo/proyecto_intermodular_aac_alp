@@ -1,4 +1,4 @@
-from .user import UserBase, UserOut
+from app.models.user import UserBase, UserOut
 
 class AlumnoCreate(UserBase):
     curso: str 
