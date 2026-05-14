@@ -15,7 +15,7 @@ router = APIRouter(
     tags=["Attitudes"]
 )
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_actitud(id_usuario: int, actitud: ActitudCreate, token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
@@ -34,7 +34,7 @@ async def crear_actitud(id_usuario: int, actitud: ActitudCreate, token: str = De
     return {"message": "Actitud asignada correctamente", "id": actitud_id}
 
 
-@router.get("/usuario/{id_usuario}/", response_model=List[ActitudOut], status_code=status.HTTP_200_OK)
+@router.get("/users/{id_usuario}/", response_model=List[ActitudOut], status_code=status.HTTP_200_OK)
 async def ver_actitudes_alumno(id_usuario: int, token: str = Depends(oauth2_scheme)):
     
     actitudes = read_actitudes_by_usuario(id_usuario)

@@ -11,8 +11,8 @@ from app.database.horario import (
 from app.database.database_config import validateIsAdmin
 
 router = APIRouter(
-    prefix="/horarios",
-    tags=["Horarios"]
+    prefix="/schedules",
+    tags=["Schedules"]
 )
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
@@ -36,9 +36,11 @@ async def crear_horario(
 
 
 @router.get("/", response_model=List[HorarioOut], status_code=status.HTTP_200_OK)
-async def ver_horarios(token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+async def ver_horarios(
+    # token: str = Depends(oauth2_scheme)
+    ):
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     return read_all_horarios()
 

@@ -12,8 +12,8 @@ from app.database.curso import (
 from app.database.database_config import validateIsAdmin
 
 router = APIRouter(
-    prefix="/cursos",
-    tags=["Cursos"]
+    prefix="/courses",
+    tags=["Courses"]
 )
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)

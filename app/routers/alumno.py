@@ -21,7 +21,7 @@ router = APIRouter(
 
 
 # 1. Insertar Alumno
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_alumno(alumno: AlumnoCreate, token: str = Depends(oauth2_scheme)):
     if validateIsAdmin(token) == True:
         try:

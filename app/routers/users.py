@@ -26,7 +26,7 @@ router = APIRouter(
 
 
 # User signup ----------------------------------------(CREAR USUARIO NUEVO)-----------------------------------------------------------
-@router.post("/singup/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(
     userbase : UserBase, 
     token: str = Depends(oauth2_scheme)

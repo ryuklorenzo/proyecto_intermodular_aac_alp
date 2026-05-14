@@ -19,7 +19,7 @@ router = APIRouter(
     tags=["Teachers"]
 )
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_profesor(
     userbase : UserBase, 
     token: str = Depends(oauth2_scheme)

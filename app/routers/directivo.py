@@ -17,7 +17,7 @@ router = APIRouter(
     tags=["Executives"]
 )
 
-@router.post("/{id_profesor}", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("/{id_profesor}/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_directivo(
     id_profesor: int,
     directivo: DirectivoImport,

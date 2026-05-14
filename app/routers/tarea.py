@@ -11,11 +11,11 @@ from app.database.user import read_user_by_id
 from app.database.database_config import validateIsAdmin
 
 router = APIRouter(
-    prefix="/tareas",
-    tags=["Tareas"]
+    prefix="/tasks",
+    tags=["Tasks"]
 )
 
-@router.post("", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def crear_tarea(
     tarea: TareaCreate,
     token: str = Depends(oauth2_scheme)
@@ -35,14 +35,14 @@ async def crear_tarea(
 
     return {"message": "Tarea asignada correctamente", "id": tarea_id}
 
-@router.get("/alumno/{id_alumno}/", response_model=List[TareaOut])
+@router.get("/students/{id_alumno}/", response_model=List[TareaOut])
 async def ver_tareas_alumno(id_alumno: int, token: str = Depends(oauth2_scheme)):
     
     tareas = read_tareas_by_alumno(id_alumno)
     return tareas
 
 
-@router.get("/alumno/{id_profesor}/", response_model=List[TareaOut])
+@router.get("/teachers/{id_profesor}/", response_model=List[TareaOut])
 async def ver_tareas_profesor(id_profesor: int, token: str = Depends(oauth2_scheme)):
     
     tareas = read_tareas_by_profesor(id_profesor)
