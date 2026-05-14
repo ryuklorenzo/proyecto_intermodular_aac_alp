@@ -1,12 +1,23 @@
 from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse
-from app.routers import users, alumno, profesor, directivo, actitud, tarea, expediente, curso, horario
-
+from app.routers import (
+    users, 
+    alumno, 
+    profesor, 
+    directivo, 
+    actitud, 
+    tarea, 
+    expediente, 
+    curso, 
+    horario,
+    amonestacion
+)
 # Desactivamos la ruta 'docs' automática
 app = FastAPI(debug=True, docs_url=None)
 
 # Inclusión de routers #Aqui arriba poner los nuevos o por testear, que salen antes.
+app.include_router(amonestacion.router)
 
 #testeados
 app.include_router(tarea.router)
