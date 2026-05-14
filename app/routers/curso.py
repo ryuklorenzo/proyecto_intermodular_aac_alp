@@ -18,13 +18,14 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_curso(
+    id_horario: int,
     curso: CursoCreate,
     # token: str = Depends(oauth2_scheme)
 ):
     # if not validateIsAdmin(token):
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
-    curso_id = insert_curso(curso)
+    curso_id = insert_curso(curso, id_horario)
 
     if curso_id == -1:
         raise HTTPException(
@@ -69,12 +70,13 @@ async def ver_curso_by_id(
 async def actualizar_curso(
     id:int,
     curso: CursoCreate,
+    id_horario: int,
     # token: str = Depends(oauth2_scheme)
 ):
     # if not validateIsAdmin(token):
     #     raise HTTPException(status_code=401, detail="UNAUTHORIZED")
 
-    updated = update_curso(id, curso)
+    updated = update_curso(id, curso, id_horario)
 
     if not updated:
         raise HTTPException(

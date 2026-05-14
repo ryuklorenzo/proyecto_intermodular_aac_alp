@@ -3,7 +3,7 @@ from app.database.database_config import db_config
 import mariadb
 
 #--------------------------------------------------- ALUMNOS ---------------------------------------------------
-def insert_alumno(id: int, alumno: AlumnoCreate) -> int:
+def insert_alumno(id: int, alumno: AlumnoCreate, id_curso: int) -> int:
     conn = None
     cursor = None
     try:
@@ -11,7 +11,7 @@ def insert_alumno(id: int, alumno: AlumnoCreate) -> int:
         cursor = conn.cursor()
         
         sql = "INSERT INTO ALUMNO (id, id_curso) VALUES (?, ?)"
-        values = (id, alumno.id_curso)
+        values = (id, id_curso)
         
         cursor.execute(sql, values)
         conn.commit()

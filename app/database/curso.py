@@ -3,7 +3,7 @@ from app.models.curso import CursoCreate, CursoOut
 import mariadb
 
 #--------------------------------------------------- CURSOS ---------------------------------------------------
-def insert_curso(curso: CursoCreate) -> int:
+def insert_curso(curso: CursoCreate, id_horario: int) -> int:
     conn = None
     cursor = None
     try:
@@ -14,7 +14,7 @@ def insert_curso(curso: CursoCreate) -> int:
         INSERT INTO CURSO (nivel, curso, modulo, id_horario)
         VALUES (?, ?, ?, ?)
         """
-        values = (curso.nivel, curso.curso, curso.modulo, curso.id_horario)
+        values = (curso.nivel, curso.curso, curso.modulo, id_horario)
 
         cursor.execute(sql, values)
         conn.commit()
@@ -114,7 +114,7 @@ def read_curso_by_id(id: int) -> CursoOut | None:
             conn.close()
 
 
-def update_curso(id: int, curso: CursoCreate) -> bool:
+def update_curso(id: int, curso: CursoCreate, id_horario: int) -> bool:
     conn = None
     cursor = None
     try:
@@ -135,7 +135,7 @@ def update_curso(id: int, curso: CursoCreate) -> bool:
             curso.nivel,
             curso.curso,
             curso.modulo,
-            curso.id_horario,
+            id_horario,
             id
         )
 

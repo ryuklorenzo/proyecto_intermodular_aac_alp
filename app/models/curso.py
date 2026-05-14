@@ -4,7 +4,6 @@ class CursoCreate(BaseModel):
     nivel: str
     curso: str
     modulo: str
-    id_horario: int
 
 class CursoOut(BaseModel):
     id:int

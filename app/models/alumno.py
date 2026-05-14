@@ -1,7 +1,7 @@
 from app.models.user import UserBase, UserOut
 
 class AlumnoCreate(UserBase):
-    id_curso: int 
+    pass
 
 class AlumnoOut(UserOut):
     id: int
