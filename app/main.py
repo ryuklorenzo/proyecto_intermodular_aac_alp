@@ -11,7 +11,8 @@ from app.routers import (
     expediente, 
     curso, 
     horario,
-    amonestacion
+    amonestacion,
+    aula_convivencia
 )
 # Desactivamos la ruta 'docs' automática
 app = FastAPI(debug=True, docs_url=None)
@@ -29,6 +30,7 @@ app.include_router(expediente.router)
 app.include_router(directivo.router) #TODO fix delete
 app.include_router(horario.router)
 app.include_router(curso.router)
+app.include_router(aula_convivencia.router)
 
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():
