@@ -19,9 +19,10 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_aula_convivencia(
     aula: AulaConvivenciaImport,
+    id_horario: int,
 ):
 
-    aula_id = insert_aula_convivencia(aula)
+    aula_id = insert_aula_convivencia(id_horario, aula)
 
     if aula_id == -1:
         raise HTTPException(
@@ -58,9 +59,10 @@ async def ver_aula_convivencia_by_id(id: int):
 async def actualizar_aula_convivencia(
     id:int,
     aula: AulaConvivenciaImport,
+    id_horario: int
 ):
 
-    updated = update_aula_convivencia(id, aula)
+    updated = update_aula_convivencia(id, aula, id_horario)
 
     if not updated:
         raise HTTPException(

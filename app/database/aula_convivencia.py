@@ -4,7 +4,7 @@ from app.models.aula_convivencia import AulaConvivenciaImport, AulaConvivenciaOu
 import mariadb
 
 #--------------------------------------------------- AULA_CONVIVENCIA ---------------------------------------------------
-def insert_aula_convivencia(aula: AulaConvivenciaImport) -> int:
+def insert_aula_convivencia(id_horario: int , aula: AulaConvivenciaImport) -> int:
     conn = None
     cursor = None
     try:
@@ -12,10 +12,10 @@ def insert_aula_convivencia(aula: AulaConvivenciaImport) -> int:
         cursor = conn.cursor()
 
         sql = """
-        INSERT INTO AULA CONVIVENCIA (nombre, fecha, id_horario)
+        INSERT INTO AULA_CONVIVENCIA (nombre, fecha, id_horario)
         VALUES (?, ?, ?)
         """
-        values = (aula.nombre, aula.fecha, aula.id_horario)
+        values = (aula.nombre, aula.fecha, id_horario)
 
         cursor.execute(sql, values)
         conn.commit()
@@ -105,12 +105,14 @@ def read_aula_convivencia_by_id(id: int) -> AulaConvivenciaOut | None:
             conn.close()
 
 
-def update_aula_convivencia(id: int, aula: AulaConvivenciaImport) -> bool:
+def update_aula_convivencia(id: int, aula: AulaConvivenciaImport, id_horario: int) -> bool:
     conn = None
     cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
+        
+        # verificar si existe el horario antes de actualizar
 
         sql = """
         UPDATE AULA_CONVIVENCIA
@@ -120,14 +122,13 @@ def update_aula_convivencia(id: int, aula: AulaConvivenciaImport) -> bool:
         values = (
             aula.nombre,
             aula.fecha,
-            aula.id_horario,
+            id_horario,
             id
         )
-
         cursor.execute(sql, values)
         conn.commit()
 
-        return cursor.rowcount > 0 #1 si se actualizo algo
+        return True #1 si se actualizo algo
 
     except mariadb.Error as e:
         print(f"Error actualizando aula de convivencia: {e}")

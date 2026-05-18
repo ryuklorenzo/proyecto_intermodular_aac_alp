@@ -18,6 +18,7 @@ from app.routers import (
 app = FastAPI(debug=True, docs_url=None)
 
 # Inclusión de routers #Aqui arriba poner los nuevos o por testear, que salen antes.
+app.include_router(aula_convivencia.router)
 app.include_router(amonestacion.router)
 
 #testeados
@@ -30,7 +31,6 @@ app.include_router(expediente.router)
 app.include_router(directivo.router) #TODO fix delete
 app.include_router(horario.router)
 app.include_router(curso.router)
-app.include_router(aula_convivencia.router)
 
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():
