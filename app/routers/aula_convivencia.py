@@ -12,8 +12,8 @@ from app.database.aula_convivencia import (
 from app.database.database_config import validateIsAdmin
 
 router = APIRouter(
-    prefix="/aulas_convivencia",
-    tags=["Aulas Convivencia"]
+    prefix="/aula_convivencia",
+    tags=["Aula_Convivencia"]
 )
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
@@ -41,7 +41,7 @@ async def ver_aulas_convivencia(
     return read_all_aulas_convivencia()
 
 
-@router.get("/{id}/", response_model=AulaConvivenciaOut, status_code=status.HTTP_200_OK)
+@router.get("/{id}", response_model=AulaConvivenciaOut, status_code=status.HTTP_200_OK)
 async def ver_aula_convivencia_by_id(id: int):
 
     aula = read_aula_convivencia_by_id(id)
@@ -55,7 +55,7 @@ async def ver_aula_convivencia_by_id(id: int):
     return aula
 
 
-@router.put("/{id}/", status_code=status.HTTP_200_OK)
+@router.put("/{id}", status_code=status.HTTP_200_OK)
 async def actualizar_aula_convivencia(
     id:int,
     aula: AulaConvivenciaImport,
@@ -73,7 +73,7 @@ async def actualizar_aula_convivencia(
     return {"message": "Aula de convivencia actualizado correctamente"}
 
 
-@router.delete("/{id}/", status_code=status.HTTP_200_OK)
+@router.delete("/{id}", status_code=status.HTTP_200_OK)
 async def borrar_aula_convivencia(
     id: int,
     ):

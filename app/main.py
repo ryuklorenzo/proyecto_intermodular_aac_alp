@@ -12,7 +12,7 @@ from app.routers import (
     curso, 
     horario,
     amonestacion,
-    aula_convivencia
+    aula_convivencia,
 )
 # Desactivamos la ruta 'docs' automática
 app = FastAPI(debug=True, docs_url=None)
