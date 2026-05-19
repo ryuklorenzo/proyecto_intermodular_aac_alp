@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from app.models.actitud import ActitudOut, ActitudCreate
 
-class AmonestacionBase(ActitudCreate):
+class AmonestacionBase(BaseModel):
     nivel: str
 
 class AmonestacionOut(AmonestacionBase, ActitudOut):

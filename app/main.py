@@ -19,8 +19,8 @@ from app.routers import (
 app = FastAPI(debug=True, docs_url=None)
 
 # Inclusión de routers #Aqui arriba poner los nuevos o por testear, que salen antes.
-app.include_router(previ.router)
 app.include_router(amonestacion.router) #añadir el resto, solo esta el post basico.
+app.include_router(previ.router)
 
 #testeados
 app.include_router(directivo.router) #TODO fix delete
