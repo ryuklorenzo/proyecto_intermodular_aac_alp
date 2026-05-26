@@ -112,7 +112,7 @@ CREATE TABLE PREVI (
     id INT AUTO_INCREMENT PRIMARY KEY,
     detalle TEXT,
     fecha DATE,
-    id_directivo INT NOT NULL,
+    id_directivo INT NOT NULL, 
     id_expediente INT,
     FOREIGN KEY (id_directivo) REFERENCES DIRECTIVO(id),
     FOREIGN KEY (id_expediente) REFERENCES EXPEDIENTE(id)
@@ -124,6 +124,7 @@ CREATE TABLE AMONESTACION (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nivel VARCHAR(20) NOT NULL,
     id_actitud INT,
+    -- TODO Aqui igual deberia de llevar un id de directivo o algo asi idk FK-PROFESOR-ID
     FOREIGN KEY (id_actitud) REFERENCES ACTITUD(id)
 );
 
