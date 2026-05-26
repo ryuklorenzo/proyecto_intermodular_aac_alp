@@ -1,25 +1,25 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
-from app.models.profesor import ProfesorImport, ProfesorOut
+from app.models.profesor import ProfesorOut
 from app.models.user import UserBase
 from app.auth.auth import oauth2_scheme
-from app.database import (
+from app.database.profesor import (
     insert_profesor,
     delete_profesor,
     read_all_profesores,
     read_profesor_by_id,
     profesor_exists,
-    validateIsAdmin,
-    baja_profesor,
-    insert_user
+    baja_profesor
 )
+from app.database.database_config import validateIsAdmin
+from app.database.user import insert_user
 
 router = APIRouter(
     prefix="/teachers",
     tags=["Teachers"]
 )
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_profesor(
     userbase : UserBase, 
     token: str = Depends(oauth2_scheme)

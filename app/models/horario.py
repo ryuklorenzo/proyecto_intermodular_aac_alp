@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 
 class HorarioImport(BaseModel):
-    dia: str
-    horario_inicio: str
-    horario_fin: str
+    formato: str
+    hora_inicio: str
+    hora_fin: str
 
 class HorarioOut(HorarioImport):
     id: int

@@ -6,7 +6,7 @@ class UserBase(BaseModel):
     activo : bool = True
     password : str
 
-# Los datos de los usuarios se almacenan en la bsae de datos
+# Los datos de los usuarios se almacenan en la base de datos
 class UserDb(UserBase):
     id: int
 

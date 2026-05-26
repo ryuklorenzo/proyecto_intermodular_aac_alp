@@ -1,9 +1,10 @@
-from .user import UserBase, UserOut
+from app.models.user import UserBase, UserOut
 
 class AlumnoCreate(UserBase):
-    curso: str 
+    pass
 
 class AlumnoOut(UserOut):
     id: int
+    id_curso: int
     curso: str
-    pass
+    modulo: str

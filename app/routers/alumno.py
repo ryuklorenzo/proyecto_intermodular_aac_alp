@@ -1,15 +1,16 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.alumno import AlumnoCreate, AlumnoOut
-from app.database import (
+from app.auth.auth import oauth2_scheme # Si quieres proteger las rutas con token
+from app.database.user import insert_user
+from app.database.alumno import (
     insert_alumno, 
     read_all_alumnos, 
     read_alumno_by_id, 
     baja_alumno, 
-    validateIsAdmin,
-    insert_user
 )
-from app.auth.auth import oauth2_scheme # Si quieres proteger las rutas con token
+from app.database.database_config import validateIsAdmin
+
 
 #insertar alumno, ver alumnos, ver alumnoID, dar de baja
 
@@ -20,13 +21,17 @@ router = APIRouter(
 
 
 # 1. Insertar Alumno
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=dict)
-async def crear_alumno(alumno: AlumnoCreate, token: str = Depends(oauth2_scheme)):
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
+async def crear_alumno(
+    id_curso: int,
+    alumno: AlumnoCreate, 
+    token: str = Depends(oauth2_scheme)
+):
     if validateIsAdmin(token) == True:
         try:
             # Nota: El id_usuario debe existir previamente en la tabla USUARIO
             user_id = insert_user(alumno)
-            alumno_id = insert_alumno(user_id, alumno)
+            alumno_id = insert_alumno(user_id, alumno, id_curso)
             return {"message": "Alumno creado exitosamente", "id": user_id}
         except Exception as e:
             raise HTTPException(

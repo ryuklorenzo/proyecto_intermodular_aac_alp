@@ -2,16 +2,21 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.expediente import ExpedienteImport, ExpedienteOut
 from app.auth.auth import oauth2_scheme
-from app.database import(
-    insert_expediente, read_all_expedientes, read_expediente_by_directivo, read_directivo_by_id, validateIsAdmin
+from app.database.expediente import(
+    insert_expediente, 
+    read_all_expedientes, 
+    read_expediente_by_directivo, 
 )
+from app.database.directivo import read_directivo_by_id
+from app.database.database_config import validateIsAdmin
+
 
 router = APIRouter(
-    prefix="/expedientes",
-    tags=["Expedientes"]
+    prefix="/records",
+    tags=["Records"]
 )
 
-@router.post("/directivo/{id_directivo}/", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_expediente(id_directivo: int, expediente: ExpedienteImport, token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
@@ -41,7 +46,7 @@ async def ver_expedientes(token: str = Depends(oauth2_scheme)):
     return read_all_expedientes()
 
 
-@router.get("/directivo/{id_directivo}/", response_model=List[ExpedienteOut], status_code=status.HTTP_200_OK)
+@router.get("/{id_directivo}", response_model=List[ExpedienteOut], status_code=status.HTTP_200_OK)
 async def ver_expedientes_por_directivo(id_directivo: int, token: str = Depends(oauth2_scheme)):
     
     expedientes = read_expediente_by_directivo(id_directivo)

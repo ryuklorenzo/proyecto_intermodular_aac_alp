@@ -2,20 +2,20 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.actitud import ActitudCreate, ActitudOut
 from app.auth.auth import oauth2_scheme
-from app.database import (
+from app.database.actitud import (
     insert_actitud,
     read_actitudes_by_usuario,
-    delete_actitud,
-    read_user_by_id,
-    validateIsAdmin
+    delete_actitud
 )
+from app.database.user import read_user_by_id
+from app.database.database_config import validateIsAdmin
 
 router = APIRouter(
     prefix="/attitudes",
     tags=["Attitudes"]
 )
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_actitud(id_usuario: int, actitud: ActitudCreate, token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
@@ -34,7 +34,7 @@ async def crear_actitud(id_usuario: int, actitud: ActitudCreate, token: str = De
     return {"message": "Actitud asignada correctamente", "id": actitud_id}
 
 
-@router.get("/usuario/{id_usuario}/", response_model=List[ActitudOut], status_code=status.HTTP_200_OK)
+@router.get("/users/{id_usuario}/", response_model=List[ActitudOut], status_code=status.HTTP_200_OK)
 async def ver_actitudes_alumno(id_usuario: int, token: str = Depends(oauth2_scheme)):
     
     actitudes = read_actitudes_by_usuario(id_usuario)
