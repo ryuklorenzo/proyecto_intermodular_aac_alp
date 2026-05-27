@@ -197,7 +197,7 @@ def assign_alumnos_to_aula(id_aula_convivencia: int, alumnos_ids: list[int]) -> 
 
         sql = """
         INSERT INTO AULA_CONVIVENCIA_ALUMNO
-        (id_aula_convencia, id_alumno)
+        (id_aula_convivencia, id_alumno)
         VALUES (?, ?)
         """
 
@@ -213,9 +213,9 @@ def assign_alumnos_to_aula(id_aula_convivencia: int, alumnos_ids: list[int]) -> 
                     sql,
                     (id_aula_convivencia, id_alumno)
                 )
-            conn.commit()
+        conn.commit()
 
-            return True
+        return True
 
     except mariadb.Error as e:
         print(f"Error añadiendo alumno a aula: {e}")
