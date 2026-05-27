@@ -1,10 +1,10 @@
 from app.database.database_config import db_config
-from app.models import reconocimiento
-from app.models.reconocimiento import ReconocimientoImport, ReconocimientoOut
+from app.models import mencion
+from app.models.mencion import MencionImport, MencionOut
 import mariadb
 
-#--------------------------------------------------- RECONOCIMIENTO ---------------------------------------------------
-def insert_reconocimiento(id_actitud: int , reconocimiento: ReconocimientoImport) -> int:
+#--------------------------------------------------- MENCION ---------------------------------------------------
+def insert_mencion(id_reconocimiento: int , mencion: MencionImport) -> int:
     conn = None
     cursor = None
     try:
@@ -12,24 +12,24 @@ def insert_reconocimiento(id_actitud: int , reconocimiento: ReconocimientoImport
         cursor = conn.cursor()
 
         sql = """
-        INSERT INTO RECONOCIMIENTO (detalle, id_actitud)
+        INSERT INTO MENCION (fecha, id_reconocimiento)
         VALUES (?, ?)
         """
-        values = (reconocimiento.detalle, id_actitud)
+        values = (mencion.fecha, id_reconocimiento)
 
         cursor.execute(sql, values)
         conn.commit()
         return cursor.lastrowid
     
     except mariadb.Error as e:
-        print(f"Error insertando reconocimiento: {e}")
+        print(f"Error insertando mencion: {e}")
         return -1
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
 
 
-def read_all_reconocimientos() -> list[ReconocimientoOut]:
+def read_all_menciones() -> list[MencionOut]:
     conn = None
     cursor = None
 
@@ -38,25 +38,25 @@ def read_all_reconocimientos() -> list[ReconocimientoOut]:
         cursor = conn.cursor()
         
         sql = """
-        SELECT id, detalle, id_actitud
-        FROM RECONOCIMIENTO
+        SELECT id, fecha, id_reconocimiento
+        FROM MENCION
         """
         cursor.execute(sql)
         results = cursor.fetchall()
         
-        reconocimientos = []
+        menciones = []
         for row in results:
-            reconocimientos.append(
-                ReconocimientoOut(
+            menciones.append(
+                MencionOut(
                     id=row[0],
-                    detalle=row[1],
-                    id_actitud=row[2]
+                    fecha=row[1],
+                    id_reconocimiento=row[2]
                 )
             )
-        return reconocimientos
+        return menciones
         
     except mariadb.Error as e:
-        print(f"Error leyendo reconocimientos: {e}")
+        print(f"Error leyendo menciones: {e}")
         return []
 
     finally:
@@ -66,7 +66,7 @@ def read_all_reconocimientos() -> list[ReconocimientoOut]:
             conn.close()
 
 
-def read_reconocimiento_by_id(id: int) -> ReconocimientoOut | None:
+def read_mencion_by_id(id: int) -> MencionOut | None:
     conn = None
     cursor = None
 
@@ -75,8 +75,8 @@ def read_reconocimiento_by_id(id: int) -> ReconocimientoOut | None:
         cursor = conn.cursor()
 
         sql = """
-        SELECT id, detalle, id_actitud
-        FROM RECONOCIMIENTO
+        SELECT id, fecha, id_reconocimiento
+        FROM MENCION
         WHERE id = ?
         """
 
@@ -84,16 +84,16 @@ def read_reconocimiento_by_id(id: int) -> ReconocimientoOut | None:
         row = cursor.fetchone()
 
         if row:
-            return ReconocimientoOut(
+            return MencionOut(
                 id=row[0],
-                detalle=row[1],
-                id_actitud=row[2]
+                fecha=row[1],
+                id_reconocimiento=row[2]
             )
 
         return None
 
     except mariadb.Error as e:
-        print(f"Error leyendo reconocimiento: {e}")
+        print(f"Error leyendo mencion: {e}")
         return None
 
     finally:
@@ -104,7 +104,7 @@ def read_reconocimiento_by_id(id: int) -> ReconocimientoOut | None:
             conn.close()
 
 
-def read_reconocimientos_by_actitud(id_actitud: int) -> list[ReconocimientoOut]:
+def read_menciones_by_reconocimiento(id_reconocimiento: int) -> list[MencionOut]:
     conn = None
     cursor = None
 
@@ -113,27 +113,27 @@ def read_reconocimientos_by_actitud(id_actitud: int) -> list[ReconocimientoOut]:
         cursor = conn.cursor()
 
         sql = """
-        SELECT id, detalle, id_actitud
-        FROM RECONOCIMIENTO
-        WHERE id_actitud = ?
+        SELECT id, fecha, id_reconocimiento
+        FROM MENCION
+        WHERE id_reconocimiento = ?
         """
-        cursor.execute(sql, (id_actitud,))
+        cursor.execute(sql, (id_reconocimiento,))
         results = cursor.fetchall()
 
-        reconocimientos = []
+        menciones = []
 
         for row in results:
-            reconocimientos.append(
-                ReconocimientoOut(
+            menciones.append(
+                MencionOut(
                     id=row[0],
-                    detalle=row[1],
-                    id_actitud=row[2]
+                    fecha=row[1],
+                    id_reconocimiento=row[2]
                 )
             )
-        return reconocimientos
+        return menciones
 
     except mariadb.Error as e:
-        print(f"Error leyendo reconocimientos por actitud: {e}")
+        print(f"Error leyendo menciones por reconocimiento: {e}")
         return []
 
     finally:
@@ -144,24 +144,24 @@ def read_reconocimientos_by_actitud(id_actitud: int) -> list[ReconocimientoOut]:
             conn.close()
 
 
-def update_reconocimiento(id: int, reconocimiento: ReconocimientoImport, id_actitud: int) -> bool:
+def update_mencion(id: int, mencion: MencionImport, id_reconocimiento: int) -> bool:
     conn = None
     cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        cursor.execute("SELECT id FROM ACTITUD WHERE id = ?", (id_actitud,))
+        cursor.execute("SELECT id FROM RECONOCIMIENTO WHERE id = ?", (id_reconocimiento,))
         if not cursor.fetchone():
-            print(f"Error: La actitud con id {id_actitud} no existe.")
+            print(f"Error: El reconocimiento con id {id_reconocimiento} no existe.")
             return False
 
         sql = """
-        UPDATE RECONOCIMIENTO
-        SET detalle = ?, id_actitud = ?
+        UPDATE MENCION
+        SET fecha = ?, id_reconocimiento = ?
         WHERE id = ?
         """
-        values = (reconocimiento.detalle, id_actitud, id)
+        values = (mencion.fecha, id_reconocimiento, id)
         
         cursor.execute(sql, values)
         conn.commit()
@@ -169,14 +169,14 @@ def update_reconocimiento(id: int, reconocimiento: ReconocimientoImport, id_acti
         return True
 
     except mariadb.Error as e:
-        print(f"Error actualizando reconocimiento: {e}")
+        print(f"Error actualizando mencion: {e}")
         return False
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
 
 
-def delete_reconocimiento(id: int) -> bool:
+def delete_mencion(id: int) -> bool:
     conn = None
     cursor = None
 
@@ -184,13 +184,13 @@ def delete_reconocimiento(id: int) -> bool:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = "DELETE FROM RECONOCIMIENTO WHERE id = ?"
+        sql = "DELETE FROM MENCION WHERE id = ?"
         cursor.execute(sql, (id,))
         conn.commit()
         return cursor.rowcount > 0
 
     except mariadb.Error as e:
-        print(f"Error borrando reconocimiento: {e}")
+        print(f"Error borrando mencion: {e}")
         return False
 
     finally:
