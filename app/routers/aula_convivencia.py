@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.aula_convivencia import AulaConvivenciaImport, AulaConvivenciaOut
+from app.models.aula_convivencia_alumno import AulaConvivenciaAlumnoImport
 from app.auth.auth import oauth2_scheme
 from app.database.aula_convivencia import (
+    assign_alumnos_to_aula,
     insert_aula_convivencia,
     read_all_aulas_convivencia,
     read_aula_convivencia_by_id,
@@ -86,3 +88,24 @@ async def borrar_aula_convivencia(
         )
 
     return {"message": "Aula de convivencia eliminado correctamente"}
+
+
+@router.post("/assign-students", status_code=status.HTTP_200_OK)
+async def asignar_alumnos_aula(
+    data: AulaConvivenciaAlumnoImport
+):
+
+    assigned = assign_alumnos_to_aula(
+        data.id_aulo_convivencia,
+        data.alumnos_ids
+    )
+
+    if not assigned:
+        raise HTTPException(
+            status_code=404,
+            detail="Error asignando alumnos"
+        )
+
+    return {
+        "message": "Alumnos asignados correctamente"
+    }

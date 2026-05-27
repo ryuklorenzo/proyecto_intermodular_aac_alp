@@ -1,6 +1,7 @@
 from app.database.database_config import db_config
 from app.models import aula_convivencia
 from app.models.aula_convivencia import AulaConvivenciaImport, AulaConvivenciaOut
+from app.models.aula_convivencia_alumno import AulaConvivenciaAlumnoImport
 import mariadb
 
 #--------------------------------------------------- AULA_CONVIVENCIA ---------------------------------------------------
@@ -168,6 +169,56 @@ def delete_aula_convivencia(id: int) -> bool:
 
     except mariadb.Error as e:
         print(f"Error borrando aula de convivencia: {e}")
+        return False
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def assign_alumnos_to_aula(id_aula_convivencia: int, alumnos_ids: list[int]) -> bool:
+    conn = None
+    cursor = None
+
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT id FROM AULA_CONVIVENCIA WHERE id = ?", 
+            (id_aula_convivencia,)
+        )
+
+        if not cursor.fetchone():
+            print("Aula no encontrada")
+            return False
+
+        sql = """
+        INSERT INTO AULA_CONVIVENCIA_ALUMNO
+        (id_aula_convencia, id_alumno)
+        VALUES (?, ?)
+        """
+
+        for id_alumno in alumnos_ids:
+
+            cursor.execute(
+                "SELECT id FROM ALUMNO WHERE id = ?",
+                (id_alumno,)
+            )
+
+            if cursor.fetchone():
+                cursor.execute(
+                    sql,
+                    (id_aula_convivencia, id_alumno)
+                )
+            conn.commit()
+
+            return True
+
+    except mariadb.Error as e:
+        print(f"Error añadiendo alumno a aula: {e}")
         return False
 
     finally:
