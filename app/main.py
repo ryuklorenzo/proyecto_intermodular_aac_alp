@@ -15,7 +15,8 @@ from app.routers import (
     aula_convivencia,
     probi,
     reconocimiento,
-    mencion
+    mencion,
+    previ
 )
 # Desactivamos la ruta 'docs' automática
 app = FastAPI(debug=True, docs_url=None)
@@ -26,15 +27,18 @@ app.include_router(amonestacion.router)
 app.include_router(probi.router)
 app.include_router(reconocimiento.router)
 app.include_router(mencion.router)
+app.include_router(amonestacion.router) #añadir el resto, solo esta el post basico.
+app.include_router(previ.router)
 
 #testeados
+app.include_router(directivo.router) #TODO fix delete
+app.include_router(aula_convivencia.router) 
 app.include_router(tarea.router)
 app.include_router(alumno.router)
 app.include_router(users.router)
 app.include_router(profesor.router)
 app.include_router(actitud.router)
 app.include_router(expediente.router)
-app.include_router(directivo.router) #TODO fix delete
 app.include_router(horario.router)
 app.include_router(curso.router)
 

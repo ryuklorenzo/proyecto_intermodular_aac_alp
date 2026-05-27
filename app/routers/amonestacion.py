@@ -2,6 +2,7 @@ from app.auth.auth import oauth2_scheme # Si quieres proteger las rutas con toke
 from app.database.database_config import validateIsAdmin
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
+from app.models.actitud import  ActitudCreate
 from app.models.amonestacion import AmonestacionBase, AmonestacionOut
 from app.database.actitud import insert_actitud, delete_actitud
 from app.database.amonestacion import (
@@ -16,18 +17,18 @@ router = APIRouter(
     tags=["Reprimands"]
 )
 
-#TODO FURULA PERO DA ERROR POR TERMINAL EN API:  FIXXEAR
-@router.post("/", response_model=int, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def crear_amonestacion(
     id_alumno: int,
     amonestacion: AmonestacionBase,
+    actitud: ActitudCreate,
     # token: str = Depends(oauth2_scheme)
 ):
     # if validateIsAdmin(token) == True:
         try:
-            id_actitud = insert_actitud(id_alumno, amonestacion)
+            id_actitud = insert_actitud(id_alumno, actitud)
             id_amonestacion = insert_amonestacion(id_actitud, amonestacion)
-            return id_amonestacion
+            return {"message": "Amonestación asignada correctamente", "id": id_amonestacion}
 
         except Exception as e:
             raise HTTPException(
@@ -38,5 +39,27 @@ async def crear_amonestacion(
     #     raise HTTPException(
     #         status_code=status.HTTP_401_UNAUTHORIZED,
     #         detail="UNAUTHORIZED"
-    #     )
-#TODO para el out un AmonestacionOUT que llama diriectamente a actitud out y le añadimos el id de amonestacion
+
+@router.get("/", response_model=List[AmonestacionOut], status_code=status.HTTP_200_OK)
+async def ver_amonestaciones(
+    # token: str = Depends(oauth2_scheme)
+):
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+
+    amonestaciones = read_all_amonestaciones()
+    return amonestaciones
+
+@router.get("/{id}", response_model=AmonestacionOut, status_code=status.HTTP_200_OK)
+async def ver_amonestacion_por_id(
+    id: int,
+    # token: str = Depends(oauth2_scheme)
+):
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+
+    amonestacion = read_amonestacion_by_id(id)
+    if not amonestacion:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Amonestación no encontrada")
+    return amonestacion
+

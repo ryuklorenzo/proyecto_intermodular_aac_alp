@@ -9,8 +9,8 @@ def insert_amonestacion(id_actitud: int, amonestacion: AmonestacionBase) -> int:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = "INSERT INTO AMONESTACION (id, nivel) VALUES (?, ?)"
-        values = (id_actitud, amonestacion.nivel)
+        sql = "INSERT INTO AMONESTACION (id, nivel, id_actitud) VALUES (?, ?, ?)"
+        values = (None, amonestacion.nivel, id_actitud)
         
         cursor.execute(sql, values)
         conn.commit()
@@ -27,6 +27,9 @@ def insert_amonestacion(id_actitud: int, amonestacion: AmonestacionBase) -> int:
         if conn:
             conn.close()
 
+
+# app/database/amonestacion.py
+
 def read_all_amonestaciones() -> list[AmonestacionOut]:
     conn = None
     cursor = None
@@ -34,9 +37,10 @@ def read_all_amonestaciones() -> list[AmonestacionOut]:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
+        # 1. Añadimos ac.tipo y cambiamos ac.id_alumno por ac.id_usuario
         sql = """
         SELECT 
-            a.id, a.nivel, ac.id, ac.descripcion, ac.fecha, ac.id_alumno
+            a.id, a.nivel, ac.id, ac.descripcion, ac.fecha, ac.tipo, ac.id_usuario
         FROM AMONESTACION a
         JOIN ACTITUD ac ON a.id_actitud = ac.id
         """
@@ -46,12 +50,13 @@ def read_all_amonestaciones() -> list[AmonestacionOut]:
         amonestaciones_db = []
         for row in results:
             amonestacion = AmonestacionOut(
-                id=row[0],
-                nivel=row[1],
-                #id_actitud=row[2],
-                descripcion=row[3],
-                fecha=row[4],
-                #id_alumno=row[5]
+                id=row[0],               # a.id
+                nivel=row[1],            # a.nivel
+                # row[2] es ac.id (el id de la actitud), no lo necesitas en el Out a menos que lo definas
+                descripcion=row[3],      # ac.descripcion
+                fecha=row[4],            # ac.fecha (Pydantic se encarga de pasarlo a Date)
+                tipo=row[5],             # ac.tipo (¡Faltaba esto!)
+                id_usuario=row[6]        # ac.id_usuario (¡Faltaba esto y lo tenías comentado!)
             )
             amonestaciones_db.append(amonestacion)
         
@@ -66,6 +71,7 @@ def read_all_amonestaciones() -> list[AmonestacionOut]:
         if conn:
             conn.close()
 
+
 def read_amonestacion_by_id(id: int) -> AmonestacionOut:
     conn = None
     cursor = None
@@ -73,9 +79,10 @@ def read_amonestacion_by_id(id: int) -> AmonestacionOut:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
+        # Actualizar la SQL igual que arriba
         sql = """
         SELECT 
-            a.id, a.nivel, ac.id, ac.descripcion, ac.fecha, ac.id_alumno
+            a.id, a.nivel, ac.id, ac.descripcion, ac.fecha, ac.tipo, ac.id_usuario
         FROM AMONESTACION a
         JOIN ACTITUD ac ON a.id_actitud = ac.id
         WHERE a.id = ?
@@ -87,10 +94,10 @@ def read_amonestacion_by_id(id: int) -> AmonestacionOut:
             amonestacion = AmonestacionOut(
                 id=result[0],
                 nivel=result[1],
-                #id_actitud=result[2],
                 descripcion=result[3],
                 fecha=result[4],
-                #id_alumno=result[5]
+                tipo=result[5],          # Añadir
+                id_usuario=result[6]     # Descomentar/Añadir
             )
             return amonestacion
         else:
