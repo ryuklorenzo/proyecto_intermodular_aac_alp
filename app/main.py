@@ -13,6 +13,9 @@ from app.routers import (
     horario,
     amonestacion,
     aula_convivencia,
+    probi,
+    reconocimiento,
+    mencion
 )
 # Desactivamos la ruta 'docs' automática
 app = FastAPI(debug=True, docs_url=None)
@@ -20,6 +23,9 @@ app = FastAPI(debug=True, docs_url=None)
 # Inclusión de routers #Aqui arriba poner los nuevos o por testear, que salen antes.
 app.include_router(aula_convivencia.router)
 app.include_router(amonestacion.router)
+app.include_router(probi.router)
+app.include_router(reconocimiento.router)
+app.include_router(mencion.router)
 
 #testeados
 app.include_router(tarea.router)
