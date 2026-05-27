@@ -13,7 +13,7 @@ def insert_probi(id_mencion: int , probi: ProbiImport) -> int:
 
         sql = """
         INSERT INTO PROBI (fecha, id_mencion)
-        VALUES (?, ?, ?)
+        VALUES (?, ?)
         """
         values = (probi.fecha, id_mencion)
 
