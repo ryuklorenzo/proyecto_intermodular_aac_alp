@@ -54,7 +54,7 @@ def read_all_aulas_convivencia() -> list[AulaConvivenciaOut]:
                 AulaConvivenciaOut(
                     id=row[0],
                     nombre=row[1],
-                    fecha=str(row[2]),
+                    fecha=row[2],
                     id_horario=row[3],     # h.id
                     formato=str(row[4]),   # h.formato (Aquí daba el IndexError)
                     hora_inicio=str(row[5]), # h.hora_inicio
@@ -99,7 +99,7 @@ def read_aula_convivencia_by_id(id: int) -> AulaConvivenciaOut | None:
             return AulaConvivenciaOut(
                 id=row[0],
                 nombre=row[1],
-                fecha=str(row[2]),
+                fecha=row[2],
                 id_horario=row[3],     # h.id
                 formato=str(row[4]),   # h.formato
                 hora_inicio=str(row[5]), # h.hora_inicio
