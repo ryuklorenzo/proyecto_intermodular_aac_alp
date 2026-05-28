@@ -5,4 +5,5 @@ class ExpedienteImport(BaseModel):
 
 class ExpedienteOut(ExpedienteImport):
     id: int
+    id_alumno: int
     id_directivo: int

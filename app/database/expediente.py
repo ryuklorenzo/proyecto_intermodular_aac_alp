@@ -3,7 +3,7 @@ from app.models.expediente import ExpedienteImport, ExpedienteOut
 import mariadb
 
 #--------------------------------------------------- EXPEDIENTES ---------------------------------------------------
-def insert_expediente(id_directivo: int,expediente: ExpedienteImport) -> int:
+def insert_expediente(id_alumno: int, id_directivo: int, expediente: ExpedienteImport) -> int:
     conn = None
     cursor = None
     try:
@@ -11,10 +11,10 @@ def insert_expediente(id_directivo: int,expediente: ExpedienteImport) -> int:
         cursor = conn.cursor()
 
         sql = """
-        INSERT INTO EXPEDIENTE (estado, id_directivo)
-        VALUES (?, ?)
+        INSERT INTO EXPEDIENTE (estado, id_alumno, id_directivo)
+        VALUES (?, ?, ?)
         """
-        values = (expediente.estado, id_directivo)
+        values = (expediente.estado, id_alumno, id_directivo)
 
         cursor.execute(sql, values)
         conn.commit()
@@ -37,7 +37,7 @@ def read_all_expedientes() -> list[ExpedienteOut]:
         cursor = conn.cursor()
         
         sql = """
-        SELECT id, estado, id_directivo FROM EXPEDIENTE
+        SELECT id, estado, id_alumno, id_directivo FROM EXPEDIENTE
         """
         cursor.execute(sql)
         results = cursor.fetchall()
@@ -48,7 +48,8 @@ def read_all_expedientes() -> list[ExpedienteOut]:
                 ExpedienteOut(
                     id=row[0],
                     estado=row[1],
-                    id_directivo=row[2]
+                    id_alumno=row[2],
+                    id_directivo=row[3]
                 )
             )
         return expedientes
@@ -71,7 +72,7 @@ def read_expediente_by_directivo(id_directivo: int) -> list[ExpedienteOut]:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = "SELECT id, estado, id_directivo FROM EXPEDIENTE WHERE id_directivo = ?"
+        sql = "SELECT id, estado, id_alumno, id_directivo FROM EXPEDIENTE WHERE id_directivo = ?"
         cursor.execute(sql, (id_directivo,))
         results = cursor.fetchall()
 
@@ -79,7 +80,8 @@ def read_expediente_by_directivo(id_directivo: int) -> list[ExpedienteOut]:
             ExpedienteOut(
                 id=row[0],
                 estado=row[1],
-                id_directivo=row[2]
+                id_alumno=row[2],
+                id_directivo=row[3]
             )
             for row in results
         ]
