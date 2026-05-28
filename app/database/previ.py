@@ -125,8 +125,8 @@ def read_all_previes() -> list[PreviOut]:
                     id=row[0],
                     detalle=row[1],
                     fecha=str(row[2]),
-                    id_expediente=row[3],
-                    id_directivo=row[4]
+                    id_directivo=row[3],
+                    id_expediente=row[4],
                 )
             )
         return previes
