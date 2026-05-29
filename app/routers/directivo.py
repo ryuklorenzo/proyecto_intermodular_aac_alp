@@ -8,8 +8,7 @@ from app.database.directivo import (
     read_directivo_by_id,
     read_all_directivos,
     directivo_exists,
-    baja_directivo,
-    delete_directivo as delete_directivo_db
+    baja_directivo
 )
 from app.database.database_config import validateIsAdmin
 
@@ -47,18 +46,23 @@ async def crear_directivo(
 
 
 @router.get("/", response_model=List[DirectivoOut], status_code=status.HTTP_200_OK)
-async def ver_directivos(token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+async def ver_directivos(
+    # token: str = Depends(oauth2_scheme)
+):
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     directivos = read_all_directivos()
     return directivos
 
 
 @router.get("/{id}/", response_model=DirectivoOut, status_code=status.HTTP_200_OK)
-async def ver_directivo_por_id(id: int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+async def ver_directivo_por_id(
+    id: int, 
+    # token: str = Depends(oauth2_scheme)
+):
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     directivo = read_directivo_by_id(id)
     if not directivo:
@@ -67,21 +71,6 @@ async def ver_directivo_por_id(id: int, token: str = Depends(oauth2_scheme)):
             detail=f"Directivo con id {id} no encontrado"
         )
     return directivo
-
-
-@router.delete("/{id}/", status_code=status.HTTP_200_OK)
-async def borrar_directivo(id: int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
-
-    deleted = delete_directivo_db(id)
-    if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Directivo no encontrado"
-        )
-
-    return {"message": "Directivo eliminado correctamente"}
 
 
 @router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)

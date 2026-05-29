@@ -124,31 +124,6 @@ def read_directivo_by_id(id: int) -> DirectivoOut | None:
             conn.close()
 
 
-def delete_directivo(id: int) -> bool:
-    conn = None
-    cursor = None
-
-    try:
-        conn = mariadb.connect(**db_config)
-        cursor = conn.cursor()
-
-        sql_delete = "DELETE FROM DIRECTIVO WHERE id = ?"
-        cursor.execute(sql_delete, (id,))
-        conn.commit()
-
-        return cursor.rowcount > 0
-
-    except mariadb.Error as e:
-        print(f"Error borrando directivo: {e}")
-        return False
-
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
-
-
 def directivo_exists(id_profesor: int, cargo: str) -> bool:
 
     conn = None
