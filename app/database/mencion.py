@@ -3,6 +3,25 @@ from app.models import mencion
 from app.models.mencion import MencionImport, MencionOut
 import mariadb
 
+BASE_QUERY = """
+        SELECT m.id, m.fecha, m.id_reconocimiento, r.detalle, a.id, a.descripcion, a.fecha, a.tipo
+        FROM MENCION as m
+        JOIN RECONOCIMIENTO as r ON m.id_reconocimiento = r.id
+        JOIN ACTITUD as a ON r.id_actitud = a.id
+        """
+
+def map_mencion_row(row) -> MencionOut:
+    return MencionOut(
+        id=row[0],
+        fecha=row[1],
+        id_reconocimiento=row[2],
+        detalle_reconocimiento=row[3],
+        id_actitud=row[4],
+        descripcion_actitud=row[5],
+        fecha_actitud=row[6],
+        tipo_actitud=row[7]
+    )
+
 #--------------------------------------------------- MENCION ---------------------------------------------------
 def insert_mencion(id_reconocimiento: int , mencion: MencionImport) -> int:
     conn = None
@@ -37,23 +56,10 @@ def read_all_menciones() -> list[MencionOut]:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = """
-        SELECT id, fecha, id_reconocimiento
-        FROM MENCION
-        """
+        sql = BASE_QUERY
         cursor.execute(sql)
         results = cursor.fetchall()
-        
-        menciones = []
-        for row in results:
-            menciones.append(
-                MencionOut(
-                    id=row[0],
-                    fecha=row[1],
-                    id_reconocimiento=row[2]
-                )
-            )
-        return menciones
+        return [map_mencion_row(row) for row in results]
         
     except mariadb.Error as e:
         print(f"Error leyendo menciones: {e}")
@@ -74,22 +80,13 @@ def read_mencion_by_id(id: int) -> MencionOut | None:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = """
-        SELECT id, fecha, id_reconocimiento
-        FROM MENCION
-        WHERE id = ?
-        """
+        sql = BASE_QUERY + "WHERE m.id = ?"
 
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
 
         if row:
-            return MencionOut(
-                id=row[0],
-                fecha=row[1],
-                id_reconocimiento=row[2]
-            )
-
+            return map_mencion_row(row)
         return None
 
     except mariadb.Error as e:
@@ -112,25 +109,10 @@ def read_menciones_by_reconocimiento(id_reconocimiento: int) -> list[MencionOut]
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = """
-        SELECT id, fecha, id_reconocimiento
-        FROM MENCION
-        WHERE id_reconocimiento = ?
-        """
+        sql = BASE_QUERY + "WHERE m.id_reconocimiento = ?"
         cursor.execute(sql, (id_reconocimiento,))
         results = cursor.fetchall()
-
-        menciones = []
-
-        for row in results:
-            menciones.append(
-                MencionOut(
-                    id=row[0],
-                    fecha=row[1],
-                    id_reconocimiento=row[2]
-                )
-            )
-        return menciones
+        return [map_mencion_row(row) for row in results]
 
     except mariadb.Error as e:
         print(f"Error leyendo menciones por reconocimiento: {e}")
