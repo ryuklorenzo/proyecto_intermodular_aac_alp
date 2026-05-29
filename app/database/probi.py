@@ -3,6 +3,28 @@ from app.models import probi
 from app.models.probi import ProbiImport, ProbiOut
 import mariadb
 
+BASE_SQL = """
+            SELECT 
+                p.id, 
+                p.fecha, 
+                p.id_mencion, 
+                r.id,
+                r.detalle
+            FROM PROBI p
+            JOIN MENCION m ON p.id_mencion = m.id
+            JOIN RECONOCIMIENTO r ON m.id_reconocimiento = r.id
+        """
+
+def map_probi_row(row) -> ProbiOut:
+    return ProbiOut(
+        id=row[0],
+            fecha=row[1], 
+            id_mencion=row[2],
+            id_reconocimiento=row[3],
+            detalle_reconocimiento=row[4]
+        )
+
+
 #--------------------------------------------------- PROBI ---------------------------------------------------
 def insert_probi(id_mencion: int , probi: ProbiImport) -> int:
     conn = None
@@ -37,23 +59,11 @@ def read_all_probis() -> list[ProbiOut]:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = """
-        SELECT id, fecha, id_mencion
-        FROM PROBI
-        """
+        sql = BASE_SQL 
         cursor.execute(sql)
         results = cursor.fetchall()
         
-        probis = []
-        for row in results:
-            probis.append(
-                ProbiOut(
-                    id=row[0],
-                    fecha=row[1],
-                    id_mencion=row[2]
-                )
-            )
-        return probis
+        return [map_probi_row(row) for row in results]
         
     except mariadb.Error as e:
         print(f"Error leyendo Probis: {e}")
@@ -74,22 +84,12 @@ def read_probi_by_id(id: int) -> ProbiOut | None:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = """
-        SELECT id, fecha, id_mencion
-        FROM PROBI
-        WHERE id = ?
-        """
-
+        sql = BASE_SQL + " WHERE p.id = ?"
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
 
         if row:
-            return ProbiOut(
-                id=row[0],
-                fecha=row[1],
-                id_mencion=row[2]
-            )
-
+            return map_probi_row(row)
         return None
 
     except mariadb.Error as e:

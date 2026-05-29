@@ -7,3 +7,5 @@ class ProbiImport(BaseModel):
 class ProbiOut(ProbiImport):
     id: int
     id_mencion: int
+    id_reconocimiento: int
+    detalle_reconocimiento: str
