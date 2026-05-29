@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.aula_convivencia import AulaConvivenciaImport, AulaConvivenciaOut
-from app.models.aula_convivencia_alumno import AulaConvivenciaAlumnoImport
+from app.models.aula_convivencia_alumno import AulaConvivenciaAlumnoImport, AulaConvivenciaAlumnoOut
 from app.auth.auth import oauth2_scheme
 from app.database.aula_convivencia import (
     assign_alumnos_to_aula,
     insert_aula_convivencia,
     read_all_aulas_convivencia,
+    read_alumnos_in_aula,
     read_aula_convivencia_by_id,
+    remove_alumno_from_aula,
     update_aula_convivencia,
     delete_aula_convivencia
 )
@@ -17,6 +19,7 @@ router = APIRouter(
     prefix="/aula_convivencia",
     tags=["Aula_Convivencia"]
 )
+
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_aula_convivencia(
@@ -33,7 +36,6 @@ async def crear_aula_convivencia(
         )
 
     return {"message": "Aula de convivencia creado exitosamente", "id": aula_id}
-
 
 
 @router.get("/", response_model=List[AulaConvivenciaOut], status_code=status.HTTP_200_OK)
@@ -96,7 +98,7 @@ async def asignar_alumnos_aula(
 ):
 
     assigned = assign_alumnos_to_aula(
-        data.id_aulo_convivencia,
+        data.id_aula_convivencia,
         data.alumnos_ids
     )
 
@@ -106,6 +108,49 @@ async def asignar_alumnos_aula(
             detail="Error asignando alumnos"
         )
 
-    return {
-        "message": "Alumnos asignados correctamente"
-    }
+    return {"message": "Alumnos asignados correctamente"}
+
+
+@router.get("/{id_aula}/students", response_model=List[AulaConvivenciaAlumnoOut], status_code=status.HTTP_200_OK)
+async def ver_alumnos_en_aula(
+    id_aula: int, 
+    # token: str = Depends(oauth2_scheme)
+):
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+
+    aula = read_aula_convivencia_by_id(id_aula)
+    if not aula:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Aula de convivencia no encontrada"
+        )
+        
+    return read_alumnos_in_aula(id_aula)
+
+
+@router.delete("/{id_aula}/students/{id_alumno}", status_code=status.HTTP_200_OK)
+async def sacar_alumno_de_aula(
+    id_aula: int, 
+    id_alumno: int, 
+    # token: str = Depends(oauth2_scheme)
+):
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+
+    aula = read_aula_convivencia_by_id(id_aula)
+    if not aula:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Aula de convivencia no encontrada"
+        )
+
+    exito = remove_alumno_from_aula(id_aula, id_alumno)
+    
+    if not exito:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="El alumno no se encuentra en esta aula de convivencia o no se pudo sacar"
+        )
+
+    return {"message": "Alumno sacado del aula de convivencia correctamente"}
