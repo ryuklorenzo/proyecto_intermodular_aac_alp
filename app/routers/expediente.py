@@ -4,7 +4,8 @@ from app.models.expediente import ExpedienteImport, ExpedienteOut
 from app.auth.auth import oauth2_scheme
 from app.database.expediente import(
     insert_expediente, 
-    read_all_expedientes, 
+    read_all_expedientes,
+    read_expediente_by_alumno, 
     read_expediente_by_directivo, 
 )
 from app.database.directivo import read_directivo_by_id
@@ -46,8 +47,23 @@ async def ver_expedientes(token: str = Depends(oauth2_scheme)):
     return read_all_expedientes()
 
 
-@router.get("/{id_directivo}", response_model=List[ExpedienteOut], status_code=status.HTTP_200_OK)
+@router.get("/executives/{id_directivo}", response_model=List[ExpedienteOut], status_code=status.HTTP_200_OK)
 async def ver_expedientes_por_directivo(id_directivo: int, token: str = Depends(oauth2_scheme)):
-    
+    if not validateIsAdmin(token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="UNAUTHORIZED"
+        )
     expedientes = read_expediente_by_directivo(id_directivo)
+    return expedientes
+
+
+@router.get("/students/{id_alumno}", response_model=List[ExpedienteOut], status_code=status.HTTP_200_OK)
+async def ver_expedientes_por_alumno(id_alumno: int, token: str = Depends(oauth2_scheme)):
+    if not validateIsAdmin(token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="UNAUTHORIZED"
+        )
+    expedientes = read_expediente_by_alumno(id_alumno)
     return expedientes
