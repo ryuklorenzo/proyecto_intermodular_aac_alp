@@ -20,6 +20,7 @@ router = APIRouter(
 @router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def crear_amonestacion(
     id_alumno: int,
+    id_profesor: int,
     amonestacion: AmonestacionBase,
     actitud: ActitudCreate,
     # token: str = Depends(oauth2_scheme)
@@ -27,7 +28,7 @@ async def crear_amonestacion(
     # if validateIsAdmin(token) == True:
         try:
             id_actitud = insert_actitud(id_alumno, actitud)
-            id_amonestacion = insert_amonestacion(id_actitud, amonestacion)
+            id_amonestacion = insert_amonestacion(id_actitud, amonestacion, id_profesor)
             return {"message": "Amonestación asignada correctamente", "id": id_amonestacion}
 
         except Exception as e:

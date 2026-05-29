@@ -2,15 +2,55 @@ from app.database.database_config import db_config
 from app.models.amonestacion import AmonestacionBase, AmonestacionOut
 import mariadb
 
-def insert_amonestacion(id_actitud: int, amonestacion: AmonestacionBase) -> int:
+BASE_QUERY = """
+    SELECT 
+        a.id, 
+        a.nivel, 
+        
+        ac.id, 
+        ac.descripcion, 
+        ac.tipo,
+        ac.fecha, 
+        
+        u.id, 
+        u.nombre, 
+        u.apellidos,
+        
+        p.id, 
+        up.nombre, 
+        up.apellidos
+    FROM AMONESTACION a
+    JOIN ACTITUD ac ON a.id_actitud = ac.id
+    JOIN USUARIO u ON ac.id_usuario = u.id
+    JOIN PROFESOR p ON a.id_profesor = p.id
+    JOIN USUARIO up ON p.id = up.id
+"""
+
+def map_amonestacion_row(row) -> AmonestacionOut:
+    return AmonestacionOut(
+        id=row[0],
+        nivel=row[1],
+        actitud_id=row[2],
+        actitud_descripcion=row[3],
+        actitud_tipo=row[4],
+        actitud_fecha=row[5],
+        usuario_id=row[6],
+        usuario_nombre=row[7],
+        usuario_apellido=row[8],
+        profesor_id=row[9],
+        profesor_nombre=row[10],
+        profesor_apellido=row[11]
+    )
+
+def insert_amonestacion(id_actitud: int, amonestacion: AmonestacionBase, id_profesor: int) -> int:
     conn = None
     cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = "INSERT INTO AMONESTACION (id, nivel, id_actitud) VALUES (?, ?, ?)"
-        values = (None, amonestacion.nivel, id_actitud)
+        sql = "INSERT INTO AMONESTACION (id, nivel, id_actitud, id_profesor) VALUES (?, ?, ?, ?)"
+        values = (None, amonestacion.nivel, id_actitud, id_profesor)
         
         cursor.execute(sql, values)
         conn.commit()
@@ -28,8 +68,6 @@ def insert_amonestacion(id_actitud: int, amonestacion: AmonestacionBase) -> int:
             conn.close()
 
 
-# app/database/amonestacion.py
-
 def read_all_amonestaciones() -> list[AmonestacionOut]:
     conn = None
     cursor = None
@@ -37,30 +75,10 @@ def read_all_amonestaciones() -> list[AmonestacionOut]:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        # 1. Añadimos ac.tipo y cambiamos ac.id_alumno por ac.id_usuario
-        sql = """
-        SELECT 
-            a.id, a.nivel, ac.id, ac.descripcion, ac.fecha, ac.tipo, ac.id_usuario
-        FROM AMONESTACION a
-        JOIN ACTITUD ac ON a.id_actitud = ac.id
-        """
+        sql = BASE_QUERY
         cursor.execute(sql)
         results = cursor.fetchall()
-        
-        amonestaciones_db = []
-        for row in results:
-            amonestacion = AmonestacionOut(
-                id=row[0],               # a.id
-                nivel=row[1],            # a.nivel
-                # row[2] es ac.id (el id de la actitud), no lo necesitas en el Out a menos que lo definas
-                descripcion=row[3],      # ac.descripcion
-                fecha=row[4],            # ac.fecha (Pydantic se encarga de pasarlo a Date)
-                tipo=row[5],             # ac.tipo (¡Faltaba esto!)
-                id_usuario=row[6]        # ac.id_usuario (¡Faltaba esto y lo tenías comentado!)
-            )
-            amonestaciones_db.append(amonestacion)
-        
-        return amonestaciones_db
+        return [map_amonestacion_row(row) for row in results]
         
     except mariadb.Error as e:
         print(f"Error leyendo amonestaciones: {e}")
@@ -72,34 +90,19 @@ def read_all_amonestaciones() -> list[AmonestacionOut]:
             conn.close()
 
 
-def read_amonestacion_by_id(id: int) -> AmonestacionOut:
+def read_amonestacion_by_id(id: int) -> AmonestacionOut | None:
     conn = None
     cursor = None
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        # Actualizar la SQL igual que arriba
-        sql = """
-        SELECT 
-            a.id, a.nivel, ac.id, ac.descripcion, ac.fecha, ac.tipo, ac.id_usuario
-        FROM AMONESTACION a
-        JOIN ACTITUD ac ON a.id_actitud = ac.id
-        WHERE a.id = ?
-        """
+        sql = BASE_QUERY + " WHERE a.id = ?"
         cursor.execute(sql, (id,))
         result = cursor.fetchone()
         
         if result:
-            amonestacion = AmonestacionOut(
-                id=result[0],
-                nivel=result[1],
-                descripcion=result[3],
-                fecha=result[4],
-                tipo=result[5],          # Añadir
-                id_usuario=result[6]     # Descomentar/Añadir
-            )
-            return amonestacion
+            return map_amonestacion_row(result)
         else:
             return None
         
