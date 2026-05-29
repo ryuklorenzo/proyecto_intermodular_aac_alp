@@ -3,8 +3,24 @@ from app.models import reconocimiento
 from app.models.reconocimiento import ReconocimientoImport, ReconocimientoOut
 import mariadb
 
+BASE_QUERY = """
+        SELECT r.id, r.detalle, r.id_actitud, a.descripcion, a.fecha, a.tipo
+        FROM RECONOCIMIENTO as r
+        JOIN ACTITUD as a ON r.id_actitud = a.id
+        """
+
+def map_reconocimiento_row(row) -> ReconocimientoOut:
+    return ReconocimientoOut(
+        id=row[0],
+        detalle=row[1],
+        id_actitud=row[2],
+        actitud_descripcion=row[3],
+        actitud_fecha=row[4],
+        actitud_tipo=row[5]
+    )
+
 #--------------------------------------------------- RECONOCIMIENTO ---------------------------------------------------
-def insert_reconocimiento(id_actitud: int , reconocimiento: ReconocimientoImport) -> int:
+def insert_reconocimiento(id_actitud: int , reconocimiento: ReconocimientoImport, id_profesor: int) -> int:
     conn = None
     cursor = None
     try:
@@ -12,10 +28,10 @@ def insert_reconocimiento(id_actitud: int , reconocimiento: ReconocimientoImport
         cursor = conn.cursor()
 
         sql = """
-        INSERT INTO RECONOCIMIENTO (detalle, id_actitud)
-        VALUES (?, ?)
+        INSERT INTO RECONOCIMIENTO (detalle, id_actitud, id_profesor)
+        VALUES (?, ?, ?)
         """
-        values = (reconocimiento.detalle, id_actitud)
+        values = (reconocimiento.detalle, id_actitud, id_profesor)
 
         cursor.execute(sql, values)
         conn.commit()
@@ -37,23 +53,10 @@ def read_all_reconocimientos() -> list[ReconocimientoOut]:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
         
-        sql = """
-        SELECT id, detalle, id_actitud
-        FROM RECONOCIMIENTO
-        """
+        sql = BASE_QUERY
         cursor.execute(sql)
         results = cursor.fetchall()
-        
-        reconocimientos = []
-        for row in results:
-            reconocimientos.append(
-                ReconocimientoOut(
-                    id=row[0],
-                    detalle=row[1],
-                    id_actitud=row[2]
-                )
-            )
-        return reconocimientos
+        return [map_reconocimiento_row(row) for row in results]
         
     except mariadb.Error as e:
         print(f"Error leyendo reconocimientos: {e}")
@@ -74,22 +77,12 @@ def read_reconocimiento_by_id(id: int) -> ReconocimientoOut | None:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = """
-        SELECT id, detalle, id_actitud
-        FROM RECONOCIMIENTO
-        WHERE id = ?
-        """
+        sql = BASE_QUERY + " WHERE r.id = ?"
 
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
-
         if row:
-            return ReconocimientoOut(
-                id=row[0],
-                detalle=row[1],
-                id_actitud=row[2]
-            )
-
+            return map_reconocimiento_row(row)
         return None
 
     except mariadb.Error as e:
@@ -112,25 +105,11 @@ def read_reconocimientos_by_actitud(id_actitud: int) -> list[ReconocimientoOut]:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = """
-        SELECT id, detalle, id_actitud
-        FROM RECONOCIMIENTO
-        WHERE id_actitud = ?
-        """
+        sql = BASE_QUERY + " WHERE r.id_actitud = ?"
         cursor.execute(sql, (id_actitud,))
         results = cursor.fetchall()
 
-        reconocimientos = []
-
-        for row in results:
-            reconocimientos.append(
-                ReconocimientoOut(
-                    id=row[0],
-                    detalle=row[1],
-                    id_actitud=row[2]
-                )
-            )
-        return reconocimientos
+        return [map_reconocimiento_row(row) for row in results]
 
     except mariadb.Error as e:
         print(f"Error leyendo reconocimientos por actitud: {e}")

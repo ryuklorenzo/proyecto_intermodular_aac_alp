@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
+from app.database.actitud import insert_actitud
 from app.models import reconocimiento
+from app.models.actitud import ActitudCreate
 from app.models.reconocimiento import ReconocimientoImport, ReconocimientoOut
 from app.auth.auth import oauth2_scheme
 from app.database.reconocimiento import (
@@ -20,11 +22,13 @@ router = APIRouter(
 
 @router.post("/attitudes/{id_actitud}", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_reconocimiento(
+    id_alumno: int,
+    id_profesor: int,
     reconocimiento: ReconocimientoImport,
-    id_actitud: int,
+    actitud: ActitudCreate,
 ):
-
-    reconocimiento_id = insert_reconocimiento(id_actitud, reconocimiento)
+    id_actitud = insert_actitud(id_alumno, actitud)
+    reconocimiento_id = insert_reconocimiento(id_actitud, reconocimiento, id_profesor)
 
     if reconocimiento_id == -1:
         raise HTTPException(
