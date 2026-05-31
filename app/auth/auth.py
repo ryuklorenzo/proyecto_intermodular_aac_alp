@@ -14,6 +14,14 @@ ACCESS_TOKEN_EXPIRE_MIN = 7 * 24 * 60
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login/")
 
+db_config = {
+    #"host": "127.0.0.1", # localhost si se prueba sin docker puerto 8082
+    "host": "myapidb", # myapidb si se prueba desde docker puerto 8000
+    "port": 3306,
+    "user": "myapi",
+    "password": "myapi",
+    "database": "myapi"
+}
 
 class Token(BaseModel):
     access_token: str
@@ -58,4 +66,18 @@ def decode_token(token: str) -> TokenData:
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"}
         )
+
+def validate_role(token: str, allowed_roles: list[str]) -> bool:
+    """
+    Comprueba si el rol guardado en el token está dentro de la lista de roles permitidos.
+    """
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        role = payload.get("role")
         
+        # Comprobamos si el rol del usuario está en la lista de permitidos
+        return role in allowed_roles
+        
+    except Exception as e:
+        print(f"Error validando token: {e}")
+        return False
