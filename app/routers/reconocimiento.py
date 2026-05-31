@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.database.actitud import insert_actitud
-from app.models import reconocimiento
 from app.models.actitud import ActitudCreate
 from app.models.reconocimiento import ReconocimientoImport, ReconocimientoOut
 from app.auth.auth import oauth2_scheme
@@ -29,13 +28,11 @@ async def crear_reconocimiento(
 ):
     id_actitud = insert_actitud(id_alumno, actitud)
     reconocimiento_id = insert_reconocimiento(id_actitud, reconocimiento, id_profesor)
-
     if reconocimiento_id == -1:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creando reconocimiento"
         )
-
     return {"message": "Reconocimiento creado exitosamente", "id": reconocimiento_id}
 
 
@@ -86,15 +83,17 @@ async def actualizar_reconocimiento(
 
 
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
-async def borrar_reconocimiento(
-    id: int,
-    ):
-
-    deleted = delete_reconocimiento(id)
+async def borrar_reconocimiento(id: int):
+    deleted, mensaje = delete_reconocimiento(id)
     if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Reconocimiento no encontrado"
-        )
-
+        if mensaje == "not_found":
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Reconocimiento no encontrado"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"No se puede borrar el reconocimiento porque tiene una mención asociada. Error DB: {mensaje}"
+            )
     return {"message": "Reconocimiento eliminado correctamente"}

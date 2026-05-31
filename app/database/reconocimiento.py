@@ -155,7 +155,7 @@ def update_reconocimiento(id: int, reconocimiento: ReconocimientoImport, id_acti
         if conn: conn.close()
 
 
-def delete_reconocimiento(id: int) -> bool:
+def delete_reconocimiento(id: int) -> tuple[bool, str]:
     conn = None
     cursor = None
 
@@ -163,14 +163,19 @@ def delete_reconocimiento(id: int) -> bool:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
+        cursor.execute("SELECT id FROM RECONOCIMIENTO WHERE id = ?", (id,))
+        if not cursor.fetchone():
+            return False, "not_found"
+
         sql = "DELETE FROM RECONOCIMIENTO WHERE id = ?"
         cursor.execute(sql, (id,))
         conn.commit()
-        return cursor.rowcount > 0
+
+        return True, "ok"
 
     except mariadb.Error as e:
         print(f"Error borrando reconocimiento: {e}")
-        return False
+        return False, str(e)
 
     finally:
         if cursor:
