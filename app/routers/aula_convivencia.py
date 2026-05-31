@@ -13,7 +13,7 @@ from app.database.aula_convivencia import (
     update_aula_convivencia,
     delete_aula_convivencia
 )
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 
 router = APIRouter(
     prefix="/aula_convivencia",
@@ -116,7 +116,7 @@ async def ver_alumnos_en_aula(
     id_aula: int, 
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     aula = read_aula_convivencia_by_id(id_aula)
@@ -135,7 +135,7 @@ async def sacar_alumno_de_aula(
     id_alumno: int, 
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     aula = read_aula_convivencia_by_id(id_aula)

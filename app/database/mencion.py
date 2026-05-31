@@ -1,4 +1,4 @@
-from app.database.database_config import db_config
+from app.auth.auth import db_config
 from app.models import mencion
 from app.models.mencion import MencionImport, MencionOut
 import mariadb

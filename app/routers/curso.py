@@ -9,7 +9,7 @@ from app.database.curso import (
     update_curso,
     delete_curso,
 )
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 
 router = APIRouter(
     prefix="/courses",
@@ -22,7 +22,7 @@ async def crear_curso(
     curso: CursoCreate,
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     curso_id = insert_curso(curso, id_horario)
@@ -41,7 +41,7 @@ async def crear_curso(
 async def ver_cursos(
     #token: str = Depends(oauth2_scheme)
     ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     return read_all_cursos()
@@ -52,7 +52,7 @@ async def ver_curso_by_id(
     id:int, 
     #token: str = Depends(oauth2_scheme)
     ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(
     #         status_code=status.HTTP_401_UNAUTHORIZED,
     #         detail="UNAUTHORIZED"
@@ -73,7 +73,7 @@ async def actualizar_curso(
     id_horario: int,
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=401, detail="UNAUTHORIZED")
 
     updated = update_curso(id, curso, id_horario)
@@ -92,7 +92,7 @@ async def borrar_curso(
     id: int, 
     #token: str = Depends(oauth2_scheme)
     ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     deleted = delete_curso(id)

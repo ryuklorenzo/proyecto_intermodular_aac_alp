@@ -8,7 +8,7 @@ from app.database.actitud import (
     delete_actitud
 )
 from app.database.user import read_user_by_id
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 
 router = APIRouter(
     prefix="/attitudes",
@@ -17,7 +17,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_actitud(id_alumno: int, actitud: ActitudCreate, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
+    if not validate_role(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     usuario = read_user_by_id(id_alumno)

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.auth.auth import oauth2_scheme
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 from app.models.previ import PreviImport, PreviOut
 from app.database.previ import (delete_previ, insert_previ, read_all_previes, read_previ_by_directivo, read_previ_by_expediente, update_previ)
 
@@ -17,7 +17,7 @@ async def crear_previ(
     previ : PreviImport,
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes permisos para acceder a esta ruta.")
     
     # Aquí iría la lógica para obtener los datos de "previ" desde la base de datos
@@ -36,7 +36,7 @@ async def ver_previes_por_expediente(
     id_expediente: int, 
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes permisos para acceder a esta ruta.")
     
     # Aquí iría la lógica para obtener los datos de "previ" desde la base de datos
@@ -49,7 +49,7 @@ async def ver_previes_por_directivo(
     #TODO solo funciona al pasarle id expediente NOSE POR QUE
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes permisos para acceder a esta ruta.")
     
     # Aquí iría la lógica para obtener los datos de "previ" desde la base de datos
@@ -60,7 +60,7 @@ async def ver_previes_por_directivo(
 async def ver_todos_los_previes(
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes permisos para acceder a esta ruta.")
     
     # Aquí iría la lógica para obtener los datos de "previ" desde la base de datos
@@ -73,7 +73,7 @@ async def actualizar_previ(
     previ: PreviImport, 
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes permisos para acceder a esta ruta.")
     
     # Aquí iría la lógica para actualizar los datos de "previ" en la base de datos
@@ -91,7 +91,7 @@ async def borrar_previ(
     id_previ: int, 
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes permisos para acceder a esta ruta.")
     
     # Aquí iría la lógica para eliminar el "previ" de la base de datos

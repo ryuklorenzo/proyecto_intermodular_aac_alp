@@ -1,5 +1,5 @@
 from app.auth.auth import oauth2_scheme # Si quieres proteger las rutas con token
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.actitud import  ActitudCreate
@@ -26,7 +26,7 @@ async def crear_amonestacion(
     actitud: ActitudCreate,
     # token: str = Depends(oauth2_scheme)
 ):
-    # if validateIsAdmin(token) == True:
+    # if validate_role(token) == True:
         try:
             id_actitud = insert_actitud(id_alumno, actitud)
             id_amonestacion = insert_amonestacion(id_actitud, amonestacion, id_profesor)
@@ -46,7 +46,7 @@ async def crear_amonestacion(
 async def ver_amonestaciones(
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     amonestaciones = read_all_amonestaciones()
@@ -57,7 +57,7 @@ async def ver_amonestacion_por_id(
     id: int,
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     amonestacion = read_amonestacion_by_id(id)
@@ -70,7 +70,7 @@ async def ver_amonestaciones_de_alumno(
     id_alumno: int,
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     amonestacion = read_amonestacion_by_userid(id_alumno)

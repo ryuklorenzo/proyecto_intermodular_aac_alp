@@ -1,5 +1,5 @@
 from app.database.profesor import read_profesor_by_id
-from app.database.database_config import db_config
+from app.auth.auth import db_config
 from app.models.directivo import DirectivoImport, DirectivoOut
 import mariadb
 

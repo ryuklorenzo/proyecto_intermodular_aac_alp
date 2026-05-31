@@ -12,7 +12,7 @@ from app.database.reconocimiento import (
     update_reconocimiento,
     delete_reconocimiento
 )
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 
 router = APIRouter(
     prefix="/recognitions",

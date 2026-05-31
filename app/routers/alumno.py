@@ -9,7 +9,7 @@ from app.database.alumno import (
     read_alumno_by_id, 
     baja_alumno, 
 )
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 
 
 #insertar alumno, ver alumnos, ver alumnoID, dar de baja
@@ -27,7 +27,7 @@ async def crear_alumno(
     alumno: AlumnoCreate, 
     token: str = Depends(oauth2_scheme)
 ):
-    if validateIsAdmin(token) == True:
+    if validate_role(token) == True:
         try:
             # Nota: El id_usuario debe existir previamente en la tabla USUARIO
             user_id = insert_user(alumno)
@@ -50,19 +50,20 @@ async def crear_alumno(
 @router.get("/", response_model=List[AlumnoOut], status_code=status.HTTP_200_OK)
 async def ver_alumnos(token: str = Depends(oauth2_scheme)):
     # Aquí podrías añadir Depends(oauth2_scheme) si quieres que solo usuarios logueados lo vean
-    if validateIsAdmin(token) == True:
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tienes permisos para ver los alumnos"
+        )
+        
+    else:
         alumnos = read_all_alumnos()
         return alumnos
-    else:
-            raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"UNAUTHORIZED"
-                )
 
 # 3. Ver alumno por ID
 @router.get("/{id}/", response_model=AlumnoOut, status_code=status.HTTP_200_OK)
 async def ver_alumno_por_id(id: int, token: str = Depends(oauth2_scheme)):
-    if validateIsAdmin(token) == True:
+    if validate_role(token) == True:
         alumno = read_alumno_by_id(id)
         if not alumno:
             raise HTTPException(
@@ -80,7 +81,7 @@ async def ver_alumno_por_id(id: int, token: str = Depends(oauth2_scheme)):
 # 4. Dar de baja (Soft Delete)
 @router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
 async def dar_baja_alumno(id: int, token: str = Depends(oauth2_scheme)):
-    if validateIsAdmin(token) == True:
+    if validate_role(token) == True:
         alumno = read_alumno_by_id(id)
         if not alumno:
             raise HTTPException(

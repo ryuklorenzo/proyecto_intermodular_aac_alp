@@ -10,7 +10,7 @@ from app.database.tarea import (
 from app.database.alumno import read_alumno_by_id
 from app.database.profesor import read_profesor_by_id
 from app.database.user import read_user_by_id
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 
 router = APIRouter(
     prefix="/tasks",

@@ -1,7 +1,7 @@
 '''from os import read
 from fastapi import APIRouter, Depends, status, HTTPException
 from app.models import RootIn, RootDb, RootOut
-from app.database import usersAdmins, read_all_roots, delete_root, insert_root, validateIsAdmin
+from app.database import usersAdmins, read_all_roots, delete_root, insert_root, validate_role
 from app.auth.auth import  oauth2_scheme, decode_token, TokenData
 
 # insertar root, borrar root, ver roots
@@ -14,7 +14,7 @@ router = APIRouter(
 #----------------------------------------(CREAR ROOT NUEVO)-----------------------------------------------------------
 @router.post("/root_add/", status_code=status.HTTP_201_CREATED)
 async def create_root(rootIn : RootIn, token: str = Depends(oauth2_scheme)):
-    if validateIsAdmin(token) == True:
+    if validate_role(token) == True:
         new_root = RootDb(id=0, name=rootIn.name, code=rootIn.code)
         
         try:
@@ -35,7 +35,7 @@ async def create_root(rootIn : RootIn, token: str = Depends(oauth2_scheme)):
 #----------------------------------------(OBTENER TODOS LOS ROOTS)-----------------------------------------------------------
 @router.get("/", response_model=list[RootOut], status_code=status.HTTP_200_OK)
 async def get_all_roots(token: str = Depends(oauth2_scheme)):
-    if validateIsAdmin(token) == True:
+    if validate_role(token) == True:
         return read_all_roots()
     else:
         raise HTTPException(
@@ -48,7 +48,7 @@ async def get_all_roots(token: str = Depends(oauth2_scheme)):
 # Delete ROOT ----------------------------------------(BORRAR ROOT)-----------------------------------------------------------
 @router.delete("/{id}/", status_code=status.HTTP_200_OK)
 async def delete_root_e(id: int, token: str = Depends(oauth2_scheme)):
-    if validateIsAdmin(token) == True:
+    if validate_role(token) == True:
         deleted = delete_root(id)
 
         if not deleted:

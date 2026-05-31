@@ -11,7 +11,7 @@ from app.database.profesor import (
     profesor_exists,
     baja_profesor
 )
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 from app.database.user import insert_user
 
 router = APIRouter(
@@ -24,7 +24,7 @@ async def crear_profesor(
     userbase : UserBase, 
     token: str = Depends(oauth2_scheme)
 ):
-    if not validateIsAdmin(token):
+    if not validate_role(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     user_id = insert_user(userbase)
@@ -46,7 +46,7 @@ async def crear_profesor(
 
 @router.get("/", response_model=List[ProfesorOut], status_code=status.HTTP_200_OK)
 async def ver_profesores(token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
+    if not validate_role(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     profesores = read_all_profesores()
@@ -55,7 +55,7 @@ async def ver_profesores(token: str = Depends(oauth2_scheme)):
 
 @router.get("/{id}/", response_model=ProfesorOut, status_code=status.HTTP_200_OK)
 async def ver_profesor_por_id(id: int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
+    if not validate_role(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     profesor = read_profesor_by_id(id)
@@ -69,7 +69,7 @@ async def ver_profesor_por_id(id: int, token: str = Depends(oauth2_scheme)):
 
 @router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
 async def dar_de_baja_profesor(id: int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
+    if not validate_role(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     profesor = read_profesor_by_id(id)

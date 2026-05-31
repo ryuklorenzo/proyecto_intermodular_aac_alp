@@ -10,7 +10,7 @@ from app.database.directivo import (
     directivo_exists,
     baja_directivo
 )
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 
 
 router = APIRouter(
@@ -24,7 +24,7 @@ async def crear_directivo(
     directivo: DirectivoImport,
     token: str = Depends(oauth2_scheme)
 ):
-    if not validateIsAdmin(token):
+    if not validate_role(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     if directivo_exists(id_profesor, directivo.cargo):
@@ -49,7 +49,7 @@ async def crear_directivo(
 async def ver_directivos(
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     directivos = read_all_directivos()
@@ -61,7 +61,7 @@ async def ver_directivo_por_id(
     id: int, 
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     directivo = read_directivo_by_id(id)
@@ -75,7 +75,7 @@ async def ver_directivo_por_id(
 
 @router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
 async def dar_de_baja_directivo(id: int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
+    if not validate_role(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     directivo = read_directivo_by_id(id)

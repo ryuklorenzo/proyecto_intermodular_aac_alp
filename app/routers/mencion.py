@@ -11,7 +11,7 @@ from app.database.mencion import (
     update_mencion,
     delete_mencion
 )
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 from app.models.reconocimiento import ReconocimientoImport
 
 router = APIRouter(

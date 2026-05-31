@@ -1,4 +1,4 @@
-from app.database.database_config import db_config
+from app.auth.auth import db_config
 from app.models import aula_convivencia
 from app.models.aula_convivencia import AulaConvivenciaImport, AulaConvivenciaOut
 from app.models.aula_convivencia_alumno import AulaConvivenciaAlumnoImport, AulaConvivenciaAlumnoOut

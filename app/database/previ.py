@@ -1,6 +1,6 @@
 from app.database.previ import *
 from app.models.previ import *
-from app.database.database_config import db_config
+from app.auth.auth import db_config
 import mariadb
 
 #--------------------------------------------------- PREVI ---------------------------------------------------

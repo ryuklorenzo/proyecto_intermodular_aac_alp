@@ -1,4 +1,4 @@
-from app.database.database_config import db_config
+from app.auth.auth import db_config
 from app.models.expediente import ExpedienteImport, ExpedienteOut
 import mariadb
 

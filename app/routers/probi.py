@@ -9,7 +9,7 @@ from app.database.probi import (
     update_probi,
     delete_probi
 )
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 
 router = APIRouter(
     prefix="/probis",

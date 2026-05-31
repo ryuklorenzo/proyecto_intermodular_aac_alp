@@ -8,7 +8,7 @@ from app.database.horario import (
     update_horario,
     delete_horario,
 )
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 
 router = APIRouter(
     prefix="/schedules",
@@ -20,7 +20,7 @@ async def crear_horario(
     horario: HorarioImport,
     #token: str = Depends(oauth2_scheme)
 ):
-    #if not validateIsAdmin(token): 
+    #if not validate_role(token): 
     # raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     horario_id = insert_horario(horario)
@@ -39,7 +39,7 @@ async def crear_horario(
 async def ver_horarios(
     # token: str = Depends(oauth2_scheme)
     ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     return read_all_horarios()
@@ -51,7 +51,7 @@ async def actualizar_horario(
     horario: HorarioImport,
     # token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=401, detail="UNAUTHORIZED")
 
     updated = update_horario(id, horario)
@@ -70,7 +70,7 @@ async def borrar_horario(
     id: int, 
     #token: str = Depends(oauth2_scheme)
     ):
-    # if not validateIsAdmin(token):
+    # if not validate_role(token):
     #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
     deleted = delete_horario(id)
