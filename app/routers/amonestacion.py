@@ -9,7 +9,8 @@ from app.database.amonestacion import (
     insert_amonestacion,
     read_all_amonestaciones,
     read_amonestacion_by_id,
-    delete_amonestacion
+    delete_amonestacion,
+    read_amonestacion_by_userid
 )
 
 router = APIRouter(
@@ -64,3 +65,15 @@ async def ver_amonestacion_por_id(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Amonestación no encontrada")
     return amonestacion
 
+@router.get("/students/{id_student}", response_model=List[AmonestacionOut]) 
+async def ver_amonestaciones_de_alumno(
+    id_alumno: int,
+    # token: str = Depends(oauth2_scheme)
+):
+    # if not validateIsAdmin(token):
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+
+    amonestacion = read_amonestacion_by_userid(id_alumno)
+    if not amonestacion:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Amonestación no encontrada")
+    return amonestacion

@@ -115,6 +115,29 @@ def read_amonestacion_by_id(id: int) -> AmonestacionOut | None:
         if conn:
             conn.close()
 
+
+def read_amonestacion_by_userid(id_alumno: int) -> AmonestacionOut | None:
+    conn = None
+    cursor = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+        
+        sql = BASE_QUERY + " WHERE u.id = ?"
+        cursor.execute(sql, (id_alumno,))
+        results = cursor.fetchall()
+        return [map_amonestacion_row(row) for row in results]
+        
+    except mariadb.Error as e:
+        print(f"Error leyendo amonestacion por id: {e}")
+        raise e
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
 def delete_amonestacion(id: int) -> bool:
     conn = None
     cursor = None
