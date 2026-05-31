@@ -1,6 +1,6 @@
 from app.database.user import read_user_by_id
 from app.models.profesor import ProfesorOut, ProfesorImport
-from app.database.database_config import db_config
+from app.auth.auth import db_config
 import mariadb
 
 #--------------------------------------------------- PROFESORES ---------------------------------------------------

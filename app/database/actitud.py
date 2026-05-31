@@ -1,5 +1,5 @@
 from app.models.actitud import ActitudCreate, ActitudOut
-from app.database.database_config import db_config
+from app.auth.auth import db_config
 import mariadb
 
 #--------------------------------------------------- ACTITUDES ---------------------------------------------------
@@ -28,7 +28,7 @@ def insert_actitud(id_usuario: int, actitud: ActitudCreate) -> int:
         if conn: conn.close()
 
 
-def read_actitudes_by_usuario(id_usuario: int) -> list[ActitudOut]:
+def read_actitudes_by_alumno(id_usuario: int) -> list[ActitudOut]:
     conn = None
     cursor = None
     try:
@@ -61,25 +61,28 @@ def read_actitudes_by_usuario(id_usuario: int) -> list[ActitudOut]:
             conn.close()
 
 
-def delete_actitud(id_actitud: int) -> bool:
+def delete_actitud(id: int) -> tuple[bool, str]:
     conn = None
     cursor = None
-
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = "SELECT id, cargo FROM ACTITUD WHERE id = ?"
-        cursor.execute(sql, (id_actitud,))
+        # Comprobamos si existe primero
+        cursor.execute("SELECT id FROM ACTITUD WHERE id = ?", (id,))
+        if not cursor.fetchone():
+            return False, "not_found"
 
-        return cursor.fetchone() is not None
+        sql = "DELETE FROM ACTITUD WHERE id = ?"
+        cursor.execute(sql, (id,))
+        conn.commit()
+
+        return True, "ok"
 
     except mariadb.Error as e:
-        print(f"Error comprobando actitud: {e}")
-        return False
+        print(f"Error borrando actitud: {e}")
+        return False, str(e)
 
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()

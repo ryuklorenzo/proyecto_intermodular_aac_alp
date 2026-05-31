@@ -9,7 +9,7 @@ from app.database.curso import (
     update_curso,
     delete_curso,
 )
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 
 router = APIRouter(
     prefix="/courses",
@@ -20,10 +20,10 @@ router = APIRouter(
 async def crear_curso(
     id_horario: int,
     curso: CursoCreate,
-    # token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     curso_id = insert_curso(curso, id_horario)
 
@@ -39,10 +39,10 @@ async def crear_curso(
 
 @router.get("/", response_model=List[CursoOut], status_code=status.HTTP_200_OK)
 async def ver_cursos(
-    #token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme)
     ):
-    # if not validateIsAdmin(token):
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     return read_all_cursos()
 
@@ -50,13 +50,10 @@ async def ver_cursos(
 @router.get("/{id}/", response_model=CursoOut, status_code=status.HTTP_200_OK)
 async def ver_curso_by_id(
     id:int, 
-    #token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme)
     ):
-    # if not validateIsAdmin(token):
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="UNAUTHORIZED"
-    #     )
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     curso = read_curso_by_id(id)
 
@@ -71,10 +68,10 @@ async def actualizar_curso(
     id:int,
     curso: CursoCreate,
     id_horario: int,
-    # token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme)
 ):
-    # if not validateIsAdmin(token):
-    #     raise HTTPException(status_code=401, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     updated = update_curso(id, curso, id_horario)
 
@@ -90,10 +87,10 @@ async def actualizar_curso(
 @router.delete("/{id}/", status_code=status.HTTP_200_OK)
 async def borrar_curso(
     id: int, 
-    #token: str = Depends(oauth2_scheme)
-    ):
-    # if not validateIsAdmin(token):
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    token: str = Depends(oauth2_scheme)
+):
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     deleted = delete_curso(id)
     if not deleted:

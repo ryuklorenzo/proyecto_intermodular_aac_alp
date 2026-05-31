@@ -1,8 +1,9 @@
+from datetime import date
 from pydantic import BaseModel
 
 class PreviImport(BaseModel):
     detalle: str
-    fecha: str
+    fecha: date
 
 class PreviOut(PreviImport):
     id : int

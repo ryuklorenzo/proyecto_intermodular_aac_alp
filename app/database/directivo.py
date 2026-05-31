@@ -1,5 +1,5 @@
 from app.database.profesor import read_profesor_by_id
-from app.database.database_config import db_config
+from app.auth.auth import db_config
 from app.models.directivo import DirectivoImport, DirectivoOut
 import mariadb
 
@@ -124,31 +124,6 @@ def read_directivo_by_id(id: int) -> DirectivoOut | None:
             conn.close()
 
 
-def delete_directivo(id: int) -> bool:
-    conn = None
-    cursor = None
-
-    try:
-        conn = mariadb.connect(**db_config)
-        cursor = conn.cursor()
-
-        sql_delete = "DELETE FROM DIRECTIVO WHERE id = ?"
-        cursor.execute(sql_delete, (id,))
-        conn.commit()
-
-        return cursor.rowcount > 0
-
-    except mariadb.Error as e:
-        print(f"Error borrando directivo: {e}")
-        return False
-
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
-
-
 def directivo_exists(id_profesor: int, cargo: str) -> bool:
 
     conn = None
@@ -158,7 +133,7 @@ def directivo_exists(id_profesor: int, cargo: str) -> bool:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
 
-        sql = "SELECT id, cargo FROM DIRECTIVO WHERE id = ?"
+        sql = "SELECT id, cargo FROM DIRECTIVO WHERE id = ? AND cargo = ?"
         cursor.execute(sql, (id_profesor, cargo))
 
         return cursor.fetchone() is not None
@@ -173,3 +148,34 @@ def directivo_exists(id_profesor: int, cargo: str) -> bool:
         if conn:
             conn.close()
 
+
+def baja_directivo(id: int) -> bool:
+    conn = None
+    cursor = None
+
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = """
+        UPDATE USUARIO u
+        JOIN DIRECTIVO d ON u.id = d.id
+        SET u.activo = 0
+        WHERE d.id = ?
+        """
+
+        cursor.execute(sql, (id,))
+        conn.commit()
+
+        return True
+
+    except mariadb.Error as e:
+        print(f"Error dando de baja al directivo: {e}")
+        return False
+
+    finally:
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()

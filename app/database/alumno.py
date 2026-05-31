@@ -1,5 +1,5 @@
 from app.models.alumno import AlumnoCreate, AlumnoOut
-from app.database.database_config import db_config
+from app.auth.auth import db_config
 import mariadb
 
 #--------------------------------------------------- ALUMNOS ---------------------------------------------------

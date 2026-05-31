@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
+from app.models import directivo
 from app.models.directivo import DirectivoImport, DirectivoOut
 from app.auth.auth import oauth2_scheme
 from app.database.directivo import (
@@ -7,9 +8,9 @@ from app.database.directivo import (
     read_directivo_by_id,
     read_all_directivos,
     directivo_exists,
-    delete_directivo as delete_directivo_db
+    baja_directivo
 )
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 
 
 router = APIRouter(
@@ -23,8 +24,8 @@ async def crear_directivo(
     directivo: DirectivoImport,
     token: str = Depends(oauth2_scheme)
 ):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     if directivo_exists(id_profesor, directivo.cargo):
         raise HTTPException(
@@ -45,18 +46,23 @@ async def crear_directivo(
 
 
 @router.get("/", response_model=List[DirectivoOut], status_code=status.HTTP_200_OK)
-async def ver_directivos(token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+async def ver_directivos(
+    token: str = Depends(oauth2_scheme)
+):
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     directivos = read_all_directivos()
     return directivos
 
 
 @router.get("/{id}/", response_model=DirectivoOut, status_code=status.HTTP_200_OK)
-async def ver_directivo_por_id(id: int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+async def ver_directivo_por_id(
+    id: int, 
+    token: str = Depends(oauth2_scheme)
+):
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     directivo = read_directivo_by_id(id)
     if not directivo:
@@ -67,43 +73,26 @@ async def ver_directivo_por_id(id: int, token: str = Depends(oauth2_scheme)):
     return directivo
 
 
-@router.delete("/{id}/", status_code=status.HTTP_200_OK)
-async def borrar_directivo(id: int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+@router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
+async def dar_de_baja_directivo(id: int, token: str = Depends(oauth2_scheme)):
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
-    deleted = delete_directivo_db(id)
-    if not deleted:
+    directivo = read_directivo_by_id(id)
+    if not directivo:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Directivo no encontrado"
         )
-
-    return {"message": "Directivo eliminado correctamente"}
-
-
-'''
-@router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
-async def dar_de_baja_profesor(id: int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
-
-    profesor = read_profesor_by_id(id)
-    if not profesor:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profesor no encontrado"
-        )
     
-    if not profesor.activo:
-        return {"message": f"El profesor con id {id} ya estaba dado de baja previamente"}
+    if not directivo.activo:
+        return {"message": f"El directivo con id {id} ya estaba dado de baja previamente"}
     
-    exito = baja_profesor(id)
+    exito = baja_directivo(id)
     if not exito:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="No se pudo dar de baja al Profesor (Error en BD)"
+            detail="No se pudo dar de baja al Directivo (Error en BD)"
         )
         
-    return {"message": f"Profesor con id {id} dado de baja correctamente (activo=False)"}
-'''
+    return {"message": f"Directivo con id {id} dado de baja correctamente (activo=False)"}

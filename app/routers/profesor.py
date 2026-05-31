@@ -11,7 +11,7 @@ from app.database.profesor import (
     profesor_exists,
     baja_profesor
 )
-from app.database.database_config import validateIsAdmin
+from app.auth.auth import validate_role
 from app.database.user import insert_user
 
 router = APIRouter(
@@ -24,8 +24,8 @@ async def crear_profesor(
     userbase : UserBase, 
     token: str = Depends(oauth2_scheme)
 ):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     user_id = insert_user(userbase)
     if profesor_exists(user_id):
@@ -46,8 +46,8 @@ async def crear_profesor(
 
 @router.get("/", response_model=List[ProfesorOut], status_code=status.HTTP_200_OK)
 async def ver_profesores(token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     profesores = read_all_profesores()
     return profesores
@@ -55,8 +55,8 @@ async def ver_profesores(token: str = Depends(oauth2_scheme)):
 
 @router.get("/{id}/", response_model=ProfesorOut, status_code=status.HTTP_200_OK)
 async def ver_profesor_por_id(id: int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     profesor = read_profesor_by_id(id)
     if not profesor:
@@ -69,8 +69,8 @@ async def ver_profesor_por_id(id: int, token: str = Depends(oauth2_scheme)):
 
 @router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
 async def dar_de_baja_profesor(id: int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     profesor = read_profesor_by_id(id)
     if not profesor:

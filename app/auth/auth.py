@@ -14,10 +14,19 @@ ACCESS_TOKEN_EXPIRE_MIN = 7 * 24 * 60
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login/")
 
+db_config = {
+    #"host": "127.0.0.1", # localhost si se prueba sin docker puerto 8082
+    "host": "myapidb", # myapidb si se prueba desde docker puerto 8000
+    "port": 3306,
+    "user": "myapi",
+    "password": "myapi",
+    "database": "myapi"
+}
 
 class Token(BaseModel):
     access_token: str
     token_type: str
+    role: str 
 
 
 class TokenData(BaseModel):
@@ -37,11 +46,14 @@ def verify_password(plain_pw, hashed_pw) -> bool:
     return bcrypt.checkpw(password=plain_pw_bytes, hashed_password=hashed_pw_bytes)
 
 
-def create_access_token(user: UserBase) -> Token:
+def create_access_token(data: dict) -> str:
+    #copia por si hay error
+    to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MIN)
-    to_encode = {"sub": user.nombre, "exp": expire}
+    #añadimos la expiración al diccionario 
+    to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return Token(access_token=encoded_jwt, token_type="bearer")
+    return encoded_jwt
 
 
 def decode_token(token: str) -> TokenData:
@@ -54,4 +66,18 @@ def decode_token(token: str) -> TokenData:
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"}
         )
+
+def validate_role(token: str, allowed_roles: list[str]) -> bool:
+    """
+    Comprueba si el rol guardado en el token está dentro de la lista de roles permitidos.
+    """
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        role = payload.get("role")
         
+        # Comprobamos si el rol del usuario está en la lista de permitidos
+        return role in allowed_roles
+        
+    except Exception as e:
+        print(f"Error validando token: {e}")
+        return False
