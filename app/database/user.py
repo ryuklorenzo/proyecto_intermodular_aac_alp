@@ -123,3 +123,52 @@ def read_user_by_id(id: int) -> UserDb | None:
             cursor.close()
         if conn:
             conn.close()
+
+
+def get_user_for_login(username: str):
+    conn = None
+    cursor = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+        
+        sql = """
+        SELECT 
+            u.id, 
+            u.nombre, 
+            u.password, 
+            u.activo,
+            CASE
+                WHEN r.id IS NOT NULL THEN 'admin'
+                WHEN d.id IS NOT NULL THEN 'directivo'
+                WHEN p.id IS NOT NULL THEN 'profesor'
+                WHEN a.id IS NOT NULL THEN 'alumno'
+                ELSE 'none'
+            END as rol
+        FROM USUARIO u
+        LEFT JOIN ROOT r ON u.id = r.id
+        LEFT JOIN DIRECTIVO d ON u.id = d.id
+        LEFT JOIN PROFESOR p ON u.id = p.id
+        LEFT JOIN ALUMNO a ON u.id = a.id
+        WHERE u.nombre = ?
+        """
+        
+        cursor.execute(sql, (username,))
+        row = cursor.fetchone()
+        
+        if row:
+            return {
+                "id": row[0],
+                "nombre": row[1],
+                "password": row[2],
+                "activo": bool(row[3]),
+                "rol": row[4]
+            }
+        return None
+        
+    except mariadb.Error as e:
+        print(f"Error buscando usuario para login: {e}")
+        return None
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
