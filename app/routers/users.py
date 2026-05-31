@@ -9,7 +9,8 @@ from app.database.user import (
     read_user_by_id
 )
 from app.auth.auth import (
-    create_access_token, 
+    create_access_token,
+    validate_role, 
     verify_password, 
     Token, oauth2_scheme, 
     get_hash_password
@@ -32,27 +33,17 @@ async def create_user(
     userbase : UserBase, 
     token: str = Depends(oauth2_scheme)
 ):
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     try:
-        hashed_password = get_hash_password(userbase.password)
-        new_user = UserBase(
-            nombre=userbase.nombre,
-            apellidos=userbase.apellidos,
-            activo=userbase.activo,
-            password=hashed_password
-        )
-        try:
-            user_id = insert_user(new_user)
-            return {"message": "Usuario creado exitosamente", "id": user_id}
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error al crear el usuario: {str(e)}"
-            )
+        user_id = insert_user(userbase)
+        return {"message": "Usuario creado exitosamente", "id": user_id}
     except Exception as e:
-            raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"UNAUTHORIZED"
-                )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al crear el usuario: {str(e)}"
+        )
+
 
 
 # User login  ----------------------------------------(INICIAR SESION)-----------------------------------------------------------
@@ -135,6 +126,8 @@ async def get_user(id: int, token: str = Depends(oauth2_scheme)):
 # Delete user by ID  ----------------------------------------(BORRAR USUARIO)-----------------------------------------------------------
 @router.delete("/{id}/", status_code=status.HTTP_200_OK)
 async def delete_user(UserDb : UserDb, token: str = Depends(oauth2_scheme)):
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     try:
         deleted = deleteUser(UserDb)
         if not deleted:

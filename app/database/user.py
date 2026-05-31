@@ -1,5 +1,5 @@
 from app.models.user import UserDb, UserBase
-from app.auth.auth import db_config
+from app.auth.auth import db_config, get_hash_password
 import mariadb
 
 # --------------------------------------------------- USERS ---------------------------------------------------
@@ -7,8 +7,9 @@ def insert_user(user: UserDb) -> int:
     try:
         conn = mariadb.connect(**db_config)
         cursor = conn.cursor()
+        hashed_password = get_hash_password(user.password)
         sql = "INSERT INTO USUARIO (nombre, apellidos, activo, password) VALUES (?, ?, ?, ?)"
-        values = (user.nombre, user.apellidos,user.activo, user.password)
+        values = (user.nombre, user.apellidos,user.activo, hashed_password)
         
         cursor.execute(sql, values)
         conn.commit()
