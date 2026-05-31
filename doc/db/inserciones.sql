@@ -12,16 +12,17 @@ VALUES (1, 'Secundaria', '3º ESO', 'Matemáticas', 1);
 
 -- CREACIÓN DE LOS USUARIOS BASE
 INSERT INTO USUARIO (id, nombre, apellidos, activo, password) VALUES 
-(1, 'Admin', 'Sistema', 1, 'hash_pass_root_123'),
-(2, 'Laura', 'Martínez', 1, 'hash_pass_profe_123'),
-(3, 'Carlos', 'Gómez', 1, 'hash_pass_direc_123'),
-(4, 'Lucía', 'Pérez', 1, 'hash_pass_alum_123'),
-(5, 'Pablo', 'Ruiz', 1, 'hash_pass_alum2_123');
+(1, 'angel', 'Sistema', 1, '$2b$12$dASoKE28t0vvW0e5g08fNuVBOvI6RkNOh5j9uVJ0qiGkvzJwqxqhe'),
+(2, 'Laura', 'Martínez', 1, '$2b$12$4oCuULugms1NRgyPj/4yFuwRWOoabt/6TmahnJEjfMFrThgnqDDBK'),
+(3, 'Carlos', 'Gómez', 1, '$2b$12$tL7nGTxwzbaH03/LCzkf3.YVsAetP1gHRrnk9z7Qc7JuSNQjYKwya'),
+(4, 'Lucía', 'Pérez', 1, '$2b$12$PW7k5SvZLDfTJKpnBTgpouHba1M2pvyA1DvE/NpYRWRNmjONXjNae'),
+(5, 'Pablo', 'Ruiz', 1, '$2b$12$jZ1nzTFS6.R.77A7vCmUyuHG27q5p9zT3ivcRLX3TlqXQvNTcy3A.'),
+(6, 'azael', 'Sistema', 1, '$2b$12$9L5x16cOo.vi1yNET7ToBusGBy7YslCVn9uOrZgeJOnV9XGAaq50K');
 
 -- ROLES
 -- ROOT 
 INSERT INTO ROOT (id) 
-VALUES (1);
+VALUES (1), (6);
 
 -- PROFESOR 
 INSERT INTO PROFESOR (id, id_curso) 
