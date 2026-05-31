@@ -4,7 +4,7 @@ from app.models.actitud import ActitudCreate, ActitudOut
 from app.auth.auth import oauth2_scheme
 from app.database.actitud import (
     insert_actitud,
-    read_actitudes_by_usuario,
+    read_actitudes_by_alumno,
     delete_actitud
 )
 from app.database.user import read_user_by_id
@@ -16,15 +16,15 @@ router = APIRouter(
 )
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
-async def crear_actitud(id_usuario: int, actitud: ActitudCreate, token: str = Depends(oauth2_scheme)):
+async def crear_actitud(id_alumno: int, actitud: ActitudCreate, token: str = Depends(oauth2_scheme)):
     if not validateIsAdmin(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
 
-    usuario = read_user_by_id(id_usuario)
+    usuario = read_user_by_id(id_alumno)
     if not usuario:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
 
-    actitud_id = insert_actitud(id_usuario, actitud)
+    actitud_id = insert_actitud(id_alumno, actitud)
     if actitud_id == -1:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -34,22 +34,27 @@ async def crear_actitud(id_usuario: int, actitud: ActitudCreate, token: str = De
     return {"message": "Actitud asignada correctamente", "id": actitud_id}
 
 
-@router.get("/users/{id_usuario}/", response_model=List[ActitudOut], status_code=status.HTTP_200_OK)
-async def ver_actitudes_alumno(id_usuario: int, token: str = Depends(oauth2_scheme)):
+@router.get("/users/{id_alumno}/", response_model=List[ActitudOut], status_code=status.HTTP_200_OK)
+async def ver_actitudes_alumno(id_alumno: int, token: str = Depends(oauth2_scheme)):
     
-    actitudes = read_actitudes_by_usuario(id_usuario)
+    actitudes = read_actitudes_by_alumno(id_alumno)
     return actitudes
 
 
-@router.delete("/{id}/", status_code=status.HTTP_200_OK)
-async def borrar_actitud(id: int, token: str = Depends(oauth2_scheme)):
-    if not validateIsAdmin(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
-
-    if not delete_actitud(id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="La actitud no existe"
-        )
+@router.delete("/{id}", status_code=status.HTTP_200_OK)
+async def borrar_actitud(id: int):
+    deleted, mensaje = delete_actitud(id)
+    
+    if not deleted:
+        if mensaje == "not_found":
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail="Actitud no encontrada"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, #si tiene amonestacion o reconocimiento asociado, no se puede borrar por culpa de FK
+                detail="No se puede borrar la actitud porque tiene una amonestación o reconocimiento asociado."
+            )
 
     return {"message": "Actitud eliminada correctamente"}
