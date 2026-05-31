@@ -22,21 +22,22 @@ from app.routers import (
 app = FastAPI(debug=True, docs_url=None)
 
 # Inclusión de routers #Aqui arriba poner los nuevos o por testear, que salen antes.
-app.include_router(profesor.router)
-app.include_router(directivo.router) #TODO fix delete
-app.include_router(aula_convivencia.router)
+
+#testeados
+app.include_router(expediente.router)
+app.include_router(amonestacion.router) 
+app.include_router(previ.router)
 app.include_router(probi.router)
 app.include_router(reconocimiento.router)
 app.include_router(mencion.router)
-app.include_router(amonestacion.router) #añadir el resto, solo esta el post basico.
-app.include_router(previ.router)
+app.include_router(actitud.router)
 
-#testeados
-app.include_router(tarea.router)
+app.include_router(aula_convivencia.router)
+app.include_router(directivo.router) 
+app.include_router(profesor.router)
 app.include_router(alumno.router)
 app.include_router(users.router)
-app.include_router(actitud.router)
-app.include_router(expediente.router)
+app.include_router(tarea.router)
 app.include_router(horario.router)
 app.include_router(curso.router)
 

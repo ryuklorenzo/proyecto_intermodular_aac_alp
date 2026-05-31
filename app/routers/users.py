@@ -16,6 +16,7 @@ from app.auth.auth import (
     )
 
 '''
+source .venv/bin/activate
 uvicorn app.main:app --host 0.0.0.0 --port 8081 --reload
 '''
 
