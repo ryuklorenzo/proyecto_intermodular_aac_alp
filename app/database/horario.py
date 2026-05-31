@@ -48,8 +48,8 @@ def read_all_horarios() -> list[HorarioOut]:
                 HorarioOut(
                     id=row[0],
                     formato=row[1],
-                    hora_inicio=str(row[2]),
-                    hora_fin=str(row[3])
+                    hora_inicio=str(row[2]).zfill(8), 
+                    hora_fin=str(row[3]).zfill(8)
                 )
             )
         return horarios
@@ -87,7 +87,7 @@ def update_horario(id: int, horario: HorarioImport) -> bool:
         cursor.execute(sql, values)
         conn.commit()
 
-        return cursor.rowcount > 0 #1 si se actualizo algo
+        return True 
 
     except mariadb.Error as e:
         print(f"Error actualizando horario: {e}")
@@ -110,6 +110,7 @@ def delete_horario(id: int) -> bool:
 
         sql = "DELETE FROM HORARIO WHERE id = ?"
         cursor.execute(sql, (id,))
+        conn.commit()
         return cursor.rowcount > 0
 
     except mariadb.Error as e:
