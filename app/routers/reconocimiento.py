@@ -25,7 +25,11 @@ async def crear_reconocimiento(
     id_profesor: int,
     reconocimiento: ReconocimientoImport,
     actitud: ActitudCreate,
+    token: str = Depends(oauth2_scheme)
 ):
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
+
     id_actitud = insert_actitud(id_alumno, actitud)
     reconocimiento_id = insert_reconocimiento(id_actitud, reconocimiento, id_profesor)
     if reconocimiento_id == -1:
@@ -39,14 +43,18 @@ async def crear_reconocimiento(
 
 @router.get("/", response_model=List[ReconocimientoOut], status_code=status.HTTP_200_OK)
 async def ver_reconocimientos(
-    ):
+    token: str = Depends(oauth2_scheme)
+):
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     return read_all_reconocimientos()
 
 
 @router.get("/{id}", response_model=ReconocimientoOut, status_code=status.HTTP_200_OK)
-async def ver_reconocimiento_by_id(id: int):
-
+async def ver_reconocimiento_by_id(id: int, token: str = Depends(oauth2_scheme)):
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     reconocimiento = read_reconocimiento_by_id(id)
 
     if not reconocimiento:
@@ -59,7 +67,10 @@ async def ver_reconocimiento_by_id(id: int):
 
 
 @router.get("/attitudes/{id_actitud}/", response_model=List[ReconocimientoOut], status_code=status.HTTP_200_OK)
-async def ver_reconocimientos_by_actitud(id_actitud: int):
+async def ver_reconocimientos_by_actitud(id_actitud: int, token: str = Depends(oauth2_scheme)):
+
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     return read_reconocimientos_by_actitud(id_actitud)
 
@@ -68,9 +79,11 @@ async def ver_reconocimientos_by_actitud(id_actitud: int):
 async def actualizar_reconocimiento(
     id:int,
     reconocimiento: ReconocimientoImport,
-    id_actitud: int
+    id_actitud: int,
+    token: str = Depends(oauth2_scheme)
 ):
-
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     updated = update_reconocimiento(id, reconocimiento, id_actitud)
 
     if not updated:
@@ -83,7 +96,9 @@ async def actualizar_reconocimiento(
 
 
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
-async def borrar_reconocimiento(id: int):
+async def borrar_reconocimiento(id: int, token: str = Depends(oauth2_scheme)):
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     deleted, mensaje = delete_reconocimiento(id)
     if not deleted:
         if mensaje == "not_found":

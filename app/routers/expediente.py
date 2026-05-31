@@ -19,8 +19,8 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_expediente(id_directivo: int, id_alumno: int, expediente: ExpedienteImport, token: str = Depends(oauth2_scheme)):
-    if not validate_role(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     usuario = read_directivo_by_id(id_directivo)
     if not usuario:
@@ -38,32 +38,25 @@ async def crear_expediente(id_directivo: int, id_alumno: int, expediente: Expedi
 
 @router.get("/", response_model=List[ExpedienteOut], status_code=status.HTTP_200_OK)
 async def ver_expedientes(token: str = Depends(oauth2_scheme)):
-    if not validate_role(token):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="UNAUTHORIZED"
-        )
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     return read_all_expedientes()
 
 
 @router.get("/executives/{id_directivo}", response_model=List[ExpedienteOut], status_code=status.HTTP_200_OK)
 async def ver_expedientes_por_directivo(id_directivo: int, token: str = Depends(oauth2_scheme)):
-    if not validate_role(token):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="UNAUTHORIZED"
-        )
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
+    
     expedientes = read_expediente_by_directivo(id_directivo)
     return expedientes
 
 
 @router.get("/students/{id_alumno}", response_model=List[ExpedienteOut], status_code=status.HTTP_200_OK)
 async def ver_expedientes_por_alumno(id_alumno: int, token: str = Depends(oauth2_scheme)):
-    if not validate_role(token):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="UNAUTHORIZED"
-        )
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
+    
     expedientes = read_expediente_by_alumno(id_alumno)
     return expedientes

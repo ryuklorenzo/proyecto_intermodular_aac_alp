@@ -17,8 +17,8 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_actitud(id_alumno: int, actitud: ActitudCreate, token: str = Depends(oauth2_scheme)):
-    if not validate_role(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     usuario = read_user_by_id(id_alumno)
     if not usuario:
@@ -36,13 +36,17 @@ async def crear_actitud(id_alumno: int, actitud: ActitudCreate, token: str = Dep
 
 @router.get("/users/{id_alumno}/", response_model=List[ActitudOut], status_code=status.HTTP_200_OK)
 async def ver_actitudes_alumno(id_alumno: int, token: str = Depends(oauth2_scheme)):
-    
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     actitudes = read_actitudes_by_alumno(id_alumno)
     return actitudes
 
 
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
-async def borrar_actitud(id: int):
+async def borrar_actitud(id: int, token: str = Depends(oauth2_scheme)):
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
+    
     deleted, mensaje = delete_actitud(id)
     
     if not deleted:

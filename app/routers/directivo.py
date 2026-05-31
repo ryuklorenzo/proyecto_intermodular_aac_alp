@@ -24,8 +24,8 @@ async def crear_directivo(
     directivo: DirectivoImport,
     token: str = Depends(oauth2_scheme)
 ):
-    if not validate_role(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     if directivo_exists(id_profesor, directivo.cargo):
         raise HTTPException(
@@ -47,10 +47,10 @@ async def crear_directivo(
 
 @router.get("/", response_model=List[DirectivoOut], status_code=status.HTTP_200_OK)
 async def ver_directivos(
-    # token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme)
 ):
-    # if not validate_role(token):
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     directivos = read_all_directivos()
     return directivos
@@ -59,10 +59,10 @@ async def ver_directivos(
 @router.get("/{id}/", response_model=DirectivoOut, status_code=status.HTTP_200_OK)
 async def ver_directivo_por_id(
     id: int, 
-    # token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme)
 ):
-    # if not validate_role(token):
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     directivo = read_directivo_by_id(id)
     if not directivo:
@@ -75,8 +75,8 @@ async def ver_directivo_por_id(
 
 @router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
 async def dar_de_baja_directivo(id: int, token: str = Depends(oauth2_scheme)):
-    if not validate_role(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     directivo = read_directivo_by_id(id)
     if not directivo:

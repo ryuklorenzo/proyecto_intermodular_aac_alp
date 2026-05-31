@@ -24,7 +24,8 @@ async def crear_tarea(
     tarea: TareaBase,
     token: str = Depends(oauth2_scheme)
 ):
-
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     if not read_alumno_by_id(id_alumno):
         raise HTTPException(status_code=404, detail="Alumno no encontrado")
 
@@ -49,6 +50,8 @@ async def ver_tareas_alumno(
     id_alumno: int, 
     token: str = Depends(oauth2_scheme)
 ):
+    if not validate_role(token, ["admin", "directivo", "profesor", "alumno"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     tareas = read_tareas_by_alumno(id_alumno)
     return tareas
 
@@ -58,5 +61,7 @@ async def ver_tareas_profesor(
     id_profesor: int, 
     token: str = Depends(oauth2_scheme)
 ):
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     tareas = read_tareas_by_profesor(id_profesor)
     return tareas

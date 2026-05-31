@@ -24,30 +24,29 @@ async def crear_amonestacion(
     id_profesor: int,
     amonestacion: AmonestacionBase,
     actitud: ActitudCreate,
-    # token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme)
 ):
-    # if validate_role(token) == True:
-        try:
-            id_actitud = insert_actitud(id_alumno, actitud)
-            id_amonestacion = insert_amonestacion(id_actitud, amonestacion, id_profesor)
-            return {"message": "Amonestación asignada correctamente", "id": id_amonestacion}
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error al crear la amonestación: {str(e)}"
-            )
-    # else:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="UNAUTHORIZED"
+
+    try:
+        id_actitud = insert_actitud(id_alumno, actitud)
+        id_amonestacion = insert_amonestacion(id_actitud, amonestacion, id_profesor)
+        return {"message": "Amonestación asignada correctamente", "id": id_amonestacion}
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al crear la amonestación: {str(e)}"
+        )
 
 @router.get("/", response_model=List[AmonestacionOut], status_code=status.HTTP_200_OK)
 async def ver_amonestaciones(
-    # token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme)
 ):
-    # if not validate_role(token):
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     amonestaciones = read_all_amonestaciones()
     return amonestaciones
@@ -55,10 +54,10 @@ async def ver_amonestaciones(
 @router.get("/{id}", response_model=AmonestacionOut, status_code=status.HTTP_200_OK)
 async def ver_amonestacion_por_id(
     id: int,
-    # token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme)
 ):
-    # if not validate_role(token):
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     amonestacion = read_amonestacion_by_id(id)
     if not amonestacion:
@@ -68,10 +67,10 @@ async def ver_amonestacion_por_id(
 @router.get("/students/{id_student}", response_model=List[AmonestacionOut]) 
 async def ver_amonestaciones_de_alumno(
     id_alumno: int,
-    # token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme)
 ):
-    # if not validate_role(token):
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     amonestacion = read_amonestacion_by_userid(id_alumno)
     if not amonestacion:

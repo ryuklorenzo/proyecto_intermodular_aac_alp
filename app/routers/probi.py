@@ -20,8 +20,10 @@ router = APIRouter(
 async def crear_probi(
     aula: ProbiImport,
     id_mencion: int,
+    token: str = Depends(oauth2_scheme)
 ):
-
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     probi_id = insert_probi(id_mencion, aula)
 
     if probi_id == -1:
@@ -36,14 +38,17 @@ async def crear_probi(
 
 @router.get("/", response_model=List[ProbiOut], status_code=status.HTTP_200_OK)
 async def ver_probi(
+    token: str = Depends(oauth2_scheme)
     ):
-
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     return read_all_probis()
 
 
 @router.get("/{id}", response_model=ProbiOut, status_code=status.HTTP_200_OK)
-async def ver_probi_by_id(id: int):
-
+async def ver_probi_by_id(id: int, token: str = Depends(oauth2_scheme)):
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     probi = read_probi_by_id(id)
 
     if not probi:
@@ -59,9 +64,11 @@ async def ver_probi_by_id(id: int):
 async def actualizar_probi(
     id:int,
     probi: ProbiImport,
-    id_mencion: int
+    id_mencion: int,
+    token: str = Depends(oauth2_scheme)
 ):
-
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     updated = update_probi(id, probi, id_mencion)
 
     if not updated:
@@ -76,8 +83,11 @@ async def actualizar_probi(
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
 async def borrar_probi(
     id: int,
+    token: str = Depends(oauth2_scheme)
     ):
-
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
+    
     deleted = delete_probi(id)
     if not deleted:
         raise HTTPException(

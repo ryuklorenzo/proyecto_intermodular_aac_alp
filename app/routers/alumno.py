@@ -27,22 +27,19 @@ async def crear_alumno(
     alumno: AlumnoCreate, 
     token: str = Depends(oauth2_scheme)
 ):
-    if validate_role(token) == True:
-        try:
-            # Nota: El id_usuario debe existir previamente en la tabla USUARIO
-            user_id = insert_user(alumno)
-            alumno_id = insert_alumno(user_id, alumno, id_curso)
-            return {"message": "Alumno creado exitosamente", "id": user_id}
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error al crear el alumno. Verifica que el id_usuario exista: {str(e)}"
-            )
-    else:
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
+    try:
+        # Nota: El id_usuario debe existir previamente en la tabla USUARIO
+        user_id = insert_user(alumno)
+        alumno_id = insert_alumno(user_id, alumno, id_curso)
+        return {"message": "Alumno creado exitosamente", "id": user_id}
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="UNAUTHORIZED"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al crear el alumno. Verifica que el id_usuario exista: {str(e)}"
         )
+
 
 
 
@@ -51,10 +48,7 @@ async def crear_alumno(
 async def ver_alumnos(token: str = Depends(oauth2_scheme)):
     # Aquí podrías añadir Depends(oauth2_scheme) si quieres que solo usuarios logueados lo vean
     if not validate_role(token, ["admin", "directivo", "profesor"]):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="No tienes permisos para ver los alumnos"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
         
     else:
         alumnos = read_all_alumnos()
@@ -63,51 +57,38 @@ async def ver_alumnos(token: str = Depends(oauth2_scheme)):
 # 3. Ver alumno por ID
 @router.get("/{id}/", response_model=AlumnoOut, status_code=status.HTTP_200_OK)
 async def ver_alumno_por_id(id: int, token: str = Depends(oauth2_scheme)):
-    if validate_role(token) == True:
-        alumno = read_alumno_by_id(id)
-        if not alumno:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Alumno con id {id} no encontrado"
-            )
-        return alumno
-    else:
-            raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"UNAUTHORIZED"
-                )
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
+    alumno = read_alumno_by_id(id)
+    if not alumno:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Alumno con id {id} no encontrado"
+        )
+    return alumno
 
 
 # 4. Dar de baja (Soft Delete)
 @router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
 async def dar_baja_alumno(id: int, token: str = Depends(oauth2_scheme)):
-    if validate_role(token) == True:
-        alumno = read_alumno_by_id(id)
-        if not alumno:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Alumno no encontrado"
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
+    
+    alumno = read_alumno_by_id(id)
+    if not alumno:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Alumno no encontrado"
             )
         
-        if not alumno.activo:
-            return {"message": f"El alumno con id {id} ya estaba dado de baja previamente"}
+    if not alumno.activo:
+        return {"message": f"El alumno con id {id} ya estaba dado de baja previamente"}
 
-        exito = baja_alumno(id)
-        if not exito:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="No se pudo dar de baja al alumno (Error en BD)"
-            )
-            
-        return {"message": f"Alumno con id {id} dado de baja correctamente (activo=False)"}
-    else:
-            raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"UNAUTHORIZED"
-                )
-
-
-
-
-
-
+    exito = baja_alumno(id)
+    if not exito:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="No se pudo dar de baja al alumno (Error en BD)"
+        )
+        
+    return {"message": f"Alumno con id {id} dado de baja correctamente (activo=False)"}

@@ -23,8 +23,10 @@ router = APIRouter(
 async def crear_mencion(
     mencion: MencionImport,
     id_reconocimiento: int,
+    token: str = Depends(oauth2_scheme)
 ):
-
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     mencion_id = insert_mencion(id_reconocimiento, mencion)
 
     if mencion_id == -1:
@@ -39,14 +41,17 @@ async def crear_mencion(
 
 @router.get("/", response_model=List[MencionOut], status_code=status.HTTP_200_OK)
 async def ver_reconocimientos(
+    token: str = Depends(oauth2_scheme)
     ):
-
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     return read_all_menciones()
 
 
 @router.get("/{id}", response_model=MencionOut, status_code=status.HTTP_200_OK)
-async def ver_mencion_by_id(id: int):
-
+async def ver_mencion_by_id(id: int, token: str = Depends(oauth2_scheme)):
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     mencion = read_mencion_by_id(id)
 
     if not mencion:
@@ -59,7 +64,10 @@ async def ver_mencion_by_id(id: int):
 
 
 @router.get("/recognitions/{id_reconocimiento}/", response_model=List[MencionOut], status_code=status.HTTP_200_OK)
-async def ver_menciones_by_reconocimiento(id_reconocimiento: int):
+async def ver_menciones_by_reconocimiento(id_reconocimiento: int, token: str = Depends(oauth2_scheme)):
+
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     return read_menciones_by_reconocimiento(id_reconocimiento)
 
@@ -85,8 +93,10 @@ async def actualizar_mencion(
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
 async def borrar_mencion(
     id: int,
+    token: str = Depends(oauth2_scheme)
     ):
-
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     deleted = delete_mencion(id)
     if not deleted:
         raise HTTPException(

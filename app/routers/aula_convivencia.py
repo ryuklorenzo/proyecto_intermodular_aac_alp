@@ -25,8 +25,10 @@ router = APIRouter(
 async def crear_aula_convivencia(
     aula: AulaConvivenciaImport,
     id_horario: int,
+    token: str = Depends(oauth2_scheme)
 ):
-
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     aula_id = insert_aula_convivencia(id_horario, aula)
 
     if aula_id == -1:
@@ -40,13 +42,18 @@ async def crear_aula_convivencia(
 
 @router.get("/", response_model=List[AulaConvivenciaOut], status_code=status.HTTP_200_OK)
 async def ver_aulas_convivencia(
+    token: str = Depends(oauth2_scheme)
     ):
-
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     return read_all_aulas_convivencia()
 
 
 @router.get("/{id}", response_model=AulaConvivenciaOut, status_code=status.HTTP_200_OK)
-async def ver_aula_convivencia_by_id(id: int):
+async def ver_aula_convivencia_by_id(id: int, token: str = Depends(oauth2_scheme)):
+
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     aula = read_aula_convivencia_by_id(id)
 
@@ -63,8 +70,12 @@ async def ver_aula_convivencia_by_id(id: int):
 async def actualizar_aula_convivencia(
     id:int,
     aula: AulaConvivenciaImport,
-    id_horario: int
+    id_horario: int,
+    token: str = Depends(oauth2_scheme)
 ):
+
+    if not validate_role(token, ["admin", "directivo"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     updated = update_aula_convivencia(id, aula, id_horario)
 
@@ -80,8 +91,10 @@ async def actualizar_aula_convivencia(
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
 async def borrar_aula_convivencia(
     id: int,
+    token: str = Depends(oauth2_scheme)
     ):
-
+    if not validate_role(token, ["admin"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     deleted = delete_aula_convivencia(id)
     if not deleted:
         raise HTTPException(
@@ -94,9 +107,11 @@ async def borrar_aula_convivencia(
 
 @router.post("/assign-students", status_code=status.HTTP_200_OK)
 async def asignar_alumnos_aula(
-    data: AulaConvivenciaAlumnoImport
+    data: AulaConvivenciaAlumnoImport,
+    token: str = Depends(oauth2_scheme)
 ):
-
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     assigned = assign_alumnos_to_aula(
         data.id_aula_convivencia,
         data.alumnos_ids
@@ -133,10 +148,10 @@ async def ver_alumnos_en_aula(
 async def sacar_alumno_de_aula(
     id_aula: int, 
     id_alumno: int, 
-    # token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme)
 ):
-    # if not validate_role(token):
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     aula = read_aula_convivencia_by_id(id_aula)
     if not aula:
