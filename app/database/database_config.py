@@ -4,8 +4,8 @@ from fastapi import status, HTTPException
 
 
 db_config = {
-    "host": "127.0.0.1", # localhost si se prueba sin docker puerto 8082
-    #"host": "myapidb", # myapidb si se prueba desde docker puerto 8000
+    #"host": "127.0.0.1", # localhost si se prueba sin docker puerto 8082
+    "host": "myapidb", # myapidb si se prueba desde docker puerto 8000
     "port": 3306,
     "user": "myapi",
     "password": "myapi",
