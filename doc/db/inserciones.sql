@@ -2,16 +2,13 @@
 -- DATOS DE PRUEBA (DML)
 -- ========================================================
 
--- use database myapi;
-
 -- Creamos un Horario para poder asignarlo a un Curso
 INSERT INTO HORARIO (id, formato, hora_inicio, hora_fin) 
 VALUES (1, 'Presencial', '08:00:00', '14:30:00');
 
--- Creamos un Curso para poder matricular al Alumno
+-- Creamos un Curso para poder matricular al Alumno y Profesor
 INSERT INTO CURSO (id, nivel, curso, modulo, id_horario) 
 VALUES (1, 'Secundaria', '3º ESO', 'Matemáticas', 1);
-
 
 -- CREACIÓN DE LOS USUARIOS BASE
 INSERT INTO USUARIO (id, nombre, apellidos, activo, password) VALUES 
@@ -27,13 +24,13 @@ INSERT INTO ROOT (id)
 VALUES (1);
 
 -- PROFESOR 
-INSERT INTO PROFESOR (id) 
-VALUES (2);
+INSERT INTO PROFESOR (id, id_curso) 
+VALUES (2, 1);
 
 -- DIRECTIVO 
--- El Usuario 3 TIENE que ser insertado en Profesor primero.
-INSERT INTO PROFESOR (id) 
-VALUES (3);
+-- El Usuario 3 TIENE que ser insertado en Profesor primero
+INSERT INTO PROFESOR (id, id_curso) 
+VALUES (3, 1);
 
 INSERT INTO DIRECTIVO (id, cargo) 
 VALUES (3, 'Jefe de Estudios');
