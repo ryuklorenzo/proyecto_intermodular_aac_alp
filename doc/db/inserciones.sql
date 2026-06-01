@@ -12,7 +12,7 @@ VALUES (1, 'Secundaria', '3º ESO', 'Matemáticas', 1);
 
 -- CREACIÓN DE LOS USUARIOS BASE
 INSERT INTO USUARIO (id, nombre, apellidos, activo, password) VALUES 
-(1, 'angel', 'Sistema', 1, '$2b$12$dASoKE28t0vvW0e5g08fNuVBOvI6RkNOh5j9uVJ0qiGkvzJwqxqhe'),
+(1, 'angel', 'Sistema', 1, '$2b$12$jL4GnQWjxBE/KmHEL33L..1/SkeXc5cQjXUBPZjFuXiJsisJAzLhy'),
 (2, 'Laura', 'Martínez', 1, '$2b$12$4oCuULugms1NRgyPj/4yFuwRWOoabt/6TmahnJEjfMFrThgnqDDBK'),
 (3, 'Carlos', 'Gómez', 1, '$2b$12$tL7nGTxwzbaH03/LCzkf3.YVsAetP1gHRrnk9z7Qc7JuSNQjYKwya'),
 (4, 'Lucía', 'Pérez', 1, '$2b$12$PW7k5SvZLDfTJKpnBTgpouHba1M2pvyA1DvE/NpYRWRNmjONXjNae'),
