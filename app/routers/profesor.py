@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
+from app.database.curso import read_curso_by_id
 from app.models.profesor import ProfesorImport, ProfesorOut
 from app.auth.auth import oauth2_scheme
 from app.database.profesor import (
@@ -25,6 +26,12 @@ async def crear_profesor(
 ):
     if not validate_role(token, ["admin"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
+    existe_curso = read_curso_by_id(id_curso)
+    if not existe_curso:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Curso con id {id_curso} no encontrado"
+        )
 
     user_id = insert_user(profesorBase)
     if profesor_exists(user_id):

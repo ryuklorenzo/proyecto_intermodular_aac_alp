@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
+from app.database.curso import read_curso_by_id
 from app.models.alumno import AlumnoCreate, AlumnoOut
 from app.auth.auth import oauth2_scheme 
 from app.database.user import insert_user
@@ -29,6 +30,12 @@ async def crear_alumno(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     try:
         # Nota: El id_usuario debe existir previamente en la tabla USUARIO
+        existe_curso = read_curso_by_id(id_curso)
+        if not existe_curso:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Curso con id {id_curso} no encontrado"
+            )
         user_id = insert_user(alumno)
         alumno_id = insert_alumno(user_id, id_curso)
         return {"message": "Alumno creado exitosamente", "id": user_id}
