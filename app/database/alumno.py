@@ -1,9 +1,9 @@
-from app.models.alumno import AlumnoCreate, AlumnoOut
+from app.models.alumno import AlumnoOut
 from app.auth.auth import db_config
 import mariadb
 
 #--------------------------------------------------- ALUMNOS ---------------------------------------------------
-def insert_alumno(id: int, alumno: AlumnoCreate, id_curso: int) -> int:
+def insert_alumno(id: int, id_curso: int) -> int:
     conn = None
     cursor = None
     try:
@@ -39,7 +39,7 @@ def read_all_alumnos() -> list[AlumnoOut]:
         sql = """
         SELECT 
             a.id, u.nombre, u.apellidos, u.activo, 
-            c.id, c.curso, c.modulo
+            c.id, c.nivel, c.curso, c.modulo
         FROM ALUMNO a
         JOIN USUARIO u ON a.id = u.id
         JOIN CURSO c ON a.id_curso = c.id
@@ -55,8 +55,9 @@ def read_all_alumnos() -> list[AlumnoOut]:
                 apellidos=row[2],
                 activo=bool(row[3]),
                 id_curso=row[4],
-                curso=row[5],
-                modulo=row[6]
+                nivel=row[5],
+                curso=row[6],
+                modulo=row[7]
             )
             alumnos_db.append(alumno)
             
@@ -81,7 +82,7 @@ def read_alumno_by_id(id: int) -> AlumnoOut | None:
         sql = """
         SELECT 
             a.id, u.nombre, u.apellidos, u.activo, 
-            c.id, c.curso, c.modulo
+            c.id, c.nivel, c.curso, c.modulo
         FROM ALUMNO a
         JOIN USUARIO u ON a.id = u.id
         JOIN CURSO c ON a.id_curso = c.id
@@ -97,8 +98,9 @@ def read_alumno_by_id(id: int) -> AlumnoOut | None:
                 apellidos=row[2],
                 activo=bool(row[3]),
                 id_curso=row[4],
-                curso=row[5],
-                modulo=row[6]
+                nivel=row[5],
+                curso=row[6],
+                modulo=row[7]
             )
         return None
         

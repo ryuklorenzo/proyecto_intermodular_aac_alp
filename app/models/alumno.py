@@ -6,5 +6,6 @@ class AlumnoCreate(UserBase):
 class AlumnoOut(UserOut):
     id: int
     id_curso: int
+    nivel: str
     curso: str
     modulo: str

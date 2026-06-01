@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.models.alumno import AlumnoCreate, AlumnoOut
-from app.auth.auth import oauth2_scheme # Si quieres proteger las rutas con token
+from app.auth.auth import oauth2_scheme 
 from app.database.user import insert_user
 from app.database.alumno import (
     insert_alumno, 
@@ -12,15 +12,13 @@ from app.database.alumno import (
 from app.auth.auth import validate_role
 
 
-#insertar alumno, ver alumnos, ver alumnoID, dar de baja
-
 router = APIRouter(
     prefix="/students",
     tags=["Students"]
 )
 
 
-# 1. Insertar Alumno
+# Insertar Alumno
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_alumno(
     id_curso: int,
@@ -41,12 +39,9 @@ async def crear_alumno(
         )
 
 
-
-
-# 2. Ver todos los alumnos
+# Ver todos los alumnos
 @router.get("/", response_model=List[AlumnoOut], status_code=status.HTTP_200_OK)
 async def ver_alumnos(token: str = Depends(oauth2_scheme)):
-    # Aquí podrías añadir Depends(oauth2_scheme) si quieres que solo usuarios logueados lo vean
     if not validate_role(token, ["admin", "directivo", "profesor"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
         
@@ -54,7 +49,8 @@ async def ver_alumnos(token: str = Depends(oauth2_scheme)):
         alumnos = read_all_alumnos()
         return alumnos
 
-# 3. Ver alumno por ID
+
+# Ver alumno por ID
 @router.get("/{id}/", response_model=AlumnoOut, status_code=status.HTTP_200_OK)
 async def ver_alumno_por_id(id: int, token: str = Depends(oauth2_scheme)):
     if not validate_role(token, ["admin", "directivo", "profesor"]):
@@ -68,7 +64,7 @@ async def ver_alumno_por_id(id: int, token: str = Depends(oauth2_scheme)):
     return alumno
 
 
-# 4. Dar de baja (Soft Delete)
+# Dar de baja alumno (activo=False)
 @router.delete("/{id}/baja/", status_code=status.HTTP_200_OK)
 async def dar_baja_alumno(id: int, token: str = Depends(oauth2_scheme)):
     if not validate_role(token, ["admin"]):

@@ -1,5 +1,5 @@
 from app.database.user import read_user_by_id
-from app.models.profesor import ProfesorOut, ProfesorImport
+from app.models.profesor import ProfesorOut
 from app.auth.auth import db_config
 import mariadb
 
@@ -46,10 +46,14 @@ def read_all_profesores() -> list[ProfesorOut]:
         cursor = conn.cursor()
 
         sql = """
-        SELECT p.id, u.nombre, u.apellidos, u.activo
+        SELECT 
+            p.id, u.nombre, u.apellidos, u.activo,
+            c.id, c.nivel, c.curso, c.modulo
         FROM PROFESOR p
         JOIN USUARIO u ON p.id = u.id
+        JOIN CURSO c ON p.id_curso = c.id
         """
+        
         cursor.execute(sql)
         results = cursor.fetchall()
 
@@ -58,7 +62,11 @@ def read_all_profesores() -> list[ProfesorOut]:
                 id=row[0],
                 nombre=row[1],
                 apellidos=row[2],
-                activo=bool(row[3])
+                activo=bool(row[3]),
+                id_curso=row[4],
+                nivel=row[5],
+                curso=row[6],
+                modulo=row[7]
             )
             for row in results
         ]
@@ -85,9 +93,10 @@ def read_profesor_by_id(id: int) -> ProfesorOut | None:
         # CORRECCIÓN: Hacemos JOIN con USUARIO para obtener nombre y apellidos
         # ya que la tabla PROFESOR solo tiene el ID.
         sql = """
-        SELECT p.id, u.nombre, u.apellidos, u.activo
+        SELECT p.id, u.nombre, u.apellidos, u.activo, c.id, c.nivel, c.curso, c.modulo
         FROM PROFESOR p
         JOIN USUARIO u ON p.id = u.id
+        JOIN CURSO c ON p.id_curso = c.id
         WHERE p.id = ?
         """
         cursor.execute(sql, (id,))
@@ -98,7 +107,11 @@ def read_profesor_by_id(id: int) -> ProfesorOut | None:
                 id=row[0],
                 nombre=row[1],
                 apellidos=row[2],
-                activo=bool(row[3])
+                activo=bool(row[3]),
+                id_curso=row[4],
+                nivel=row[5], 
+                curso=row[6],
+                modulo=row[7]
             )
         return None
 

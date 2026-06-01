@@ -4,4 +4,8 @@ class ProfesorImport:
     pass
 
 class ProfesorOut(UserOut):
-    pass
+    id: int
+    id_curso: int
+    nivel: str
+    curso: str
+    modulo: str
