@@ -1,9 +1,9 @@
-from app.models.alumno import AlumnoOut
+from app.models.alumno import AlumnoCreate, AlumnoOut
 from app.auth.auth import db_config
 import mariadb
 
 #--------------------------------------------------- ALUMNOS ---------------------------------------------------
-def insert_alumno(id: int, id_curso: int) -> int:
+def insert_alumno(user_id: int, id_curso: int) -> int:
     conn = None
     cursor = None
     try:
@@ -11,7 +11,7 @@ def insert_alumno(id: int, id_curso: int) -> int:
         cursor = conn.cursor()
         
         sql = "INSERT INTO ALUMNO (id, id_curso) VALUES (?, ?)"
-        values = (id, id_curso)
+        values = (user_id, id_curso)
         
         cursor.execute(sql, values)
         conn.commit()

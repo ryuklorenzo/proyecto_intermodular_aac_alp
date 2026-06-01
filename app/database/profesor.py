@@ -4,7 +4,7 @@ from app.auth.auth import db_config
 import mariadb
 
 #--------------------------------------------------- PROFESORES ---------------------------------------------------
-def insert_profesor(id_usuario: int) -> int: 
+def insert_profesor(id_usuario: int, id_curso: int) -> int: 
     conn = None
     cursor = None
 
@@ -18,11 +18,12 @@ def insert_profesor(id_usuario: int) -> int:
         cursor = conn.cursor()
 
         sql = """
-        INSERT INTO PROFESOR (id)
-        VALUES (?)
+        INSERT INTO PROFESOR (id, id_curso)
+        VALUES (?, ?)
         """
         values = (
             usuario.id,
+            id_curso
         )
 
         cursor.execute(sql, values)

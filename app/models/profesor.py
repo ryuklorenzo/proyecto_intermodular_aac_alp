@@ -1,6 +1,6 @@
-from app.models.user import UserOut
+from app.models.user import UserBase, UserOut
 
-class ProfesorImport:
+class ProfesorImport(UserBase):
     pass
 
 class ProfesorOut(UserOut):

@@ -1,11 +1,9 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
-from app.models.profesor import ProfesorOut
-from app.models.user import UserBase
+from app.models.profesor import ProfesorImport, ProfesorOut
 from app.auth.auth import oauth2_scheme
 from app.database.profesor import (
     insert_profesor,
-    delete_profesor,
     read_all_profesores,
     read_profesor_by_id,
     profesor_exists,
@@ -21,19 +19,20 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_profesor(
-    userbase : UserBase, 
+    id_curso: int,
+    profesorBase : ProfesorImport, 
     token: str = Depends(oauth2_scheme)
 ):
     if not validate_role(token, ["admin"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
-    user_id = insert_user(userbase)
+    user_id = insert_user(profesorBase)
     if profesor_exists(user_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Profesor con ese usuario ya existe"
         )
-    profesor_id = insert_profesor(user_id)
+    profesor_id = insert_profesor(user_id, id_curso)
     
     if profesor_id == -1:
         raise HTTPException(

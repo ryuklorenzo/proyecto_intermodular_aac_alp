@@ -30,7 +30,7 @@ async def crear_alumno(
     try:
         # Nota: El id_usuario debe existir previamente en la tabla USUARIO
         user_id = insert_user(alumno)
-        alumno_id = insert_alumno(user_id, alumno, id_curso)
+        alumno_id = insert_alumno(user_id, id_curso)
         return {"message": "Alumno creado exitosamente", "id": user_id}
     except Exception as e:
         raise HTTPException(
