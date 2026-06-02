@@ -19,7 +19,7 @@ router = APIRouter(
     tags=["Recognitions"]
 )
 
-@router.post("/attitudes/{id_actitud}", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_reconocimiento(
     id_alumno: int,
     id_profesor: int,
