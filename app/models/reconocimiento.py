@@ -8,6 +8,7 @@ class ReconocimientoImport(BaseModel):
 class ReconocimientoOut(ReconocimientoImport):
     id: int
     id_actitud: int
+    id_profesor: int
     
     actitud_descripcion: str
     actitud_fecha: date

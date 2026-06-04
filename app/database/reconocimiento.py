@@ -4,7 +4,7 @@ from app.models.reconocimiento import ReconocimientoImport, ReconocimientoOut
 import mariadb
 
 BASE_QUERY = """
-        SELECT r.id, r.detalle, r.id_actitud, a.descripcion, a.fecha, a.tipo
+        SELECT r.id, r.detalle, r.id_actitud, r.id_profesor, a.descripcion, a.fecha, a.tipo
         FROM RECONOCIMIENTO as r
         JOIN ACTITUD as a ON r.id_actitud = a.id
         """
@@ -14,9 +14,10 @@ def map_reconocimiento_row(row) -> ReconocimientoOut:
         id=row[0],
         detalle=row[1],
         id_actitud=row[2],
-        actitud_descripcion=row[3],
-        actitud_fecha=row[4],
-        actitud_tipo=row[5]
+        id_profesor=row[3],
+        actitud_descripcion=row[4],
+        actitud_fecha=row[5],
+        actitud_tipo=row[6]
     )
 
 #--------------------------------------------------- RECONOCIMIENTO ---------------------------------------------------
