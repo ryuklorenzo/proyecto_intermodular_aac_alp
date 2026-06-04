@@ -72,7 +72,7 @@ VALUES (1, 'Entrevista preliminar con la familia del alumno', CURDATE(), 3, 1);
 -- 6. INSERCIÓN DE TAREAS
 -- id_profesor = 2 (Laura), id_alumno = 4 (Lucía)
 INSERT INTO TAREA (descripcion, estado, id_profesor, id_alumno) 
-VALUES ('Hacer los ejercicios del 1 al 5 de la página 34 de Matemáticas', 'PENDIENTE', 2, 4);
+VALUES ('Hacer los ejercicios del 1 al 5 de la página 34 de Matemáticas', 'Pendiente', 2, 4);
 
 INSERT INTO TAREA (descripcion, estado, id_profesor, id_alumno) 
 VALUES ('Redacción sobre la Revolución Francesa', 'COMPLETADA', 2, 4);
@@ -81,7 +81,7 @@ VALUES ('Redacción sobre la Revolución Francesa', 'COMPLETADA', 2, 4);
 -- 7. INSERCIÓN DE ACTITUDES Y AMONESTACIONES
 -- Actitud generará el id=2 (porque el 1 se usó en el paso 4)
 INSERT INTO ACTITUD (id, descripcion, fecha, tipo, id_usuario) 
-VALUES (2, 'Falta de respeto continuada durante la clase de historia', '2024-05-20', 'NEGATIVA', 4);
+VALUES (2, 'Falta de respeto continuada durante la clase de historia', '2024-05-20', 'Negativa', 4);
 
 -- Amonestación para la actitud 2, puesta por el profesor 2
 INSERT INTO AMONESTACION (nivel, id_actitud, id_profesor) 
@@ -89,7 +89,7 @@ VALUES ('GRAVE', 2, 2);
 
 -- Otro ejemplo: Actitud generará id=3
 INSERT INTO ACTITUD (id, descripcion, fecha, tipo, id_usuario) 
-VALUES (3, 'Uso del teléfono móvil en clase', '2024-05-21', 'NEGATIVA', 4);
+VALUES (3, 'Uso del teléfono móvil en clase', '2024-05-21', 'Negativa', 4);
 
 -- Amonestación para la actitud 3
 INSERT INTO AMONESTACION (nivel, id_actitud, id_profesor) 
