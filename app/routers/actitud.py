@@ -3,6 +3,7 @@ from typing import List
 from app.models.actitud import ActitudCreate, ActitudOut
 from app.auth.auth import oauth2_scheme
 from app.database.actitud import (
+    get_all_actitudes,
     insert_actitud,
     read_actitudes_by_alumno,
     delete_actitud
@@ -30,8 +31,17 @@ async def crear_actitud(id_alumno: int, actitud: ActitudCreate, token: str = Dep
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error al registrar la actitud"
         )
-
     return {"message": "Actitud asignada correctamente", "id": actitud_id}
+
+
+@router.get("/", response_model=List[ActitudOut], status_code=status.HTTP_200_OK)
+async def ver_actitud(token: str = Depends(oauth2_scheme)):
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
+    actitud = get_all_actitudes()
+    if not actitud:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Actitud no encontrada")
+    return actitud
 
 
 @router.get("/users/{id_alumno}/", response_model=List[ActitudOut], status_code=status.HTTP_200_OK)

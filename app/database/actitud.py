@@ -1,3 +1,5 @@
+from unittest import result
+
 from app.models.actitud import ActitudCreate, ActitudOut
 from app.auth.auth import db_config
 import mariadb
@@ -23,6 +25,38 @@ def insert_actitud(id_usuario: int, actitud: ActitudCreate) -> int:
     except mariadb.Error as e:
         print(f"Error insertando actitud: {e}")
         return -1
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+
+def get_all_actitudes() -> list[ActitudOut]:
+    conn = None
+    cursor = None
+    try:
+        conn = mariadb.connect(**db_config)
+        cursor = conn.cursor()
+
+        sql = "SELECT id, descripcion, fecha, tipo, id_usuario FROM ACTITUD"
+        cursor.execute(sql)
+        results = cursor.fetchall()
+
+        return [
+            ActitudOut(
+                id=row[0],
+                descripcion=row[1],
+                fecha=row[2],
+                tipo=row[3],
+                id_usuario=row[4]
+            )
+            for row in results
+        ]
+
+    except mariadb.Error as e:
+        print(f"Error leyendo actitudes: {e}")
+        return []
+
+
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
