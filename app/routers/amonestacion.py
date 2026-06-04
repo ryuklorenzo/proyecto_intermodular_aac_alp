@@ -51,6 +51,25 @@ async def ver_amonestaciones(
     amonestaciones = read_all_amonestaciones()
     return amonestaciones
 
+@router.get("/students/{id_student}", response_model=List[AmonestacionOut])
+async def ver_amonestaciones_de_alumno(
+    id_student: int,
+    token: str = Depends(oauth2_scheme)
+):
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Sin permisos"
+        )
+    amonestaciones = read_amonestacion_by_userid(id_student)
+
+    if not amonestaciones:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Amonestaciones no encontradas"
+        )
+    return amonestaciones
+
 @router.get("/{id}", response_model=AmonestacionOut, status_code=status.HTTP_200_OK)
 async def ver_amonestacion_por_id(
     id: int,
@@ -64,15 +83,3 @@ async def ver_amonestacion_por_id(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Amonestación no encontrada")
     return amonestacion
 
-@router.get("/students/{id_student}", response_model=List[AmonestacionOut]) 
-async def ver_amonestaciones_de_alumno(
-    id_alumno: int,
-    token: str = Depends(oauth2_scheme)
-):
-    if not validate_role(token, ["admin", "directivo", "profesor"]):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
-    amonestacion = read_amonestacion_by_userid(id_alumno)
-    if not amonestacion:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Amonestación no encontrada")
-    return amonestacion
