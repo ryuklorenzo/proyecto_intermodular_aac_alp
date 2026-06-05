@@ -19,7 +19,7 @@ router = APIRouter(
     tags=["Mentions"]
 )
 
-@router.post("/recognitions/{id_reconocimiento}", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def crear_mencion(
     mencion: MencionImport,
     id_reconocimiento: int,
