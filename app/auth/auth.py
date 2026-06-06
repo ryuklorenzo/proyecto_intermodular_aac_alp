@@ -27,6 +27,7 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     role: str 
+    id: int
 
 
 class TokenData(BaseModel):
