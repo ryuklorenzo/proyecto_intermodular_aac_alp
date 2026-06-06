@@ -46,7 +46,7 @@ async def ver_actitud(token: str = Depends(oauth2_scheme)):
 
 @router.get("/users/{id_alumno}/", response_model=List[ActitudOut], status_code=status.HTTP_200_OK)
 async def ver_actitudes_alumno(id_alumno: int, token: str = Depends(oauth2_scheme)):
-    if not validate_role(token, ["admin", "directivo", "profesor"]):
+    if not validate_role(token, ["admin", "directivo", "profesor", "alumno"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     actitudes = read_actitudes_by_alumno(id_alumno)
     return actitudes

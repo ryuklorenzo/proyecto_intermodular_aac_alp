@@ -56,7 +56,7 @@ async def ver_amonestaciones_de_alumno(
     id_student: int,
     token: str = Depends(oauth2_scheme)
 ):
-    if not validate_role(token, ["admin", "directivo", "profesor"]):
+    if not validate_role(token, ["admin", "directivo", "profesor", "alumno"]):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Sin permisos"
