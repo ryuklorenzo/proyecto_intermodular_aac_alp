@@ -52,7 +52,7 @@ async def crear_profesor(
 
 @router.get("/", response_model=List[ProfesorOut], status_code=status.HTTP_200_OK)
 async def ver_profesores(token: str = Depends(oauth2_scheme)):
-    if not validate_role(token, ["admin", "directivo"]):
+    if not validate_role(token, ["admin", "directivo", 'profesor']):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     profesores = read_all_profesores()

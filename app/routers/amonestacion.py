@@ -45,7 +45,7 @@ async def crear_amonestacion(
 async def ver_amonestaciones(
     token: str = Depends(oauth2_scheme)
 ):
-    if not validate_role(token, ["admin", "directivo"]):
+    if not validate_role(token, ["admin", "directivo", 'profesor']):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     amonestaciones = read_all_amonestaciones()
