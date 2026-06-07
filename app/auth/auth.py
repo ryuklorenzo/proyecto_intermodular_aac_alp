@@ -28,6 +28,8 @@ class Token(BaseModel):
     token_type: str
     role: str 
     id: int
+    nombre: str
+    apellidos: str
 
 
 class TokenData(BaseModel):
