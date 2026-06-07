@@ -136,7 +136,8 @@ def get_user_for_login(username: str):
         sql = """
         SELECT 
             u.id, 
-            u.nombre, 
+            u.nombre,
+            u.apellidos,
             u.password, 
             u.activo,
             CASE
@@ -161,9 +162,10 @@ def get_user_for_login(username: str):
             return {
                 "id": row[0],
                 "nombre": row[1],
-                "password": row[2],
-                "activo": bool(row[3]),
-                "rol": row[4]
+                "apellidos": row[2],
+                "password": row[3],
+                "activo": bool(row[4]),
+                "rol": row[5]
             }
         return None
         
