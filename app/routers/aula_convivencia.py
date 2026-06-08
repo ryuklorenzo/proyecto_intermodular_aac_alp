@@ -16,8 +16,8 @@ from app.database.aula_convivencia import (
 from app.auth.auth import validate_role
 
 router = APIRouter(
-    prefix="/aula_convivencia",
-    tags=["Aula_Convivencia"]
+    prefix="/classroom_coexistence",
+    tags=["Classroom_coexistence"]
 )
 
 
