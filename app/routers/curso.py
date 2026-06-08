@@ -24,17 +24,13 @@ async def crear_curso(
 ):
     if not validate_role(token, ["admin"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
     curso_id = insert_curso(curso, id_horario)
-
     if curso_id == -1:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creando curso"
         )
-
     return {"message": "Curso creado exitosamente", "id": curso_id}
-
 
 
 @router.get("/", response_model=List[CursoOut], status_code=status.HTTP_200_OK)
@@ -43,7 +39,6 @@ async def ver_cursos(
     ):
     if not validate_role(token, ["admin", "directivo", "profesor"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
     return read_all_cursos()
 
 
@@ -54,12 +49,9 @@ async def ver_curso_by_id(
     ):
     if not validate_role(token, ["admin", "directivo"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
     curso = read_curso_by_id(id)
-
     if not curso:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curso no encontrado")
-
     return curso
 
 
@@ -72,15 +64,12 @@ async def actualizar_curso(
 ):
     if not validate_role(token, ["admin"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
     updated = update_curso(id, curso, id_horario)
-
     if not updated:
         raise HTTPException(
             status_code=404,
             detail="Curso no encontrado"
         )
-
     return {"message": "Curso actualizado correctamente"}
 
 
@@ -91,12 +80,10 @@ async def borrar_curso(
 ):
     if not validate_role(token, ["admin"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
     deleted = delete_curso(id)
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Curso no encontrado"
         )
-
     return {"message": "Curso eliminado correctamente"}

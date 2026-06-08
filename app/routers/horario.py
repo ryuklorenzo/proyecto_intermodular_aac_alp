@@ -24,13 +24,11 @@ async def crear_horario(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
 
     horario_id = insert_horario(horario)
-
     if horario_id == -1:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creando horario"
         )
-
     return {"message": "Horario creado exitosamente", "id": horario_id}
 
 
@@ -41,7 +39,6 @@ async def ver_horarios(
 ):
     if not validate_role(token, ["admin", "directivo", "profesor"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
     return read_all_horarios()
 
 
@@ -53,15 +50,12 @@ async def actualizar_horario(
 ):
     if not validate_role(token, ["admin"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
     updated = update_horario(id, horario)
-
     if not updated:
         raise HTTPException(
             status_code=404,
             detail="Horario no encontrado"
         )
-
     return {"message": "Horario actualizado correctamente"}
 
 
@@ -72,12 +66,10 @@ async def borrar_horario(
     ):
     if not validate_role(token, ["admin"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
     deleted = delete_horario(id)
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Horario no encontrado"
         )
-
     return {"message": "Horario eliminado correctamente"}

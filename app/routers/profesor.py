@@ -40,13 +40,11 @@ async def crear_profesor(
             detail=f"Profesor con ese usuario ya existe"
         )
     profesor_id = insert_profesor(user_id, id_curso)
-    
     if profesor_id == -1:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creando el profesor"
         )
-
     return {"message": "Profesor creado exitosamente", "id": profesor_id}
 
 
@@ -84,7 +82,6 @@ async def dar_de_baja_profesor(id: int, token: str = Depends(oauth2_scheme)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Profesor no encontrado"
         )
-    
     if not profesor.activo:
         return {"message": f"El profesor con id {id} ya estaba dado de baja previamente"}
     
@@ -94,5 +91,4 @@ async def dar_de_baja_profesor(id: int, token: str = Depends(oauth2_scheme)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="No se pudo dar de baja al Profesor (Error en BD)"
         )
-        
     return {"message": f"Profesor con id {id} dado de baja correctamente (activo=False)"}

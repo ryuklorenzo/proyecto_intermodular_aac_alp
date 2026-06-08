@@ -39,10 +39,8 @@ async def crear_tarea(
         id_alumno=id_alumno
     )
     tarea_id = insert_tarea(new_tarea)
-
     if tarea_id == -1:
         raise HTTPException(status_code=500, detail="Error al crear la tarea")
-
     return {"message": "Tarea asignada correctamente", "id": tarea_id}
 
 @router.get("/students/{id_alumno}/", response_model=List[TareaOut])

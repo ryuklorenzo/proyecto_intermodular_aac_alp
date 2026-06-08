@@ -28,8 +28,6 @@ async def crear_amonestacion(
 ):
     if not validate_role(token, ["admin", "directivo", "profesor"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
-
     try:
         id_actitud = insert_actitud(id_alumno, actitud)
         id_amonestacion = insert_amonestacion(id_actitud, amonestacion, id_profesor)
@@ -51,7 +49,7 @@ async def ver_amonestaciones(
     amonestaciones = read_all_amonestaciones()
     return amonestaciones
 
-@router.get("/students/{id_student}", response_model=List[AmonestacionOut])
+@router.get("/students/{id_student}/", response_model=List[AmonestacionOut])
 async def ver_amonestaciones_de_alumno(
     id_student: int,
     token: str = Depends(oauth2_scheme)
@@ -70,7 +68,7 @@ async def ver_amonestaciones_de_alumno(
         )
     return amonestaciones
 
-@router.get("/{id}", response_model=AmonestacionOut, status_code=status.HTTP_200_OK)
+@router.get("/{id}/", response_model=AmonestacionOut, status_code=status.HTTP_200_OK)
 async def ver_amonestacion_por_id(
     id: int,
     token: str = Depends(oauth2_scheme)

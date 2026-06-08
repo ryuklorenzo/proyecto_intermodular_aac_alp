@@ -45,13 +45,11 @@ async def create_user(
         )
 
 
-
 # User login  ----------------------------------------(INICIAR SESION)-----------------------------------------------------------
 @router.post("/login/", response_model=Token, status_code=status.HTTP_200_OK)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     
     user_db = get_user_for_login(form_data.username)
-    
     if not user_db:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -108,7 +106,6 @@ async def get_all_users(token: str = Depends(oauth2_scheme)):
 @router.get("/{id}/", response_model=UserOut, status_code=status.HTTP_200_OK)
 async def get_user(id: int, token: str = Depends(oauth2_scheme)): 
     try:
-        # Buscamos en la base de datos usando la ID de la URL
         user_db = read_user_by_id(id)
         
         if not user_db:
@@ -116,8 +113,6 @@ async def get_user(id: int, token: str = Depends(oauth2_scheme)):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-            
-        # Devolvemos el objeto, FastAPI se encarga de filtrarlo a UserOut
         return user_db
     except Exception as e:
             raise HTTPException(
@@ -135,7 +130,7 @@ async def delete_user(UserDb : UserDb, token: str = Depends(oauth2_scheme)):
         deleted = deleteUser(UserDb)
         if not deleted:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, # O 404
+                status_code=status.HTTP_401_UNAUTHORIZED, 
                 detail="Error: Usuario no encontrado o contraseña incorrecta"
             )
         return {"message": "Usuario eliminado correctamente"}

@@ -29,7 +29,6 @@ async def crear_alumno(
     if not validate_role(token, ["admin"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     try:
-        # Nota: El id_usuario debe existir previamente en la tabla USUARIO
         existe_curso = read_curso_by_id(id_curso)
         if not existe_curso:
             raise HTTPException(

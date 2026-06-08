@@ -30,13 +30,11 @@ async def crear_aula_convivencia(
     if not validate_role(token, ["admin", "directivo"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     aula_id = insert_aula_convivencia(id_horario, aula)
-
     if aula_id == -1:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creando aula de convivencia"
         )
-
     return {"message": "Aula de convivencia creado exitosamente", "id": aula_id}
 
 
@@ -49,24 +47,21 @@ async def ver_aulas_convivencia(
     return read_all_aulas_convivencia()
 
 
-@router.get("/{id}", response_model=AulaConvivenciaOut, status_code=status.HTTP_200_OK)
+@router.get("/{id}/", response_model=AulaConvivenciaOut, status_code=status.HTTP_200_OK)
 async def ver_aula_convivencia_by_id(id: int, token: str = Depends(oauth2_scheme)):
 
     if not validate_role(token, ["admin", "directivo", "profesor"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
     aula = read_aula_convivencia_by_id(id)
-
     if not aula:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Aula de convivencia no encontrada"
         )
-
     return aula
 
 
-@router.put("/{id}", status_code=status.HTTP_200_OK)
+@router.put("/{id}/", status_code=status.HTTP_200_OK)
 async def actualizar_aula_convivencia(
     id:int,
     aula: AulaConvivenciaImport,
@@ -76,9 +71,7 @@ async def actualizar_aula_convivencia(
 
     if not validate_role(token, ["admin", "directivo"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
     updated = update_aula_convivencia(id, aula, id_horario)
-
     if not updated:
         raise HTTPException(
             status_code=404,
@@ -88,7 +81,7 @@ async def actualizar_aula_convivencia(
     return {"message": "Aula de convivencia actualizado correctamente"}
 
 
-@router.delete("/{id}", status_code=status.HTTP_200_OK)
+@router.delete("/{id}/", status_code=status.HTTP_200_OK)
 async def borrar_aula_convivencia(
     id: int,
     token: str = Depends(oauth2_scheme)
@@ -101,11 +94,10 @@ async def borrar_aula_convivencia(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Aula de convivencia no encontrada"
         )
-
     return {"message": "Aula de convivencia eliminado correctamente"}
 
 
-@router.post("/assign-students", status_code=status.HTTP_200_OK)
+@router.post("/assign-students/", status_code=status.HTTP_200_OK)
 async def asignar_alumnos_aula(
     data: AulaConvivenciaAlumnoImport,
     token: str = Depends(oauth2_scheme)
@@ -116,24 +108,21 @@ async def asignar_alumnos_aula(
         data.id_aula_convivencia,
         data.alumnos_ids
     )
-
     if not assigned:
         raise HTTPException(
             status_code=404,
             detail="Error asignando alumnos"
         )
-
     return {"message": "Alumnos asignados correctamente"}
 
 
-@router.get("/{id_aula}/students", response_model=List[AulaConvivenciaAlumnoOut], status_code=status.HTTP_200_OK)
+@router.get("/{id_aula}/students/", response_model=List[AulaConvivenciaAlumnoOut], status_code=status.HTTP_200_OK)
 async def ver_alumnos_en_aula(
     id_aula: int, 
-    # token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme)
 ):
-    # if not validate_role(token):
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
-
+    if not validate_role(token, ["admin", "directivo", "profesor"]):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
     aula = read_aula_convivencia_by_id(id_aula)
     if not aula:
         raise HTTPException(
@@ -144,7 +133,7 @@ async def ver_alumnos_en_aula(
     return read_alumnos_in_aula(id_aula)
 
 
-@router.delete("/{id_aula}/students/{id_alumno}", status_code=status.HTTP_200_OK)
+@router.delete("/{id_aula}/students/{id_alumno}/", status_code=status.HTTP_200_OK)
 async def sacar_alumno_de_aula(
     id_aula: int, 
     id_alumno: int, 
@@ -152,20 +141,16 @@ async def sacar_alumno_de_aula(
 ):
     if not validate_role(token, ["admin", "directivo", "profesor"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
     aula = read_aula_convivencia_by_id(id_aula)
     if not aula:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Aula de convivencia no encontrada"
         )
-
     exito = remove_alumno_from_aula(id_aula, id_alumno)
-    
     if not exito:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="El alumno no se encuentra en esta aula de convivencia o no se pudo sacar"
         )
-
     return {"message": "Alumno sacado del aula de convivencia correctamente"}

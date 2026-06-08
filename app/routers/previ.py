@@ -26,11 +26,10 @@ async def crear_previ(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
             detail="Error al insertar el previ."
             )
-    
     return {"message": "Previ insertado correctamente.", "id": previ_id}
 
 
-@router.get("/expediente/{id_expediente}", response_model=List[PreviOut], status_code=status.HTTP_200_OK)
+@router.get("/expediente/{id_expediente}/", response_model=List[PreviOut], status_code=status.HTTP_200_OK)
 async def ver_previes_por_expediente(
     id_expediente: int, 
     token: str = Depends(oauth2_scheme)
@@ -40,7 +39,7 @@ async def ver_previes_por_expediente(
     return read_previ_by_expediente(id_expediente)
 
 
-@router.get("/directivo/{id_directivo}", response_model=List[PreviOut], status_code=status.HTTP_200_OK)
+@router.get("/directivo/{id_directivo}/", response_model=List[PreviOut], status_code=status.HTTP_200_OK)
 async def ver_previes_por_directivo(
     id_directivo: int, 
     token: str = Depends(oauth2_scheme)
@@ -59,7 +58,7 @@ async def ver_todos_los_previes(
     return read_all_previes()
 
 
-@router.put("/{id_previ}", status_code=status.HTTP_200_OK, response_model=dict)
+@router.put("/{id_previ}/", status_code=status.HTTP_200_OK, response_model=dict)
 async def actualizar_previ(
     id_previ: int, 
     previ: PreviImport, 
@@ -76,7 +75,7 @@ async def actualizar_previ(
     return {"message": "Previ actualizado correctamente."}
 
 
-@router.delete("/{id_previ}", status_code=status.HTTP_200_OK, response_model=dict)
+@router.delete("/{id_previ}/", status_code=status.HTTP_200_OK, response_model=dict)
 async def borrar_previ(
     id_previ: int, 
     token: str = Depends(oauth2_scheme)

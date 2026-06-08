@@ -47,11 +47,10 @@ async def ver_reconocimientos(
 ):
     if not validate_role(token, ["admin", "directivo", "profesor"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
     return read_all_reconocimientos()
 
 
-@router.get("/{id}", response_model=ReconocimientoOut, status_code=status.HTTP_200_OK)
+@router.get("/{id}/", response_model=ReconocimientoOut, status_code=status.HTTP_200_OK)
 async def ver_reconocimiento_by_id(id: int, token: str = Depends(oauth2_scheme)):
     if not validate_role(token, ["admin", "directivo", "profesor"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
@@ -62,20 +61,17 @@ async def ver_reconocimiento_by_id(id: int, token: str = Depends(oauth2_scheme))
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Reconocimiento no encontrado"
         )
-
     return reconocimiento
 
 
 @router.get("/attitudes/{id_actitud}/", response_model=List[ReconocimientoOut], status_code=status.HTTP_200_OK)
 async def ver_reconocimientos_by_actitud(id_actitud: int, token: str = Depends(oauth2_scheme)):
-
     if not validate_role(token, ["admin", "directivo", "profesor", "alumno"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
     return read_reconocimientos_by_actitud(id_actitud)
 
 
-@router.put("/{id}", status_code=status.HTTP_200_OK)
+@router.put("/{id}/", status_code=status.HTTP_200_OK)
 async def actualizar_reconocimiento(
     id:int,
     reconocimiento: ReconocimientoImport,
@@ -85,17 +81,15 @@ async def actualizar_reconocimiento(
     if not validate_role(token, ["admin", "directivo", "profesor"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     updated = update_reconocimiento(id, reconocimiento, id_actitud)
-
     if not updated:
         raise HTTPException(
             status_code=404,
             detail="Reconocimiento no encontrado"
         )
-
     return {"message": "Reconocimiento actualizado correctamente"}
 
 
-@router.delete("/{id}", status_code=status.HTTP_200_OK)
+@router.delete("/{id}/", status_code=status.HTTP_200_OK)
 async def borrar_reconocimiento(id: int, token: str = Depends(oauth2_scheme)):
     if not validate_role(token, ["admin", "directivo", "profesor"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")

@@ -28,15 +28,12 @@ async def crear_mencion(
     if not validate_role(token, ["admin", "directivo"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     mencion_id = insert_mencion(id_reconocimiento, mencion)
-
     if mencion_id == -1:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creando mencion"
         )
-
     return {"message": "Mencion creado exitosamente", "id": mencion_id}
-
 
 
 @router.get("/", response_model=List[MencionOut], status_code=status.HTTP_200_OK)
@@ -48,49 +45,44 @@ async def ver_reconocimientos(
     return read_all_menciones()
 
 
-@router.get("/{id}", response_model=MencionOut, status_code=status.HTTP_200_OK)
+@router.get("/{id}/", response_model=MencionOut, status_code=status.HTTP_200_OK)
 async def ver_mencion_by_id(id: int, token: str = Depends(oauth2_scheme)):
     if not validate_role(token, ["admin", "directivo", "profesor"]):
+        
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     mencion = read_mencion_by_id(id)
-
     if not mencion:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Mencion no encontrado"
         )
-
     return mencion
 
 
 @router.get("/recognitions/{id_reconocimiento}/", response_model=List[MencionOut], status_code=status.HTTP_200_OK)
 async def ver_menciones_by_reconocimiento(id_reconocimiento: int, token: str = Depends(oauth2_scheme)):
-
     if not validate_role(token, ["admin", "directivo", "profesor"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
-
+    
     return read_menciones_by_reconocimiento(id_reconocimiento)
 
 
-@router.put("/{id}", status_code=status.HTTP_200_OK)
+@router.put("/{id}/", status_code=status.HTTP_200_OK)
 async def actualizar_mencion(
     id:int,
     mencion: MencionImport,
     id_reconocimiento: int
 ):
-
     updated = update_mencion(id, mencion, id_reconocimiento)
-
     if not updated:
         raise HTTPException(
             status_code=404,
             detail="Mencion no encontrada"
         )
-
     return {"message": "Mencion actualizada correctamente"}
 
 
-@router.delete("/{id}", status_code=status.HTTP_200_OK)
+@router.delete("/{id}/", status_code=status.HTTP_200_OK)
 async def borrar_mencion(
     id: int,
     token: str = Depends(oauth2_scheme)
@@ -103,5 +95,4 @@ async def borrar_mencion(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Mencion no encontrada"
         )
-
     return {"message": "Mencion eliminada correctamente"}

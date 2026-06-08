@@ -52,7 +52,7 @@ async def ver_actitudes_alumno(id_alumno: int, token: str = Depends(oauth2_schem
     return actitudes
 
 
-@router.delete("/{id}", status_code=status.HTTP_200_OK)
+@router.delete("/{id}/", status_code=status.HTTP_200_OK)
 async def borrar_actitud(id: int, token: str = Depends(oauth2_scheme)):
     if not validate_role(token, ["admin", "directivo", "profesor"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")

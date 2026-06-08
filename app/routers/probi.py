@@ -25,15 +25,12 @@ async def crear_probi(
     if not validate_role(token, ["admin", "directivo"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     probi_id = insert_probi(id_mencion, aula)
-
     if probi_id == -1:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creando probi"
         )
-
     return {"message": "Probi creado exitosamente", "id": probi_id}
-
 
 
 @router.get("/", response_model=List[ProbiOut], status_code=status.HTTP_200_OK)
@@ -45,22 +42,20 @@ async def ver_probi(
     return read_all_probis()
 
 
-@router.get("/{id}", response_model=ProbiOut, status_code=status.HTTP_200_OK)
+@router.get("/{id}/", response_model=ProbiOut, status_code=status.HTTP_200_OK)
 async def ver_probi_by_id(id: int, token: str = Depends(oauth2_scheme)):
     if not validate_role(token, ["admin", "directivo", "profesor"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     probi = read_probi_by_id(id)
-
     if not probi:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Probi no encontrada"
         )
-
     return probi
 
 
-@router.put("/{id}", status_code=status.HTTP_200_OK)
+@router.put("/{id}/", status_code=status.HTTP_200_OK)
 async def actualizar_probi(
     id:int,
     probi: ProbiImport,
@@ -76,11 +71,10 @@ async def actualizar_probi(
             status_code=404,
             detail="Probi no encontrada"
         )
-
     return {"message": "Probi actualizado correctamente"}
 
 
-@router.delete("/{id}", status_code=status.HTTP_200_OK)
+@router.delete("/{id}/", status_code=status.HTTP_200_OK)
 async def borrar_probi(
     id: int,
     token: str = Depends(oauth2_scheme)
@@ -94,5 +88,4 @@ async def borrar_probi(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Probi no encontrada"
         )
-
     return {"message": "Probi eliminado correctamente"}
