@@ -79,7 +79,7 @@ async def borrar_probi(
     id: int,
     token: str = Depends(oauth2_scheme)
     ):
-    if not validate_role(token, ["admin"]):
+    if not validate_role(token, ["admin", "directivo"]):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin permisos")
     
     deleted = delete_probi(id)
